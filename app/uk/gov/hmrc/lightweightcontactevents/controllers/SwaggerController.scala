@@ -22,6 +22,7 @@ import uk.gov.hmrc.play.microservice.controller.BaseController
 
 import scala.concurrent.Future
 
+// $COVERAGE-OFF$
 object SwaggerController extends SwaggerController
 
 trait SwaggerController extends BaseController {
@@ -33,3 +34,4 @@ trait SwaggerController extends BaseController {
     Future.fromTry(generator.generate("app.routes").map(Ok(_)))
 	}
 }
+// $COVERAGE-ON$

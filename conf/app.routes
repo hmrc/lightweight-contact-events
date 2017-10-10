@@ -20,7 +20,7 @@ GET   /assets/swagger.json     uk.gov.hmrc.lightweightcontactevents.controllers.
 #    200:
 #      description: Successful creation of the contact
 #      schema:
-#        $ref: '#/definitions/uk.gov.hmrc.lightweightcontactevents.models.ContactModel'
+#        $ref: '#/definitions/uk.gov.hmrc.lightweightcontactevents.models.Contact'
 #    400:
 #      description: Bad request, invalid JSON
 ###

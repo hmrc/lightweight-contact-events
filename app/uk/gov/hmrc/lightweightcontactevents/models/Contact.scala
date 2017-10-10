@@ -18,13 +18,13 @@ package uk.gov.hmrc.lightweightcontactevents.models
 
 import play.api.libs.json.Json
 
-case class ContactModel(contact: ConfirmedContactDetails,
-                        councilTaxAddress: Option[CouncilTaxAddress],
-                        businessRatesAddress: Option[BusinessRatesAddress],
-                        enquiryCategory: String,
-                        subEnquiryCategory: String,
-                        message: String)
+case class Contact(contact: ConfirmedContactDetails,
+                   councilTaxAddress: Option[CouncilTaxAddress],
+                   businessRatesAddress: Option[BusinessRatesAddress],
+                   enquiryCategory: String,
+                   subEnquiryCategory: String,
+                   message: String)
 
-object ContactModel {
-  implicit val format = Json.format[ContactModel]
+object Contact {
+  implicit val format = Json.format[Contact]
 }

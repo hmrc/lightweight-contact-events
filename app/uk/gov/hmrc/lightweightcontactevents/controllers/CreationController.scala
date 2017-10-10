@@ -17,30 +17,43 @@
 package uk.gov.hmrc.lightweightcontactevents.controllers
 
 import javax.inject.Inject
-
+import play.api.Logger
 import play.api.mvc.{Action, AnyContent, Controller, Results}
-
 import scala.concurrent.Future
 import play.api.libs.json._
-import uk.gov.hmrc.lightweightcontactevents.models.ContactModel
+import uk.gov.hmrc.lightweightcontactevents.models.{Contact, Reference}
 
 
 class CreationController @Inject()() extends Controller {
 
-  def createContact(json: Option[JsValue]): Either[String, ContactModel] = {
+  def createContact(json: Option[JsValue]): Either[String, Contact] = {
     json match {
       case Some(value) => {
-        val model = Json.fromJson[ContactModel](value)
+        val model = Json.fromJson[Contact](value)
         model match {
-          case JsSuccess(m, _) => if (m.councilTaxAddress.isDefined && m.businessRatesAddress.isDefined) {
-            Left("Json contains both council tax address and business rates address")
-          } else {
-            Right(m)
+          case JsSuccess(contact, _) => contact match {
+            case Contact(_, None, None, _, _, _) => Left("Json contains neither council tax address and business rates address")
+            case Contact(_, councilTaxAddress, None, _, _, _) => Right(contact)
+            case Contact(_, None, businessRatesAddress, _, _, _) => Right(contact)
+            case Contact(_, councilTaxAddress, businessRatesAddress, _, _, _) => Left("Json contains both council tax address and business rates address")
           }
           case JsError(_) => Left("Unable to parse " + value)
         }
       }
       case None => Left("No Json available")
+    }
+  }
+
+  def reference(contact: Contact): Reference = {
+    contact match {
+      case Contact(_, None, None, _, _, _) =>
+        Logger.warn("Contact " + contact + " has neither council tax and business rates defined")
+        throw new RuntimeException("Contact " + contact + " has neither council tax and business rates defined")
+      case Contact(_, councilTaxDetails, None, _, _, _) => Reference("council-tax", "XFG6F4")
+      case Contact(_, None, businessRatesAddress, _, _, _) => Reference("business-rate", "98J7VC")
+      case Contact(_, councilTaxDetails, businessRatesAddress, _, _, _) =>
+        Logger.warn("Contact " + contact + " has both council tax and business rates defined")
+        throw new RuntimeException("Contact " + contact + " has both council tax and business rates defined")
     }
   }
 

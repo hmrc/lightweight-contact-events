@@ -21,7 +21,9 @@ import play.api.libs.json.Json
 import play.api.test.FakeRequest
 import play.api.test.Helpers.{status, _}
 import uk.gov.hmrc.lightweightcontactevents.SpecBase
-import uk.gov.hmrc.lightweightcontactevents.models.{BusinessRatesAddress, ConfirmedContactDetails, CouncilTaxAddress}
+import uk.gov.hmrc.lightweightcontactevents.models.{BusinessRatesAddress, ConfirmedContactDetails, Contact, CouncilTaxAddress}
+
+import scala.concurrent.Future
 
 class CreationControllerSpec extends SpecBase {
 
@@ -107,6 +109,26 @@ class CreationControllerSpec extends SpecBase {
       |  }
     """.stripMargin
 
+  val neitherJson =
+    """{
+      |    "contact": {
+      |      "firstName": "first",
+      |      "lastName": "last",
+      |      "email": "email",
+      |      "telephone": "tel",
+      |      "mobile": "mob",
+      |      "contactPreference": "pref"
+      |    },
+      |    "enquiryCategory": "eq",
+      |    "subEnquiryCategory": "seq",
+      |    "message": "message"
+      |  }
+    """.stripMargin
+
+  val confirmedContactDetails = ConfirmedContactDetails("a", "b", "c", "d", "e", "f")
+  val councilTaxAddress = CouncilTaxAddress("line1", "line2", "town", "county", "postcode")
+  val businessRatesAddress = BusinessRatesAddress("name", "line1", "line2", "line3", "town", "county", "postcode")
+
   "Given some Json representing a Contact with a council tax enquiry, the createContact method creates a Right(Contact) with council tax address details" in {
     val controller = new CreationController()
     val result = controller.createContact(Some(Json.parse(councilTaxJson)))
@@ -143,6 +165,14 @@ class CreationControllerSpec extends SpecBase {
     result.left.get mustBe "Json contains both council tax address and business rates address"
   }
 
+  "given some Json representing a contact, it must have at least a council tax address or business rates address" in {
+    val controller = new CreationController()
+    val result = controller.createContact(Some(Json.parse(neitherJson)))
+
+    result.isLeft mustBe true
+    result.left.get mustBe "Json contains neither council tax address and business rates address"
+  }
+
   "return 200 for a POST carrying council tax enquiry" in {
     val result = new CreationController().create()(fakeRequestWithJson(councilTaxJson))
     status(result) mustBe OK
@@ -158,6 +188,11 @@ class CreationControllerSpec extends SpecBase {
     status(result) mustBe BAD_REQUEST
   }
 
+  "return 400 (badrequest) when json carrying neither business rate and council tax enquiry" in {
+    val result = new CreationController().create()(fakeRequestWithJson(neitherJson))
+    status(result) mustBe BAD_REQUEST
+  }
+
   "return 400 (badrequest) when given no json" in {
     val fakeRequest = FakeRequest("POST", "").withHeaders("Content-Type" ->  "application/json")
     val result = new CreationController().create()(fakeRequest)
@@ -168,5 +203,25 @@ class CreationControllerSpec extends SpecBase {
     val fakeRequest = FakeRequest("POST", "").withHeaders("Content-Type" ->  "application/json").withTextBody("{")
     val result = new CreationController().create()(fakeRequest)
     status(result) mustBe BAD_REQUEST
+  }
+
+  "use the reference method to create a reference with council-tax as the enquiry type if the contact has a council tax address" in {
+    val councilContact = Contact(confirmedContactDetails, Some(councilTaxAddress), None, "eq", "seq", "msg")
+    val result = new CreationController().reference(councilContact)
+    result.enquiryType mustBe("council-tax")
+  }
+
+  "use the reference method to create a reference with business-rate as the enquiry type if the contact has a business rate address" in {
+    val councilContact = Contact(confirmedContactDetails, None, Some(businessRatesAddress), "eq", "seq", "msg")
+    val result = new CreationController().reference(councilContact)
+    result.enquiryType mustBe("business-rate")
+  }
+
+  "use the reference method to throw an exception if the contact has a council tax address and a business rate address" in {
+    val bothContact = Contact(confirmedContactDetails, Some(councilTaxAddress), Some(businessRatesAddress), "eq", "seq", "msg")
+
+    intercept[Exception] {
+      new CreationController().reference(bothContact)
+    }
   }
 }
