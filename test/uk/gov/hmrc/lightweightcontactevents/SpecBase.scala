@@ -14,28 +14,22 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.lightweightcontactevents.controllers
+package uk.gov.hmrc.lightweightcontactevents
 
-import play.api.http.Status
+import org.scalatestplus.play.PlaySpec
+import org.scalatestplus.play.guice._
+import play.api.i18n.{Messages, MessagesApi}
+import play.api.inject.Injector
+import play.api.mvc.AnyContentAsEmpty
 import play.api.test.FakeRequest
-import play.api.http.Status
-import play.api.test.FakeRequest
-import uk.gov.hmrc.play.test.UnitSpec
-import uk.gov.hmrc.play.test.WithFakeApplication
-import uk.gov.hmrc.play.test.{UnitSpec, WithFakeApplication}
 
+trait SpecBase extends PlaySpec with GuiceOneAppPerSuite {
 
-class MicroserviceHelloWorldControllerSpec extends UnitSpec with WithFakeApplication{
+  def injector: Injector = app.injector
 
-  val fakeRequest = FakeRequest("GET", "/")
+  def messagesApi: MessagesApi = injector.instanceOf[MessagesApi]
 
+  def fakeRequest: FakeRequest[AnyContentAsEmpty.type] = FakeRequest("", "")
 
-//  "GET /" should {
-//    "return 200" in {
-//      val result = MicroserviceHelloWorld.hello()(fakeRequest)
-//      status(result) shouldBe Status.OK
-//    }
-//  }
-
-
+  def messages: Messages = messagesApi.preferred(fakeRequest)
 }

@@ -16,26 +16,20 @@
 
 package uk.gov.hmrc.lightweightcontactevents.controllers
 
-import play.api.http.Status
-import play.api.test.FakeRequest
-import play.api.http.Status
-import play.api.test.FakeRequest
-import uk.gov.hmrc.play.test.UnitSpec
-import uk.gov.hmrc.play.test.WithFakeApplication
-import uk.gov.hmrc.play.test.{UnitSpec, WithFakeApplication}
+import com.iheart.playSwagger.SwaggerSpecGenerator
+import play.api.mvc._
+import uk.gov.hmrc.play.microservice.controller.BaseController
 
+import scala.concurrent.Future
 
-class MicroserviceHelloWorldControllerSpec extends UnitSpec with WithFakeApplication{
+object SwaggerController extends SwaggerController
 
-  val fakeRequest = FakeRequest("GET", "/")
+trait SwaggerController extends BaseController {
 
-
-//  "GET /" should {
-//    "return 200" in {
-//      val result = MicroserviceHelloWorld.hello()(fakeRequest)
-//      status(result) shouldBe Status.OK
-//    }
-//  }
-
-
+	def specs() = Action.async { implicit request =>
+		implicit val cl = getClass.getClassLoader
+		val domainPackage = "uk.gov.hmrc.lightweightcontactevents"
+		val generator = SwaggerSpecGenerator(domainPackage)
+    Future.fromTry(generator.generate("app.routes").map(Ok(_)))
+	}
 }
