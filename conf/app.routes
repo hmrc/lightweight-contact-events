@@ -1,3 +1,27 @@
 # microservice specific routes
 
-GET        /hello-world             uk.gov.hmrc.lightweightcontactevents.controllers.MicroserviceHelloWorld.hello
+### NoDocs ###
+GET   /assets/swagger.json     uk.gov.hmrc.lightweightcontactevents.controllers.SwaggerController.specs
+
+###
+#  summary: Say Create
+#  responses:
+#    200:
+#      description: success
+###
+#GET   /create-get                  @uk.gov.hmrc.lightweightcontactevents.controllers.CreationController.createGet()
+
+###
+#  summary: Create a contact event
+#  parameters:
+#  - name: body
+#    description: The body of the request
+#  responses:
+#    200:
+#      description: Successful creation of the contact
+#      schema:
+#        $ref: '#/definitions/uk.gov.hmrc.lightweightcontactevents.models.Contact'
+#    400:
+#      description: Bad request, invalid JSON
+###
+POST   /create                  @uk.gov.hmrc.lightweightcontactevents.controllers.CreationController.create()

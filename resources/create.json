@@ -1,0 +1,15 @@
+{
+  "$schema": "http://json-schema.org/schema#",
+  "description": "A JSON schema to validate JSON as described in PPM-30048-UEM009-ICD001-HTS-HMRC-Interfaces v1.2.docx",
+
+  "type" : "object",
+  "additionalProperties": false,
+  "required": ["forename"],
+  "properties" : {
+    "forename" : {
+      "type" : "string",
+      "minLength": 1,
+      "maxLength": 30
+    }
+  }
+}
