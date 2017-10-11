@@ -21,5 +21,5 @@ import play.api.libs.json.Json
 case class Reference(enquiryType: String /* council-tax or business-rate */, reference: String)
 
 object Reference {
-  implicit val format = Json.format[Reference]
+  implicit val write = Json.writes[Reference]
 }

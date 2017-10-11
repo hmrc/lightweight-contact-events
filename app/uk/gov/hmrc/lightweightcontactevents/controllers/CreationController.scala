@@ -59,7 +59,7 @@ class CreationController @Inject()() extends Controller {
 
   def create(): Action[AnyContent] = Action.async {implicit request =>
     createContact(request.body.asJson) match {
-      case Right(m) => Future.successful(Ok("X6T67FG"))
+      case Right(contact) => Future.successful(Ok(Json.toJson(reference(contact))))
       case Left(error) => {
         Future.successful(BadRequest(error))
       }
