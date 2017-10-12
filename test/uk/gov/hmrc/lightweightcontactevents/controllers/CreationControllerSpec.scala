@@ -203,5 +203,5 @@ class CreationControllerSpec extends SpecBase {
     val fakeRequest = FakeRequest("POST", "").withHeaders("Content-Type" ->  "application/json").withTextBody("{")
     val result = new CreationController().create()(fakeRequest)
     status(result) mustBe BAD_REQUEST
-  } 
+  }
 }
