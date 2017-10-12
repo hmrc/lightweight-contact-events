@@ -18,10 +18,10 @@ package uk.gov.hmrc.lightweightcontactevents.controllers
 
 import javax.inject.Inject
 import play.api.Logger
-import play.api.mvc.{Action, AnyContent, Controller, Results}
+import play.api.mvc.{Action, AnyContent, Controller}
 import scala.concurrent.Future
 import play.api.libs.json._
-import uk.gov.hmrc.lightweightcontactevents.models.{Contact, Reference}
+import uk.gov.hmrc.lightweightcontactevents.models.Contact
 
 
 class CreationController @Inject()() extends Controller {
@@ -44,23 +44,11 @@ class CreationController @Inject()() extends Controller {
     }
   }
 
-  def reference(contact: Contact): Reference = {
-    contact match {
-      case Contact(_, None, None, _, _, _) =>
-        Logger.warn("Contact " + contact + " has neither council tax and business rates defined")
-        throw new RuntimeException("Contact " + contact + " has neither council tax and business rates defined")
-      case Contact(_, councilTaxDetails, None, _, _, _) => Reference("council-tax", "XFG6F4")
-      case Contact(_, None, businessRatesAddress, _, _, _) => Reference("business-rate", "98J7VC")
-      case Contact(_, councilTaxDetails, businessRatesAddress, _, _, _) =>
-        Logger.warn("Contact " + contact + " has both council tax and business rates defined")
-        throw new RuntimeException("Contact " + contact + " has both council tax and business rates defined")
-    }
-  }
-
   def create(): Action[AnyContent] = Action.async {implicit request =>
     createContact(request.body.asJson) match {
-      case Right(contact) => Future.successful(Ok(Json.toJson(reference(contact))))
+      case Right(contact) => Future.successful(Ok)
       case Left(error) => {
+        Logger.warn(error)
         Future.successful(BadRequest(error))
       }
     }
