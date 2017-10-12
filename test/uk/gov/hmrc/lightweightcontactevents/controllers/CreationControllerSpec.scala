@@ -203,25 +203,5 @@ class CreationControllerSpec extends SpecBase {
     val fakeRequest = FakeRequest("POST", "").withHeaders("Content-Type" ->  "application/json").withTextBody("{")
     val result = new CreationController().create()(fakeRequest)
     status(result) mustBe BAD_REQUEST
-  }
-
-  "use the reference method to create a reference with council-tax as the enquiry type if the contact has a council tax address" in {
-    val councilContact = Contact(confirmedContactDetails, Some(councilTaxAddress), None, "eq", "seq", "msg")
-    val result = new CreationController().reference(councilContact)
-    result.enquiryType mustBe("council-tax")
-  }
-
-  "use the reference method to create a reference with business-rate as the enquiry type if the contact has a business rate address" in {
-    val councilContact = Contact(confirmedContactDetails, None, Some(businessRatesAddress), "eq", "seq", "msg")
-    val result = new CreationController().reference(councilContact)
-    result.enquiryType mustBe("business-rate")
-  }
-
-  "use the reference method to throw an exception if the contact has a council tax address and a business rate address" in {
-    val bothContact = Contact(confirmedContactDetails, Some(councilTaxAddress), Some(businessRatesAddress), "eq", "seq", "msg")
-
-    intercept[Exception] {
-      new CreationController().reference(bothContact)
-    }
-  }
+  } 
 }
