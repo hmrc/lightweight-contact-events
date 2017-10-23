@@ -37,9 +37,7 @@ class CreationControllerSpec extends SpecBase {
       "firstName": "first",
       "lastName": "last",
       "email": "email",
-      "telephone": "tel",
-      "mobile": "mob",
-      "contactPreference": "pref"
+      "contactNumber": "tel"
     },
     "propertyAddress": {
       "addressLine1": "line1",
@@ -54,16 +52,16 @@ class CreationControllerSpec extends SpecBase {
   }""""
 
 
-  val confirmedContactDetails = ConfirmedContactDetails("a", "b", "c", "d", "e", "f")
-  val propertyAddress = PropertyAddress("line1", Some("line2"), "town", "county", "postcode")
+  val confirmedContactDetails = ConfirmedContactDetails("a", "b", "c", "d")
+  val propertyAddress = PropertyAddress("line1", Some("line2"), "town", Some("county"), "postcode")
 
   "Given some Json representing a Contact with an enquiry, the createContact method creates a Right(Contact) with council tax address details" in {
     val controller = new CreationController()
     val result = controller.createContact(Some(Json.parse(contactJson)))
 
     result.isRight mustBe true
-    result.right.get.contact mustBe ConfirmedContactDetails("first", "last", "email", "tel", "mob", "pref")
-    result.right.get.propertyAddress mustBe PropertyAddress("line1", Some("line2"), "town", "county", "postcode")
+    result.right.get.contact mustBe ConfirmedContactDetails("first", "last", "email", "tel")
+    result.right.get.propertyAddress mustBe PropertyAddress("line1", Some("line2"), "town", Some("county"), "postcode")
     result.right.get.enquiryCategory mustBe "eq"
     result.right.get.subEnquiryCategory mustBe "seq"
     result.right.get.message mustBe "message"
