@@ -18,14 +18,15 @@ package uk.gov.hmrc.lightweightcontactevents.controllers
 
 import javax.inject.Inject
 import play.api.Logger
-import play.api.mvc.{Action, AnyContent, Controller}
+import play.api.mvc.{Action, AnyContent}
 import scala.concurrent.Future
 import play.api.libs.json._
 import uk.gov.hmrc.lightweightcontactevents.models.Contact
+import uk.gov.hmrc.play.bootstrap.controller.BaseController
+import scala.concurrent.ExecutionContext.Implicits.global
 
 
-class CreationController @Inject()() extends Controller {
-
+class CreationController @Inject()() extends BaseController {
   def createContact(json: Option[JsValue]): Either[String, Contact] = {
     json match {
       case Some(value) => {
