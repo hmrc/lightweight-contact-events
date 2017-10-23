@@ -43,7 +43,7 @@ class CreationController @Inject()() extends BaseController {
   def create(): Action[AnyContent] = Action.async {implicit request =>
     createContact(request.body.asJson) match {
       case Right(contact) => {
-        Logger.info("Successful contact: " + contact)
+        Logger.warn("Successful contact: " + contact)
         Future.successful(Ok)
       }
       case Left(error) => {
