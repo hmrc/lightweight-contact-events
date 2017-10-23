@@ -16,7 +16,7 @@ object MicroServiceBuild extends Build with MicroService {
   private val logbackJsonLoggerVersion = "3.1.0"
   private val govukTemplateVersion = "5.3.0"
   private val playUiVersion = "7.8.0"
-  private val hmrcTestVersion = "2.4.0"
+  private val hmrcTestVersion = "3.0.0"
   private val scalaTestVersion = "3.0.1"
   private val scalaTestPlusPlayVersion = "2.0.1"
   private val pegdownVersion = "1.6.0"
