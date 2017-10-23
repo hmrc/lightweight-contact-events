@@ -21,9 +21,7 @@ import play.api.libs.json.Json
 case class ConfirmedContactDetails(firstName: String,
                                    lastName: String,
                                    email: String,
-                                   telephone: String,
-                                   mobile: String,
-                                   contactPreference: String
+                                   contactNumber: String
                                   )
 
 object ConfirmedContactDetails {
