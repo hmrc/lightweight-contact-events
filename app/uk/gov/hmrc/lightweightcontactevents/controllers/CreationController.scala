@@ -32,12 +32,7 @@ class CreationController @Inject()() extends BaseController {
       case Some(value) => {
         val model = Json.fromJson[Contact](value)
         model match {
-          case JsSuccess(contact, _) => contact match {
-            case Contact(_, None, None, _, _, _) => Left("Json contains neither council tax address and business rates address")
-            case Contact(_, councilTaxAddress, None, _, _, _) => Right(contact)
-            case Contact(_, None, businessRatesAddress, _, _, _) => Right(contact)
-            case Contact(_, councilTaxAddress, businessRatesAddress, _, _, _) => Left("Json contains both council tax address and business rates address")
-          }
+          case JsSuccess(contact, _) => Right(contact)
           case JsError(_) => Left("Unable to parse " + value)
         }
       }

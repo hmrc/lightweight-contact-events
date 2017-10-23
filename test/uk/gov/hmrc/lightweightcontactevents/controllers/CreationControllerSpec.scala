@@ -21,7 +21,7 @@ import play.api.libs.json.Json
 import play.api.test.FakeRequest
 import play.api.test.Helpers.{status, _}
 import uk.gov.hmrc.lightweightcontactevents.SpecBase
-import uk.gov.hmrc.lightweightcontactevents.models.{BusinessRatesAddress, ConfirmedContactDetails, Contact, CouncilTaxAddress}
+import uk.gov.hmrc.lightweightcontactevents.models.{ConfirmedContactDetails, Contact, PropertyAddress}
 
 import scala.concurrent.Future
 
@@ -32,7 +32,7 @@ class CreationControllerSpec extends SpecBase {
     FakeRequest("POST", "").withHeaders("Content-Type" ->  "application/json").withJsonBody(json)
   }
 
-  val councilTaxJson = """{
+  val contactJson = """{
     "contact": {
       "firstName": "first",
       "lastName": "last",
@@ -41,7 +41,7 @@ class CreationControllerSpec extends SpecBase {
       "mobile": "mob",
       "contactPreference": "pref"
     },
-    "councilTaxAddress": {
+    "propertyAddress": {
       "addressLine1": "line1",
       "addressLine2": "line2",
       "town": "town",
@@ -53,144 +53,25 @@ class CreationControllerSpec extends SpecBase {
     "message": "message"
   }""""
 
-  val businessRatesJson =
-    """{
-    |"contact": {
-    |  "firstName": "first",
-    |  "lastName": "last",
-    |  "email": "email",
-    |  "telephone": "tel",
-    |  "mobile": "mob",
-    |  "contactPreference": "pref"
-    |},
-    |"businessRatesAddress": {
-    |   "businessName": "name",
-    |   "businessAddressLine1": "line1",
-    |   "businessAddressLine2": "line2",
-    |   "businessAddressLine3": "line3",
-    |   "town": "town",
-    |   "county": "county",
-    |   "postcode": "postcode"
-    |},
-    |"enquiryCategory": "eq",
-    |"subEnquiryCategory": "seq",
-    |"message": "message"
-  }"""".stripMargin
-
-  val bothJson =
-    """{
-      |    "contact": {
-      |      "firstName": "first",
-      |      "lastName": "last",
-      |      "email": "email",
-      |      "telephone": "tel",
-      |      "mobile": "mob",
-      |      "contactPreference": "pref"
-      |    },
-      |    "councilTaxAddress": {
-      |      "addressLine1": "line1",
-      |      "addressLine2": "line2",
-      |      "town": "town",
-      |      "county": "county",
-      |      "postcode": "postcode"
-      |    },
-      |    "businessRatesAddress": {
-      |       "businessName": "name",
-      |       "businessAddressLine1": "line1",
-      |       "businessAddressLine2": "line2",
-      |       "businessAddressLine3": "line3",
-      |       "town": "town",
-      |       "county": "county",
-      |       "postcode": "postcode"
-      |    },
-      |    "enquiryCategory": "eq",
-      |    "subEnquiryCategory": "seq",
-      |    "message": "message"
-      |  }
-    """.stripMargin
-
-  val neitherJson =
-    """{
-      |    "contact": {
-      |      "firstName": "first",
-      |      "lastName": "last",
-      |      "email": "email",
-      |      "telephone": "tel",
-      |      "mobile": "mob",
-      |      "contactPreference": "pref"
-      |    },
-      |    "enquiryCategory": "eq",
-      |    "subEnquiryCategory": "seq",
-      |    "message": "message"
-      |  }
-    """.stripMargin
 
   val confirmedContactDetails = ConfirmedContactDetails("a", "b", "c", "d", "e", "f")
-  val councilTaxAddress = CouncilTaxAddress("line1", "line2", "town", "county", "postcode")
-  val businessRatesAddress = BusinessRatesAddress("name", "line1", "line2", "line3", "town", "county", "postcode")
+  val propertyAddress = PropertyAddress("line1", Some("line2"), "town", "county", "postcode")
 
-  "Given some Json representing a Contact with a council tax enquiry, the createContact method creates a Right(Contact) with council tax address details" in {
+  "Given some Json representing a Contact with an enquiry, the createContact method creates a Right(Contact) with council tax address details" in {
     val controller = new CreationController()
-    val result = controller.createContact(Some(Json.parse(councilTaxJson)))
+    val result = controller.createContact(Some(Json.parse(contactJson)))
 
     result.isRight mustBe true
     result.right.get.contact mustBe ConfirmedContactDetails("first", "last", "email", "tel", "mob", "pref")
-    result.right.get.councilTaxAddress.isDefined mustBe true
-    result.right.get.councilTaxAddress.get mustBe CouncilTaxAddress("line1", "line2", "town", "county", "postcode")
-    result.right.get.businessRatesAddress.isDefined mustBe false
+    result.right.get.propertyAddress mustBe PropertyAddress("line1", Some("line2"), "town", "county", "postcode")
     result.right.get.enquiryCategory mustBe "eq"
     result.right.get.subEnquiryCategory mustBe "seq"
     result.right.get.message mustBe "message"
   }
 
-  "Given some Json representing a Contact with a business rates enquiry, the createContact method creates a Right(Contact) with busines rates address  details" in {
-    val controller = new CreationController()
-    val result = controller.createContact(Some(Json.parse(businessRatesJson)))
-
-    result.isRight mustBe true
-    result.right.get.contact mustBe ConfirmedContactDetails("first", "last", "email", "tel", "mob", "pref")
-    result.right.get.businessRatesAddress.isDefined mustBe true
-    result.right.get.businessRatesAddress.get mustBe BusinessRatesAddress("name", "line1", "line2", "line3", "town", "county", "postcode")
-    result.right.get.councilTaxAddress.isDefined mustBe false
-    result.right.get.enquiryCategory mustBe "eq"
-    result.right.get.subEnquiryCategory mustBe "seq"
-    result.right.get.message mustBe "message"
-  }
-
-  "given some Json representing a contact, it may only have a council tax address or business rates address" in {
-    val controller = new CreationController()
-    val result = controller.createContact(Some(Json.parse(bothJson)))
-
-    result.isLeft mustBe true
-    result.left.get mustBe "Json contains both council tax address and business rates address"
-  }
-
-  "given some Json representing a contact, it must have at least a council tax address or business rates address" in {
-    val controller = new CreationController()
-    val result = controller.createContact(Some(Json.parse(neitherJson)))
-
-    result.isLeft mustBe true
-    result.left.get mustBe "Json contains neither council tax address and business rates address"
-  }
-
-  "return 200 for a POST carrying council tax enquiry" in {
-    val result = new CreationController().create()(fakeRequestWithJson(councilTaxJson))
+  "return 200 for a POST carrying an enquiry" in {
+    val result = new CreationController().create()(fakeRequestWithJson(contactJson))
     status(result) mustBe OK
-  }
-
-  "return 200 for a POST carrying a business rate enquiry" in {
-    val result = new CreationController().create()(fakeRequestWithJson(businessRatesJson))
-    status(result) mustBe OK
-  }
-
-  "return 400 (badrequest) when json carrying both a business rate and council tax enquiry" in {
-    val result = new CreationController().create()(fakeRequestWithJson(bothJson))
-    status(result) mustBe BAD_REQUEST
-  }
-
-  "return 400 (badrequest) when json carrying neither business rate and council tax enquiry" in {
-    val result = new CreationController().create()(fakeRequestWithJson(neitherJson))
-    status(result) mustBe BAD_REQUEST
   }
 
   "return 400 (badrequest) when given no json" in {

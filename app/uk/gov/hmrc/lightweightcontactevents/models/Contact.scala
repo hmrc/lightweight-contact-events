@@ -19,8 +19,7 @@ package uk.gov.hmrc.lightweightcontactevents.models
 import play.api.libs.json.Json
 
 case class Contact(contact: ConfirmedContactDetails,
-                   councilTaxAddress: Option[CouncilTaxAddress],
-                   businessRatesAddress: Option[BusinessRatesAddress],
+                   propertyAddress: PropertyAddress,
                    enquiryCategory: String,
                    subEnquiryCategory: String,
                    message: String)
