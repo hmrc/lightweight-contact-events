@@ -18,7 +18,7 @@ package uk.gov.hmrc.lightweightcontactevents.controllers
 
 import com.iheart.playSwagger.SwaggerSpecGenerator
 import play.api.mvc._
-import uk.gov.hmrc.play.microservice.controller.BaseController
+import uk.gov.hmrc.play.bootstrap.controller.BaseController
 
 import scala.concurrent.Future
 
