@@ -46,8 +46,8 @@ class CreationControllerSpec extends SpecBase {
       "county": "county",
       "postcode": "postcode"
     },
-    "enquiryCategory": "eq",
-    "subEnquiryCategory": "seq",
+    "enquiryCategoryMsg": "eq",
+    "subEnquiryCategoryMsg": "seq",
     "message": "message"
   }""""
 
@@ -62,8 +62,8 @@ class CreationControllerSpec extends SpecBase {
     result.isRight mustBe true
     result.right.get.contact mustBe ConfirmedContactDetails("first", "last", "email", "tel")
     result.right.get.propertyAddress mustBe PropertyAddress("line1", Some("line2"), "town", Some("county"), "postcode")
-    result.right.get.enquiryCategory mustBe "eq"
-    result.right.get.subEnquiryCategory mustBe "seq"
+    result.right.get.enquiryCategoryMsg mustBe "eq"
+    result.right.get.subEnquiryCategoryMsg mustBe "seq"
     result.right.get.message mustBe "message"
   }
 

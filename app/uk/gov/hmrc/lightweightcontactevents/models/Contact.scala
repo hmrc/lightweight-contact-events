@@ -20,8 +20,8 @@ import play.api.libs.json.Json
 
 case class Contact(contact: ConfirmedContactDetails,
                    propertyAddress: PropertyAddress,
-                   enquiryCategory: String,
-                   subEnquiryCategory: String,
+                   enquiryCategoryMsg: String,
+                   subEnquiryCategoryMsg: String,
                    message: String)
 
 object Contact {
