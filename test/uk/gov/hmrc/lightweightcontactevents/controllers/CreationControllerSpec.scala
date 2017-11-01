@@ -46,6 +46,7 @@ class CreationControllerSpec extends SpecBase {
       "county": "county",
       "postcode": "postcode"
     },
+    "isCouncilTaxEnquiry": true,
     "enquiryCategoryMsg": "eq",
     "subEnquiryCategoryMsg": "seq",
     "message": "message"
