@@ -32,4 +32,5 @@ class StartupModule extends AbstractModule {
     bind(classOf[Initialize]).asEagerSingleton()
   }
 }
+
   
