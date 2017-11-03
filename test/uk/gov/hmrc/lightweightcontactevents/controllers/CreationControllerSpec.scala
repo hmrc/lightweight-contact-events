@@ -17,15 +17,19 @@
 package uk.gov.hmrc.lightweightcontactevents.controllers
 
 
+import org.scalatest.mockito.MockitoSugar
 import play.api.libs.json.Json
 import play.api.test.FakeRequest
 import play.api.test.Helpers.{status, _}
 import uk.gov.hmrc.lightweightcontactevents.SpecBase
+import uk.gov.hmrc.lightweightcontactevents.connectors.EmailConnector
 import uk.gov.hmrc.lightweightcontactevents.models.{ConfirmedContactDetails, Contact, PropertyAddress}
+import uk.gov.hmrc.lightweightcontactevents.utils.Initialize
+import uk.gov.hmrc.play.bootstrap.http.HttpClient
 
 import scala.concurrent.Future
 
-class CreationControllerSpec extends SpecBase {
+class CreationControllerSpec extends SpecBase with MockitoSugar{
 
   def fakeRequestWithJson(jsonStr: String) = {
     val json = Json.parse(jsonStr)
@@ -55,9 +59,11 @@ class CreationControllerSpec extends SpecBase {
 
   val confirmedContactDetails = ConfirmedContactDetails("a", "b", "c", "d")
   val propertyAddress = PropertyAddress("line1", Some("line2"), "town", Some("county"), "postcode")
+  val emailConnector = injector.instanceOf[EmailConnector]
+  val init = injector.instanceOf[Initialize]
 
   "Given some Json representing a Contact with an enquiry, the createContact method creates a Right(Contact) with council tax address details" in {
-    val controller = new CreationController()
+    val controller = new CreationController(emailConnector, init)
     val result = controller.createContact(Some(Json.parse(contactJson)))
 
     result.isRight mustBe true
@@ -69,19 +75,19 @@ class CreationControllerSpec extends SpecBase {
   }
 
   "return 200 for a POST carrying an enquiry" in {
-    val result = new CreationController().create()(fakeRequestWithJson(contactJson))
+    val result = new CreationController(emailConnector, init).create()(fakeRequestWithJson(contactJson))
     status(result) mustBe OK
   }
 
   "return 400 (badrequest) when given no json" in {
     val fakeRequest = FakeRequest("POST", "").withHeaders("Content-Type" ->  "application/json")
-    val result = new CreationController().create()(fakeRequest)
+    val result = new CreationController(emailConnector, init).create()(fakeRequest)
     status(result) mustBe BAD_REQUEST
   }
 
   "return 400 (badrequest) when given garbled json" in {
     val fakeRequest = FakeRequest("POST", "").withHeaders("Content-Type" ->  "application/json").withTextBody("{")
-    val result = new CreationController().create()(fakeRequest)
+    val result = new CreationController(emailConnector, init).create()(fakeRequest)
     status(result) mustBe BAD_REQUEST
   }
 }
