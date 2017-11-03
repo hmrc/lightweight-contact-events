@@ -17,34 +17,29 @@
 package uk.gov.hmrc.lightweightcontactevents.models
 
 import play.api.libs.json.Json
+import uk.gov.hmrc.lightweightcontactevents.utils.AddressFormatters._
+import uk.gov.hmrc.lightweightcontactevents.utils.Initialize
 
 case class Email(to: Seq[String], templateId: String, parameters: Map[String, String])
 
 object Email {
   implicit val writer = Json.writes[Email]
 
-  def apply(ctc: Contact): Email = {
+  def apply(ctc: Contact, init: Initialize): Email = {
     val parameters = Map(
       "firstName" -> ctc.contact.firstName,
       "lastName" -> ctc.contact.lastName,
       "email" -> ctc.contact.email,
       "contactNumber" -> ctc.contact.contactNumber,
-      "addressLine1" -> ctc.propertyAddress.addressLine1,
-      "town" -> ctc.propertyAddress.town,
-      "postcode" -> ctc.propertyAddress.postcode,
+      "propertyAddress" -> formattedPropertyAddress(ctc.propertyAddress, "<br/>"),
       "enquiryCategoryMsg" -> ctc.enquiryCategoryMsg,
       "subEnquiryCategoryMsg" -> ctc.subEnquiryCategoryMsg,
       "message" -> ctc.message
-    ) ++
-      (ctc.propertyAddress.addressLine2 match {
-        case Some(addr) => Map("addressLine2" -> addr)
-        case None => Map()
-      }) ++
-      (ctc.propertyAddress.county match {
-        case Some(cty) => Map("county" -> cty)
-        case None => Map()
-      })
-    Email(Seq(), "", parameters)
+    )
+
+    val emailAddress = if (ctc.isCouncilTaxEnquiry) init.councilTaxEmail else init.businessRatesEmail
+
+    Email(Seq(emailAddress), "voa_confirmation_message_alert", parameters)
   }
 }
 

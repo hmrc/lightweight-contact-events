@@ -16,17 +16,22 @@
 
 package uk.gov.hmrc.lightweightcontactevents.controllers
 
-import javax.inject.Inject
+import javax.inject.{Singleton, Inject}
+
 import play.api.Logger
 import play.api.mvc.{Action, AnyContent}
+
 import scala.concurrent.Future
 import play.api.libs.json._
-import uk.gov.hmrc.lightweightcontactevents.models.Contact
+import uk.gov.hmrc.lightweightcontactevents.connectors.EmailConnector
+import uk.gov.hmrc.lightweightcontactevents.models.{Contact, Email}
+import uk.gov.hmrc.lightweightcontactevents.utils.Initialize
 import uk.gov.hmrc.play.bootstrap.controller.BaseController
+
 import scala.concurrent.ExecutionContext.Implicits.global
 
-
-class CreationController @Inject()() extends BaseController {
+@Singleton
+class CreationController @Inject()(val emailConnector: EmailConnector, val init: Initialize) extends BaseController {
   def createContact(json: Option[JsValue]): Either[String, Contact] = {
     json match {
       case Some(value) => {
@@ -43,7 +48,10 @@ class CreationController @Inject()() extends BaseController {
   def create(): Action[AnyContent] = Action.async {implicit request =>
     createContact(request.body.asJson) match {
       case Right(contact) => {
-        Logger.warn("Successful contact: " + contact)
+        val email = Email(contact, init)
+        //TODO: Send the email here
+        //emailConnector.sendEmail(email)
+        Logger.warn(">>> SUCCESSFUL CONTACT")
         Future.successful(Ok)
       }
       case Left(error) => {

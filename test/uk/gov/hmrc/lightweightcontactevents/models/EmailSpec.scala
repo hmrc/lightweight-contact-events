@@ -16,73 +16,66 @@
 
 package uk.gov.hmrc.lightweightcontactevents.models
 
+import com.typesafe.config.ConfigFactory
+import play.api.Configuration
 import uk.gov.hmrc.lightweightcontactevents.SpecBase
+import uk.gov.hmrc.lightweightcontactevents.utils.Initialize
+import scala.collection.JavaConversions._
 
 class EmailSpec extends SpecBase {
+  val init = injector.instanceOf[Initialize]
   val message = "MSG"
-  val enquiryCategory = "EC"
-  val subEnquiryCategory = "SEC"
+  val enquiryCategoryMsg = "Council Tax"
+  val subEnquiryCategoryMsg = "SEC"
   val confirmedContactDetails = ConfirmedContactDetails("first", "last", "email", "07777777")
   val propertyAddress = PropertyAddress("line1", Some("line2"), "town", Some("county"), "AA1 1AA")
-  val contact = Contact(confirmedContactDetails, propertyAddress, enquiryCategory, subEnquiryCategory, message)
+  val contact = Contact(confirmedContactDetails, propertyAddress, true, enquiryCategoryMsg, subEnquiryCategoryMsg, message)
 
   "creating an email from a contact results in a map of parameters containing a firstName key set to a value of first" in {
-    Email(contact).parameters.getOrElse("firstName", "") mustBe "first"
+    Email(contact, init).parameters.getOrElse("firstName", "") mustBe "first"
   }
 
   "creating an email from a contact results in a map of parameters containing a lastName key set to a value of last" in {
-    Email(contact).parameters.getOrElse("lastName", "") mustBe "last"
+    Email(contact, init).parameters.getOrElse("lastName", "") mustBe "last"
   }
 
   "creating an email from a contact results in a map of parameters containing a email key set to a value of email" in {
-    Email(contact).parameters.getOrElse("email", "") mustBe "email"
+    Email(contact, init).parameters.getOrElse("email", "") mustBe "email"
   }
 
   "creating an email from a contact results in a map of parameters containing a contactNumber key set to a value of 07777777" in {
-    Email(contact).parameters.getOrElse("contactNumber", "") mustBe "07777777"
+    Email(contact, init).parameters.getOrElse("contactNumber", "") mustBe "07777777"
   }
 
-  "creating an email from a contact results in a map of parameters containing a addressLine1 key set to a value of line1" in {
-    Email(contact).parameters.getOrElse("addressLine1", "") mustBe "line1"
-  }
-
-  "creating an email from a contact with an addressLine2 results in a map of parameters containing a addressLine2 key set to a value of line2" in {
-    Email(contact).parameters.getOrElse("addressLine2", "") mustBe "line2"
-  }
-
-  "creating an email from a contact without an addressLine2 results in a map of parameters without an addressLine2 key" in {
-    val pa = propertyAddress copy (addressLine2 = None)
-    val contact = Contact(confirmedContactDetails, pa, enquiryCategory, subEnquiryCategory, message)
-    Email(contact).parameters.isDefinedAt("addressLine2") mustBe false
-  }
-
-  "creating an email from a contact with an town results in a map of parameters containing a addressLine2 key set to a value of town" in {
-    Email(contact).parameters.getOrElse("town", "") mustBe "town"
-  }
-
-  "creating an email from a contact with an county results in a map of parameters containing a county key set to a value of county" in {
-    Email(contact).parameters.getOrElse("county", "") mustBe "county"
-  }
-
-  "creating an email from a contact without an county results in a map of parameters without county key" in {
-    val pa  = propertyAddress copy (county = None)
-    val contact = Contact(confirmedContactDetails, pa, enquiryCategory, subEnquiryCategory, message)
-    Email(contact).parameters.isDefinedAt("county") mustBe false
-  }
-
-  "creating an email from a contact with an postcode results in a map of parameters containing a postcode key set to a value of AA1 1AA" in {
-    Email(contact).parameters.getOrElse("postcode", "") mustBe "AA1 1AA"
+  "creating an email from a contact results in a map of parameters containing a propertyAddress key with address values seperated by <br/>" in {
+    Email(contact, init).parameters.getOrElse("propertyAddress", "") mustBe "line1<br/>line2<br/>town<br/>county<br/>AA1 1AA"
   }
 
   "creating an email from a contact with an enquiry category results in a map of parameters containing a enquiryCategory key set to a value of EC" in {
-    Email(contact).parameters.getOrElse("enquiryCategoryMsg", "") mustBe "EC"
+    Email(contact, init).parameters.getOrElse("enquiryCategoryMsg", "") mustBe "Council Tax"
   }
 
   "creating an email from a contact with an sub enquiry category results in a map of parameters containing a subEnquiryCategory key set to a value of SC" in {
-    Email(contact).parameters.getOrElse("subEnquiryCategoryMsg", "") mustBe "SEC"
+    Email(contact, init).parameters.getOrElse("subEnquiryCategoryMsg", "") mustBe "SEC"
   }
 
   "creating an email from a contact with an message results in a map of parameters containing a message key set to a value of MSG" in {
-    Email(contact).parameters.getOrElse("message", "") mustBe "MSG"
+    Email(contact, init).parameters.getOrElse("message", "") mustBe "MSG"
+  }
+
+  "use the council tax email from initialize if the enquiryCategory is council_tax" in {
+    val sm = Map("email.council-tax" -> "ct@voa.gov.uk", "email.non-domestic-rates" -> "ndr@voa.gov.uk")
+    val conf = new Configuration(ConfigFactory.parseMap(sm))
+    val init = new Initialize(conf)
+    Email(contact, init).to(0) mustBe "ct@voa.gov.uk"
+
+  }
+
+  "use the business rates email from initialize if the enquiryCategory is business_rates" in {
+    val contact = Contact(confirmedContactDetails, propertyAddress, false, "Business Rates", subEnquiryCategoryMsg, message)
+    val sm = Map("email.council-tax" -> "ct@voa.gov.uk", "email.non-domestic-rates" -> "ndr@voa.gov.uk")
+    val conf = new Configuration(ConfigFactory.parseMap(sm))
+    val init = new Initialize(conf)
+    Email(contact, init).to(0) mustBe "ndr@voa.gov.uk"
   }
 }

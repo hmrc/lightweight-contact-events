@@ -14,17 +14,23 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.lightweightcontactevents.models
+package uk.gov.hmrc.lightweightcontactevents.utils
 
-import play.api.libs.json.Json
+import javax.inject.{Singleton, Inject}
+import com.google.inject.AbstractModule
+import com.google.inject.name.Names
+import play.api.Configuration
 
-case class Contact(contact: ConfirmedContactDetails,
-                   propertyAddress: PropertyAddress,
-                   isCouncilTaxEnquiry: Boolean,
-                   enquiryCategoryMsg: String,
-                   subEnquiryCategoryMsg: String,
-                   message: String)
-
-object Contact {
-  implicit val format = Json.format[Contact]
+@Singleton
+class Initialize @Inject()(conf: Configuration){
+  val councilTaxEmail = conf.underlying.getString("email.council-tax")
+  val businessRatesEmail = conf.underlying.getString("email.non-domestic-rates")
 }
+
+class StartupModule extends AbstractModule {
+  def configure(): Unit = {
+    bind(classOf[Initialize]).asEagerSingleton()
+  }
+}
+
+  
