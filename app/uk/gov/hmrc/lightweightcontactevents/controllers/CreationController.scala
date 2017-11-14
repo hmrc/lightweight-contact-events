@@ -50,7 +50,9 @@ class CreationController @Inject()(val emailConnector: EmailConnector, val init:
       case Right(contact) => {
         val email = Email(contact, init)
         //TODO: Send the email here
-        //emailConnector.sendEmail(email)
+        //val result = emailConnector.sendEmail(email)
+        //result match { etc.
+        //}
         Logger.warn(">>> SUCCESSFUL CONTACT")
         Future.successful(Ok)
       }

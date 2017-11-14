@@ -100,9 +100,18 @@ class EmailConnectorSpec extends SpecBase with MockitoSugar {
       }
 
 
-      "throw an exception if the email service call fails" in {
+      "return a failureif the email service call returns a non 200 status" in {
           new EmailConnector(getHttpMock(500), configuration).sendJson(minimalJson). map {f =>
             assert(f.isFailure)
+        }
+      }
+
+      "return a failure if the email service call throws an exception" in {
+        val httpMock = mock[HttpClient]
+        when(httpMock.POST(anyString, any[JsValue], any[Seq[(String, String)]])(any[Writes[Any]], any[HttpReads[Any]],
+          any[HeaderCarrier], any())) thenReturn  Future.successful(new RuntimeException)
+        new EmailConnector(httpMock, configuration).sendJson(minimalJson). map {f =>
+          assert(f.isFailure)
         }
       }
     }

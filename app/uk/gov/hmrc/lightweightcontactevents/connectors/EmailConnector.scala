@@ -45,6 +45,10 @@ class EmailConnector @Inject()(val http: HttpClient, override val configuration:
           Logger.warn("Email service fails with status " + status)
           Failure(new RuntimeException("Email service fails with status " + status))
       }
+    } recover {
+      case ex =>
+        Logger.warn("Email service fails with exception " + ex.getMessage)
+        Failure(new RuntimeException("Email service fails with exception " + ex.getMessage))
     }
 
   def sendEmail(email: Email): Future[Try[Int]] = sendJson(Json.toJson(email))
