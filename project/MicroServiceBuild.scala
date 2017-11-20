@@ -25,7 +25,7 @@ object MicroServiceBuild extends Build with MicroService {
   private val playReactivemongoVersion = "5.2.0"
   private val playConditionalFormMappingVersion = "0.2.0"
   private val playLanguageVersion = "3.4.0"
-  private val bootstrapVersion = "0.13.0"
+  private val bootstrapVersion = "1.0.0"
   private val reactiveMongoVersion = "6.1.0"
   private val swaggerVersion = "0.6.2"
 
