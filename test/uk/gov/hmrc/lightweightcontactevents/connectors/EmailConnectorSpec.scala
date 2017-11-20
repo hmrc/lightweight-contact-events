@@ -100,9 +100,8 @@ class EmailConnectorSpec extends SpecBase with MockitoSugar {
         }
       }
 
-
-      "return a failureif the email service call returns a non 200 status" in {
-          new EmailConnector(getHttpMock(500), configuration, environment).sendJson(minimalJson). map {f =>
+      "throw an failure if the email service call fails" in {
+          new EmailConnector(getHttpMock(500), configuration, environment).sendJson(minimalJson). map { f =>
             assert(f.isFailure)
         }
       }
