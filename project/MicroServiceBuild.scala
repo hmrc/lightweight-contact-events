@@ -35,7 +35,8 @@ object MicroServiceBuild extends Build with MicroService {
     ws,
     "uk.gov.hmrc" %% "bootstrap-play-25" % bootstrapVersion,
     "uk.gov.hmrc" %% "play-reactivemongo" % reactiveMongoVersion,
-    "com.iheart" %% "play-swagger" % swaggerVersion
+    "com.iheart" %% "play-swagger" % swaggerVersion,
+    "com.hierynomus" % "sshj" % "0.23.0"
   )
 
   trait TestDependencies {
