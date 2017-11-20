@@ -20,7 +20,7 @@ import org.mockito.ArgumentCaptor
 import org.mockito.Matchers.{any, anyString}
 import org.mockito.Mockito.{verify, when}
 import org.scalatest.mockito.MockitoSugar
-import play.api.Configuration
+import play.api.{Configuration, Environment}
 import play.api.libs.json._
 import uk.gov.hmrc.http.{HeaderCarrier, HttpReads, HttpResponse}
 import uk.gov.hmrc.lightweightcontactevents.SpecBase
@@ -36,6 +36,7 @@ class EmailConnectorSpec extends SpecBase with MockitoSugar {
 
   val configuration = injector.instanceOf[Configuration]
   val init = injector.instanceOf[Initialize]
+  val environment = injector.instanceOf[Environment]
   val message = "MSG"
   val enquiryCategoryMsg = "Council Tax"
   val subEnquiryCategoryMsg = "SEC"
@@ -57,7 +58,7 @@ class EmailConnectorSpec extends SpecBase with MockitoSugar {
     "provided with Email model input" must {
       "Send the email returning a 200 when the email service succeeds" in {
         val httpMock = getHttpMock(202)
-        val connector = new EmailConnector(httpMock, configuration)
+        val connector = new EmailConnector(httpMock, configuration, environment)
         connector.sendEmail(email).map {
           case Success(status) => status mustBe 200
           case Failure(_) => assert(false)
@@ -66,7 +67,7 @@ class EmailConnectorSpec extends SpecBase with MockitoSugar {
 
       "return a failure representing the error when send method fails" in {
         val httpMock = getHttpMock(500)
-        val connector = new EmailConnector(httpMock, configuration)
+        val connector = new EmailConnector(httpMock, configuration, environment)
         connector.sendEmail(email).map { result =>
           assert(result.isFailure)
         }
@@ -83,7 +84,7 @@ class EmailConnectorSpec extends SpecBase with MockitoSugar {
         val headersCaptor = ArgumentCaptor.forClass(classOf[Seq[(String, String)]])
         val httpMock = getHttpMock(200)
 
-        val connector = new EmailConnector(httpMock, configuration)
+        val connector = new EmailConnector(httpMock, configuration, environment)
         connector.sendJson(minimalJson)
 
         verify(httpMock).POST(urlCaptor.capture, bodyCaptor.capture, headersCaptor.capture)(jsonWritesNapper.capture,
@@ -94,14 +95,14 @@ class EmailConnectorSpec extends SpecBase with MockitoSugar {
       }
 
       "return a 200 if the email service call is successful" in {
-        new EmailConnector(getHttpMock(202), configuration).sendJson(minimalJson).map { status =>
+        new EmailConnector(getHttpMock(202), configuration, environment).sendJson(minimalJson).map { status =>
           status mustBe Success(200)
         }
       }
 
 
       "throw an exception if the email service call fails" in {
-          new EmailConnector(getHttpMock(500), configuration).sendJson(minimalJson). map {f =>
+          new EmailConnector(getHttpMock(500), configuration, environment).sendJson(minimalJson). map { f =>
             assert(f.isFailure)
         }
       }
