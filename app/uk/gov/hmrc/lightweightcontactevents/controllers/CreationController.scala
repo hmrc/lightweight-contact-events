@@ -16,7 +16,7 @@
 
 package uk.gov.hmrc.lightweightcontactevents.controllers
 
-import javax.inject.{Singleton, Inject}
+import javax.inject.{Inject, Singleton}
 
 import play.api.Logger
 import play.api.mvc.{Action, AnyContent}
@@ -29,6 +29,7 @@ import uk.gov.hmrc.lightweightcontactevents.utils.Initialize
 import uk.gov.hmrc.play.bootstrap.controller.BaseController
 
 import scala.concurrent.ExecutionContext.Implicits.global
+import scala.util.{Failure, Success, Try}
 
 @Singleton
 class CreationController @Inject()(val emailConnector: EmailConnector, val init: Initialize) extends BaseController {
@@ -49,12 +50,14 @@ class CreationController @Inject()(val emailConnector: EmailConnector, val init:
     createContact(request.body.asJson) match {
       case Right(contact) => {
         val email = Email(contact, init)
-        //TODO: Send the email here
-        //val result = emailConnector.sendEmail(email)
-        //result match { etc.
-        //}
-        Logger.warn(">>> SUCCESSFUL CONTACT")
-        Future.successful(Ok)
+        val result: Future[Try[Int]] = emailConnector.sendEmail(email)
+        result map {
+          case Success(s) =>
+            Ok
+          case Failure(ex) =>
+            Logger.warn("Sending contact email fails with message " + ex.getMessage)
+            BadRequest("Sending contact email fails with message " + ex.getMessage)
+          }
       }
       case Left(error) => {
         Logger.warn(error)

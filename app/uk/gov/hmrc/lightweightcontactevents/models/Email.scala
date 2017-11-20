@@ -31,7 +31,7 @@ object Email {
       "lastName" -> ctc.contact.lastName,
       "email" -> ctc.contact.email,
       "contactNumber" -> ctc.contact.contactNumber,
-      "propertyAddress" -> formattedPropertyAddress(ctc.propertyAddress, "<br/>"),
+      "propertyAddress" -> formattedPropertyAddress(ctc.propertyAddress, ", "),
       "enquiryCategoryMsg" -> ctc.enquiryCategoryMsg,
       "subEnquiryCategoryMsg" -> ctc.subEnquiryCategoryMsg,
       "message" -> ctc.message
