@@ -18,20 +18,27 @@ package uk.gov.hmrc.lightweightcontactevents.connectors
 
 import javax.inject.{Inject, Singleton}
 
-import play.api.Configuration
+import play.api.Mode.Mode
+import play.api.{Configuration, Environment, Logger}
 import play.api.libs.json.{JsValue, Json}
-import play.api.Logger
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.lightweightcontactevents.models.Email
 import uk.gov.hmrc.play.bootstrap.http.HttpClient
-import uk.gov.hmrc.play.bootstrap.config.BaseUrl
+import uk.gov.hmrc.play.config.ServicesConfig
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 import scala.util.{Failure, Success, Try}
 
 @Singleton
-class EmailConnector @Inject()(val http: HttpClient, override val configuration: Configuration) extends BaseUrl {
+class EmailConnector @Inject()(val http: HttpClient,
+                               val configuration: Configuration,
+                               environment: Environment) extends ServicesConfig {
+
+  override protected def mode: Mode = environment.mode
+
+  override protected def runModeConfiguration: Configuration = configuration
+
   implicit val hc: HeaderCarrier = HeaderCarrier()
   val domain = "/hmrc/"
   val jsonContentTypeHeader = ("Content-Type", "application/json")
