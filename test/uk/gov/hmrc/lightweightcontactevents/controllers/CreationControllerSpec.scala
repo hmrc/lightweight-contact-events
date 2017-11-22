@@ -31,16 +31,17 @@ import uk.gov.hmrc.lightweightcontactevents.utils.Initialize
 import uk.gov.hmrc.play.bootstrap.http.HttpClient
 
 import scala.concurrent.Future
-import scala.util.{Success, Try}
+import scala.util.{Failure, Success, Try}
 
-class CreationControllerSpec extends SpecBase with MockitoSugar{
+class CreationControllerSpec extends SpecBase with MockitoSugar {
 
   def fakeRequestWithJson(jsonStr: String) = {
     val json = Json.parse(jsonStr)
-    FakeRequest("POST", "").withHeaders("Content-Type" ->  "application/json").withJsonBody(json)
+    FakeRequest("POST", "").withHeaders("Content-Type" -> "application/json").withJsonBody(json)
   }
 
-  val contactJson = """{
+  val contactJson =
+    """{
     "contact": {
       "firstName": "first",
       "lastName": "last",
@@ -60,11 +61,27 @@ class CreationControllerSpec extends SpecBase with MockitoSugar{
     "message": "message"
   }""""
 
+  val wrongJson =
+    """{
+    "contact": {
+      "firstName": "first",
+      "lastName": "last",
+      "email": "email"
+    },
+    "propertyAddress": {
+      "county": "county",
+      "postcode": "postcode"
+    },
+    "subEnquiryCategoryMsg": "seq",
+    "message": "message"
+  }""""
 
   val confirmedContactDetails = ConfirmedContactDetails("a", "b", "c", "d")
   val propertyAddress = PropertyAddress("line1", Some("line2"), "town", Some("county"), "postcode")
   val mockConnector = mock[EmailConnector]
-  when (mockConnector.sendEmail(any[Email])) thenReturn Future.successful(Try(202))
+  when(mockConnector.sendEmail(any[Email])) thenReturn Future.successful(Try(202))
+  val mockConnectorFailed = mock[EmailConnector]
+  when(mockConnectorFailed.sendEmail(any[Email])) thenReturn Future.successful(Failure(new RuntimeException("Received exception from upstream service")))
   val init = injector.instanceOf[Initialize]
 
   "Given some Json representing a Contact with an enquiry, the createContact method creates a Right(Contact) with council tax address details" in {
@@ -85,14 +102,28 @@ class CreationControllerSpec extends SpecBase with MockitoSugar{
   }
 
   "return 400 (badrequest) when given no json" in {
-    val fakeRequest = FakeRequest("POST", "").withHeaders("Content-Type" ->  "application/json")
+    val fakeRequest = FakeRequest("POST", "").withHeaders("Content-Type" -> "application/json")
     val result = new CreationController(mockConnector, init).create()(fakeRequest)
     status(result) mustBe BAD_REQUEST
   }
 
   "return 400 (badrequest) when given garbled json" in {
-    val fakeRequest = FakeRequest("POST", "").withHeaders("Content-Type" ->  "application/json").withTextBody("{")
+    val fakeRequest = FakeRequest("POST", "").withHeaders("Content-Type" -> "application/json").withTextBody("{")
     val result = new CreationController(mockConnector, init).create()(fakeRequest)
     status(result) mustBe BAD_REQUEST
+  }
+
+  "Given some wrong Json format, the createContact method returns a Left(Unable to parse)" in {
+    val controller = new CreationController(mockConnector, init)
+    val result = controller.createContact(Some(Json.parse(wrongJson)))
+
+    result.isLeft mustBe true
+  }
+
+  "Create method returns a Failure when the email service returns an internal server error" in {
+    intercept[Exception] {
+      val result = new CreationController(mockConnectorFailed, init).create()(fakeRequestWithJson(contactJson))
+      status(result) mustBe INTERNAL_SERVER_ERROR
+    }
   }
 }
