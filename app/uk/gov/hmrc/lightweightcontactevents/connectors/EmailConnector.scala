@@ -48,7 +48,7 @@ class EmailConnector @Inject()(val http: HttpClient,
     http.POST(s"$serviceUrl${domain}email", json, Seq(jsonContentTypeHeader)).map { response =>
       response.status match {
         case 202 =>
-          println("&&&&&&&&&&&&&&&&&&&&&&&&&&& EMAIL MICROSERVICE RETURNS STATUS 202")
+          Logger.warn("EMAIL MICROSERVICE RETURNS STATUS 202")
           Success(200)
         case status =>
           Logger.warn("Email service fails with status " + status)
@@ -60,5 +60,14 @@ class EmailConnector @Inject()(val http: HttpClient,
         Failure(new RuntimeException("Email service fails with exception " + ex.getMessage))
     }
 
-  def sendEmail(email: Email): Future[Try[Int]] = sendJson(Json.toJson(email))
+  def sendEmail(email: Email): Future[Try[Int]] = {
+    try {
+      val dest = email.to(0)
+      val addr = email.parameters.get("propertyAddress")
+      Logger.warn(s"Attempting  to send email to $dest about address: $addr.")
+    } catch {
+      case ex: Exception => Logger.warn("sendEmail for case class " + email + " fails with exception " + ex.getMessage)
+    }
+    sendJson(Json.toJson(email))
+  }
 }
