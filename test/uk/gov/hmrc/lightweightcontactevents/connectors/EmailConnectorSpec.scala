@@ -35,8 +35,8 @@ import scala.util.{Failure, Success}
 class EmailConnectorSpec extends SpecBase with MockitoSugar {
 
   val configuration = injector.instanceOf[Configuration]
-  val init = injector.instanceOf[Initialize]
   val environment = injector.instanceOf[Environment]
+  val init = injector.instanceOf[Initialize]
   val message = "MSG"
   val enquiryCategoryMsg = "Council Tax"
   val subEnquiryCategoryMsg = "SEC"
@@ -100,10 +100,18 @@ class EmailConnectorSpec extends SpecBase with MockitoSugar {
         }
       }
 
-
-      "throw an exception if the email service call fails" in {
+      "throw an failure if the email service call fails" in {
           new EmailConnector(getHttpMock(500), configuration, environment).sendJson(minimalJson). map { f =>
             assert(f.isFailure)
+        }
+      }
+
+      "return a failure if the email service call throws an exception" in {
+        val httpMock = mock[HttpClient]
+        when(httpMock.POST(anyString, any[JsValue], any[Seq[(String, String)]])(any[Writes[Any]], any[HttpReads[Any]],
+          any[HeaderCarrier], any())) thenReturn  Future.successful(new RuntimeException)
+        new EmailConnector(httpMock, configuration, environment).sendJson(minimalJson). map {f =>
+          assert(f.isFailure)
         }
       }
     }

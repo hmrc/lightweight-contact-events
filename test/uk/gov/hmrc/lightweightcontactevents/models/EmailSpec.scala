@@ -48,7 +48,7 @@ class EmailSpec extends SpecBase {
   }
 
   "creating an email from a contact results in a map of parameters containing a propertyAddress key with address values seperated by <br/>" in {
-    Email(contact, init).parameters.getOrElse("propertyAddress", "") mustBe "line1<br/>line2<br/>town<br/>county<br/>AA1 1AA"
+    Email(contact, init).parameters.getOrElse("propertyAddress", "") mustBe "line1, line2, town, county, AA1 1AA"
   }
 
   "creating an email from a contact with an enquiry category results in a map of parameters containing a enquiryCategory key set to a value of EC" in {

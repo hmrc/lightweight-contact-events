@@ -17,8 +17,6 @@
 package uk.gov.hmrc.lightweightcontactevents.connectors
 
 import javax.inject.{Inject, Singleton}
-
-import play.api.Mode.Mode
 import play.api.{Configuration, Environment, Logger}
 import play.api.libs.json.{JsValue, Json}
 import uk.gov.hmrc.http.HeaderCarrier
@@ -29,30 +27,47 @@ import uk.gov.hmrc.play.config.ServicesConfig
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 import scala.util.{Failure, Success, Try}
+import play.api.Mode.Mode
 
 @Singleton
 class EmailConnector @Inject()(val http: HttpClient,
                                val configuration: Configuration,
                                environment: Environment) extends ServicesConfig {
+  implicit val hc: HeaderCarrier = HeaderCarrier()
 
   override protected def mode: Mode = environment.mode
 
   override protected def runModeConfiguration: Configuration = configuration
 
-  implicit val hc: HeaderCarrier = HeaderCarrier()
   val domain = "/hmrc/"
   val jsonContentTypeHeader = ("Content-Type", "application/json")
-  lazy val serviceUrl = baseUrl("email")
+
+  val serviceUrl = baseUrl("email")
 
   def sendJson(json: JsValue): Future[Try[Int]] =
     http.POST(s"$serviceUrl${domain}email", json, Seq(jsonContentTypeHeader)).map { response =>
       response.status match {
-        case 202 => Success(200)
+        case 202 =>
+          Logger.warn("EMAIL MICROSERVICE RETURNS STATUS 202")
+          Success(200)
         case status =>
           Logger.warn("Email service fails with status " + status)
           Failure(new RuntimeException("Email service fails with status " + status))
       }
+    } recover {
+      case ex =>
+        Logger.warn("Email service fails with exception " + ex.getMessage)
+        Failure(new RuntimeException("Email service fails with exception " + ex.getMessage))
     }
 
-  def sendEmail(email: Email): Future[Try[Int]] = sendJson(Json.toJson(email))
+  def sendEmail(email: Email): Future[Try[Int]] = {
+    try {
+      val dest = email.to(0)
+      val addr = email.parameters.get("propertyAddress")
+      Logger.warn(s"Attempting  to send email to $dest about address: $addr.")
+    } catch {
+      case ex: Exception => Logger.warn("sendEmail for case class " + email + " fails with exception " + ex.getMessage)
+    }
+    sendJson(Json.toJson(email))
+  }
 }
