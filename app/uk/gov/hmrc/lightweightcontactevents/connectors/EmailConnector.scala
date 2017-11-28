@@ -40,6 +40,7 @@ class EmailConnector @Inject()(val http: HttpClient,
   override protected def runModeConfiguration: Configuration = configuration
 
   val domain = "/hmrc/"
+
   val jsonContentTypeHeader = ("Content-Type", "application/json")
 
   val serviceUrl = baseUrl("email")
@@ -60,14 +61,5 @@ class EmailConnector @Inject()(val http: HttpClient,
         Failure(new RuntimeException("Email service fails with exception " + ex.getMessage))
     }
 
-  def sendEmail(email: Email): Future[Try[Int]] = {
-    try {
-      val dest = email.to(0)
-      val addr = email.parameters.get("propertyAddress")
-      Logger.warn(s"Attempting  to send email to $dest about address: $addr.")
-    } catch {
-      case ex: Exception => Logger.warn("sendEmail for case class " + email + " fails with exception " + ex.getMessage)
-    }
-    sendJson(Json.toJson(email))
-  }
+  def sendEmail(email: Email): Future[Try[Int]] = sendJson(Json.toJson(email))
 }

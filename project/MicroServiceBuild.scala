@@ -27,15 +27,13 @@ object MicroServiceBuild extends Build with MicroService {
   private val playLanguageVersion = "3.4.0"
   private val bootstrapVersion = "1.0.0"
   private val reactiveMongoVersion = "6.1.0"
-  private val swaggerVersion = "0.6.2"
 
   override lazy val appDependencies: Seq[ModuleID] = compile ++ Test()
 
   val compile = Seq(
     ws,
     "uk.gov.hmrc" %% "bootstrap-play-25" % bootstrapVersion,
-    "uk.gov.hmrc" %% "play-reactivemongo" % reactiveMongoVersion,
-    "com.iheart" %% "play-swagger" % swaggerVersion
+    "uk.gov.hmrc" %% "play-reactivemongo" % reactiveMongoVersion
   )
 
   trait TestDependencies {
