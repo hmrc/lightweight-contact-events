@@ -33,7 +33,8 @@ object MicroServiceBuild extends Build with MicroService {
   val compile = Seq(
     ws,
     "uk.gov.hmrc" %% "bootstrap-play-25" % bootstrapVersion,
-    "uk.gov.hmrc" %% "play-reactivemongo" % reactiveMongoVersion
+    "uk.gov.hmrc" %% "play-reactivemongo" % reactiveMongoVersion,
+    "com.eclipsesource" %% "play-json-schema-validator" % "0.8.9"
   )
 
   trait TestDependencies {

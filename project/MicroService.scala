@@ -56,7 +56,8 @@ trait MicroService {
       parallelExecution in IntegrationTest := false)
       .settings(resolvers ++= Seq(
         Resolver.bintrayRepo("hmrc", "releases"),
-        Resolver.jcenterRepo
+        Resolver.jcenterRepo,
+        "emueller-bintray" at "http://dl.bintray.com/emueller/maven" // for play json schema validator
       ))
 }
 
