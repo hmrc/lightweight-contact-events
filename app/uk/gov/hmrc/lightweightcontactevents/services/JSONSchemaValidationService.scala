@@ -22,7 +22,7 @@ import play.api.Configuration
 import play.api.libs.json._
 
 @Singleton
-class JSONSchemaValidationServiceImpl @Inject() (conf: Configuration) {
+class JSONSchemaValidationService @Inject()(conf: Configuration) {
 
   private val validationSchema: SchemaType = {
     val schemaStr = conf.underlying.getString("schema")
@@ -31,10 +31,13 @@ class JSONSchemaValidationServiceImpl @Inject() (conf: Configuration) {
 
   private lazy val jsonValidator: SchemaValidator = new SchemaValidator()
 
-  private def validateAgainstSchema(contact: JsValue): Either[String, JsValue] =
-    jsonValidator.validate(validationSchema, contact) match {
-      case e: JsError      ⇒ Left(s"Content was not valid against schema: ${e.toString}")
-      case JsSuccess(u, _) ⇒ Right(u)
+  def validateAgainstSchema(contact: Option[JsValue]): Either[String, JsValue] =
+    contact match {
+      case Some(value) =>
+        jsonValidator.validate(validationSchema, value) match {
+          case e: JsError ⇒ Left(s"Content was not valid against schema: ${e.toString}")
+          case JsSuccess(c, _) ⇒ Right(c)
+        }
+      case None => Left("No Json available")
     }
-
 }
