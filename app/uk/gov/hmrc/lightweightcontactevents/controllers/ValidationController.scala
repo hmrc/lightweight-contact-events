@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+package uk.gov.hmrc.lightweightcontactevents.controllers
 import javax.inject.{Inject, Singleton}
 
 import play.api.{Configuration, Logger}

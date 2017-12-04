@@ -16,18 +16,11 @@
 
 package uk.gov.hmrc.lightweightcontactevents.controllers
 
-
-import org.mockito.Matchers.any
-import org.mockito.Mockito.when
 import org.scalatest.mockito.MockitoSugar
-import play.api.i18n.MessagesApi
-import play.api.libs.json.{JsValue, Json}
+import play.api.libs.json.Json
 import play.api.test.FakeRequest
 import play.api.test.Helpers.{status, _}
 import uk.gov.hmrc.lightweightcontactevents.SpecBase
-
-import scala.concurrent.Future
-import scala.util.{Failure, Success, Try}
 
 class ValidationControllerSpec extends SpecBase with MockitoSugar {
 
@@ -35,6 +28,8 @@ class ValidationControllerSpec extends SpecBase with MockitoSugar {
     val json = Json.parse(jsonStr)
     FakeRequest("POST", "").withHeaders("Content-Type" -> "application/json").withJsonBody(json)
   }
+
+  val fakeConfiguration = fakeApplication.configuration
 
   val contactJson =
     """{
@@ -56,61 +51,46 @@ class ValidationControllerSpec extends SpecBase with MockitoSugar {
     "message": "I think I need a reevaluation. What do I do?"
   }"""
 
-  val wrongJson =
+  val invalidJson =
     """{
-    "contact": {
-      "firstName": "first",
-      "lastName": "last",
-      "email": "email"
+    "version": "wrong format",
+    "timestamp": "2017-12-01T14:23:10+00:00",
+    "domain": 1,
+    "categories": ["Council Tax", "My property"],
+    "first-name": "Andy",
+    "last-name": "Dwelly",
+    "email": "andy.dwelly@digital.hmrc.gov.uk",
+    "phone": "07525932507",
+    "property-address": {
+      "line1": "78a High St",
+      "line2": "Ferring",
+      "town": "Worthing",
+      "county": "West Sussex",
+      "postcode": "BN443SS"
     },
-    "propertyAddress": {
-      "county": "county",
-      "postcode": "postcode"
-    },
-    "subEnquiryCategoryMsg": "seq",
-    "message": "message"
+    "message": "I think I need a reevaluation. What do I do?"
   }""""
 
-  "Given some Json representing a Contact with an enquiry, the createContact method creates a Right(Contact) with council tax address details" in {
-    val controller = new ValidationController()
-    val result = controller.(Some(Json.parse(contactJson)))
-
-    result.isRight mustBe true
-    result.right.get.contact mustBe ConfirmedContactDetails("first", "last", "email", "tel")
-    result.right.get.propertyAddress mustBe PropertyAddress("line1", Some("line2"), "town", Some("county"), "postcode")
-    result.right.get.enquiryCategoryMsg mustBe "eq"
-    result.right.get.subEnquiryCategoryMsg mustBe "seq"
-    result.right.get.message mustBe "message"
-  }
 
   "return 200 for a POST carrying an enquiry" in {
-    val result = new CreationController(mockConnector, init).create()(fakeRequestWithJson(contactJson))
+    val result = new ValidationController(fakeConfiguration).validate()(fakeRequestWithJson(contactJson))
     status(result) mustBe OK
   }
 
   "return 400 (badrequest) when given no json" in {
     val fakeRequest = FakeRequest("POST", "").withHeaders("Content-Type" -> "application/json")
-    val result = new CreationController(mockConnector, init).create()(fakeRequest)
+    val result = new ValidationController(fakeConfiguration).validate()(fakeRequest)
     status(result) mustBe BAD_REQUEST
   }
 
   "return 400 (badrequest) when given garbled json" in {
     val fakeRequest = FakeRequest("POST", "").withHeaders("Content-Type" -> "application/json").withTextBody("{")
-    val result = new CreationController(mockConnector, init).create()(fakeRequest)
+    val result = new ValidationController(fakeConfiguration).validate()(fakeRequest)
     status(result) mustBe BAD_REQUEST
   }
 
-  "Given some wrong Json format, the createContact method returns a Left(Unable to parse)" in {
-    val controller = new CreationController(mockConnector, init)
-    val result = controller.createContact(Some(Json.parse(wrongJson)))
-
-    result.isLeft mustBe true
-  }
-
-  "Create method returns a Failure when the email service returns an internal server error" in {
-    intercept[Exception] {
-      val result = new CreationController(mockConnectorFailed, init).create()(fakeRequestWithJson(contactJson))
-      status(result) mustBe INTERNAL_SERVER_ERROR
-    }
+  "Given some invalid Json format, the validate method returns a Left(error)" in {
+    val result = new ValidationController(fakeConfiguration).validate()(fakeRequestWithJson(invalidJson))
+    status(result) mustBe BAD_REQUEST
   }
 }

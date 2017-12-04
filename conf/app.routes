@@ -1,3 +1,4 @@
 # microservice specific routes
 
 POST   /create                  @uk.gov.hmrc.lightweightcontactevents.controllers.CreationController.create()
+POST   /validate                @uk.gov.hmrc.lightweightcontactevents.controllers.ValidationController.validate()
