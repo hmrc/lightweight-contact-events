@@ -15,22 +15,15 @@
  */
 
 package uk.gov.hmrc.lightweightcontactevents.controllers
-import javax.inject.{Inject, Singleton}
 
+import javax.inject.{Inject, Singleton}
 import play.api.{Configuration, Logger}
 import play.api.mvc.{Action, AnyContent}
-import uk.gov.hmrc.lightweightcontactevents.connectors.EmailConnector
-import uk.gov.hmrc.lightweightcontactevents.models.Email
-import uk.gov.hmrc.lightweightcontactevents.utils.Initialize
 import uk.gov.hmrc.play.bootstrap.controller.BaseController
-
-import scala.concurrent.Future
-import scala.util.{Failure, Success, Try}
 import uk.gov.hmrc.lightweightcontactevents.services.JSONSchemaValidationService
 
 @Singleton
 class ValidationController @Inject()(conf: Configuration) extends BaseController {
-
 
   def validate(): Action[AnyContent] = Action { implicit request =>
     new JSONSchemaValidationService(conf).validateAgainstSchema(request.body.asJson) match {
