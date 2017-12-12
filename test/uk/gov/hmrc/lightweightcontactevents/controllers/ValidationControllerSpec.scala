@@ -37,11 +37,11 @@ class ValidationControllerSpec extends SpecBase with MockitoSugar {
     "timestamp": "2017-12-01T14:23:10+00:00",
     "domain": "CT",
     "categories": ["Council Tax", "My property"],
-    "first-name": "Andy",
-    "last-name": "Dwelly",
+    "firstName": "Andy",
+    "lastName": "Dwelly",
     "email": "andy.dwelly@digital.hmrc.gov.uk",
     "phone": "07525932507",
-    "property-address": {
+    "propertyAddress": {
       "line1": "78a High St",
       "line2": "Ferring",
       "town": "Worthing",
@@ -57,11 +57,11 @@ class ValidationControllerSpec extends SpecBase with MockitoSugar {
     "timestamp": "2017-12-01T14:23:10+00:00",
     "domain": 1,
     "categories": ["Council Tax", "My property"],
-    "first-name": "Andy",
-    "last-name": "Dwelly",
+    "firstName": "Andy",
+    "lastName": "Dwelly",
     "email": "andy.dwelly@digital.hmrc.gov.uk",
     "phone": "07525932507",
-    "property-address": {
+    "propertyAddress": {
       "line1": "78a High St",
       "line2": "Ferring",
       "town": "Worthing",

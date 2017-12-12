@@ -30,11 +30,11 @@ class JSONSchemaValidationServiceSpec extends SpecBase {
     "timestamp": "2017-12-01T14:23:10+00:00",
     "domain": "CT",
     "categories": ["Council Tax", "My property"],
-    "first-name": "Andy",
-    "last-name": "Dwelly",
+    "firstName": "Andy",
+    "lastName": "Dwelly",
     "email": "andy.dwelly@digital.hmrc.gov.uk",
     "phone": "07525932507",
-    "property-address": {
+    "propertyAddress": {
       "line1": "78a High St",
       "line2": "Ferring",
       "town": "Worthing",
@@ -105,19 +105,19 @@ class JSONSchemaValidationServiceSpec extends SpecBase {
     }
 
     "when given a Contact that the json validation schema reports that the first-name is the wrong type, return a message" in {
-      testError(validJSON.replace("first-name", JsNumber(0)))
+      testError(validJSON.replace("firstName", JsNumber(0)))
     }
 
     "when given a Contact that the json validation schema reports that the first-name is missing" in {
-      testError(validJSON.remove("first-name"))
+      testError(validJSON.remove("firstName"))
     }
 
     "when given a Contact that the json validation schema reports that the last-name is the wrong type, return a message" in {
-      testError(validJSON.replace("last-name", JsNumber(0)))
+      testError(validJSON.replace("lastName", JsNumber(0)))
     }
 
     "when given a Contact that the json validation schema reports that the last-name is missing" in {
-      testError(validJSON.remove("last-name"))
+      testError(validJSON.remove("lastName"))
     }
 
     "when given a Contact that the json validation schema reports that the email is the wrong type, return a message" in {
@@ -141,7 +141,7 @@ class JSONSchemaValidationServiceSpec extends SpecBase {
     }
 
     "when given a Contact that the json validation schema reports that the line1 is missing" in {
-      testError(validJSON.removeInner("property-address", "line1"))
+      testError(validJSON.removeInner("propertyAddress", "line1"))
     }
 
     "when given a Contact that the json validation schema reports that the town is the wrong type, return a message" in {
@@ -149,7 +149,7 @@ class JSONSchemaValidationServiceSpec extends SpecBase {
     }
 
     "when given a Contact that the json validation schema reports that the town is missing" in {
-      testError(validJSON.removeInner("property-address", "town"))
+      testError(validJSON.removeInner("propertyAddress", "town"))
     }
 
     "when given a Contact that the json validation schema reports that the postcode is the wrong type, return a message" in {
@@ -157,7 +157,7 @@ class JSONSchemaValidationServiceSpec extends SpecBase {
     }
 
     "when given a Contact that the json validation schema reports that the postcode is missing" in {
-      testError(validJSON.removeInner("property-address", "postcode"))
+      testError(validJSON.removeInner("propertyAddress", "postcode"))
     }
 
     "when given a Contact that the json validation schema reports that the message is the wrong type, return a message" in {
