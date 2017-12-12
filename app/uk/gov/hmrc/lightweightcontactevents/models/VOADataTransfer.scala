@@ -40,12 +40,13 @@ uninhabitable"],
 }
  */
 
-case class VOADataTransfer(version: Int, timestamp: String, domain: String, categories: Seq[String])
+case class VOADataTransfer(version: Int, timestamp: String, domain: String, categories: Seq[String], firstName: String)
 
 object VOADataTransfer {
   def apply(ctc: Contact): VOADataTransfer =
     VOADataTransfer(0,
       LocalDateTime.now().toString,
       if (ctc.isCouncilTaxEnquiry) "CT" else "NDR",
-      Seq(ctc.enquiryCategoryMsg, ctc.subEnquiryCategoryMsg))
+      Seq(ctc.enquiryCategoryMsg, ctc.subEnquiryCategoryMsg),
+      ctc.contact.firstName)
 }
