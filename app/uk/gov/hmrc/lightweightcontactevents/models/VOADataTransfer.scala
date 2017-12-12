@@ -18,29 +18,16 @@ package uk.gov.hmrc.lightweightcontactevents.models
 
 import java.time.LocalDateTime
 
-/*
-{
-"version": 0,
-"timestamp": "2017-12-01T14:23:10+00:00",
-"domain": "CT"
-"categories": ["Council Tax", "My property is in poor repair or
-uninhabitable"],
-"first-name": "Andy",
-"last-name": "Dwelly",
-"email": "andy.dwelly@digital.hmrc.gov.uk",
-"phone": "07525932507",
-"property-address": {
-"line1": "78a High St",
-"line2": "Ferring",
-"town": "Worthing",
-"county": "West Sussex",
-"postcode": "BN443SS"
-},
-"message": "I think I need a reevaluation. What do I do?"
-}
- */
-
-case class VOADataTransfer(version: Int, timestamp: String, domain: String, categories: Seq[String], firstName: String)
+case class VOADataTransfer(version: Int,
+                           timestamp: String,
+                           domain: String,
+                           categories: Seq[String],
+                           firstName: String,
+                           lastName: String,
+                           email: String,
+                           phone: String,
+                           propertyAddress: PropertyAddress,
+                           message: String)
 
 object VOADataTransfer {
   def apply(ctc: Contact): VOADataTransfer =
@@ -48,5 +35,10 @@ object VOADataTransfer {
       LocalDateTime.now().toString,
       if (ctc.isCouncilTaxEnquiry) "CT" else "NDR",
       Seq(ctc.enquiryCategoryMsg, ctc.subEnquiryCategoryMsg),
-      ctc.contact.firstName)
+      ctc.contact.firstName,
+      ctc.contact.lastName,
+      ctc.contact.email,
+      ctc.contact.contactNumber,
+      ctc.propertyAddress,
+      ctc.message)
 }
