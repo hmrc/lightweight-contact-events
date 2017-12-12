@@ -16,6 +16,8 @@
 
 package uk.gov.hmrc.lightweightcontactevents.models
 
+import java.time.LocalDateTime
+
 /*
 {
 "version": 0,
@@ -38,8 +40,12 @@ uninhabitable"],
 }
  */
 
-case class VOADataTransfer(version: Int)
+case class VOADataTransfer(version: Int, timestamp: String, domain: String, categories: Seq[String])
 
 object VOADataTransfer {
-  def apply(ctc: Contact): VOADataTransfer = VOADataTransfer(0)
+  def apply(ctc: Contact): VOADataTransfer =
+    VOADataTransfer(0,
+      LocalDateTime.now().toString,
+      if (ctc.isCouncilTaxEnquiry) "CT" else "NDR",
+      Seq(ctc.enquiryCategoryMsg, ctc.subEnquiryCategoryMsg))
 }

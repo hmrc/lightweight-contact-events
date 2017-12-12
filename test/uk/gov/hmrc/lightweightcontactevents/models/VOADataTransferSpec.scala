@@ -46,19 +46,34 @@ class VOADataTransferSpec extends SpecBase {
   val subEnquiryCategoryMsg = "My property is in poor repair or uninhabitable"
   val confirmedContactDetails = ConfirmedContactDetails("first", "last", "email", "07777777")
   val propertyAddress = PropertyAddress("line1", Some("line2"), "town", Some("county"), "AA1 1AA")
-  val contact = Contact(confirmedContactDetails, propertyAddress, true, enquiryCategoryMsg, subEnquiryCategoryMsg, message)
+  val ctContact = Contact(confirmedContactDetails, propertyAddress, true, enquiryCategoryMsg, subEnquiryCategoryMsg, message)
+  val ndrContact = Contact(confirmedContactDetails, propertyAddress, false, enquiryCategoryMsg, subEnquiryCategoryMsg, message)
 
   "creating an VOADataTransfer object from a contact results in a map of parameters containing a version key set to a value of 0" in {
-    VOADataTransfer(contact).version mustBe 0
+    VOADataTransfer(ctContact).version mustBe 0
   }
 
-  "creating an VOADataTransfer object from a contact results in a case class containing a timestamp key where the time is approximately the current time" in {}
+  "creating an VOADataTransfer object from a contact results in a case class containing a timestamp key where the time is approximately the current time" in {
+    val timestamp = VOADataTransfer(ctContact).timestamp
+    val creationTime = java.time.LocalDateTime.parse(timestamp)
+    val between = java.time.LocalDateTime.now().toEpochSecond(java.time.ZoneOffset.UTC) - creationTime.toEpochSecond(java.time.ZoneOffset.UTC)
+    between < 100 mustBe true
+  }
 
-  "creating an VOADataTransfer object from a contact results in a case class containing a domain key set to CT if this is a contact relating to council tax" in {}
+  "creating an VOADataTransfer object from a contact results in a case class containing a domain key set to CT if this is a contact relating to council tax" in {
+    VOADataTransfer(ctContact).domain mustBe "CT"
+  }
 
-  "creating an VOADataTransfer object from a contact results in a case class containing a domain key set to NDR if this is a contact relating to business rates" in {}
+  "creating an VOADataTransfer object from a contact results in a case class containing a domain key set to NDR if this is a contact relating to business rates" in {
+    VOADataTransfer(ndrContact).domain mustBe "NDR"
+  }
 
-  "creating an VOADataTransfer object from a contact results in a case class containing a categories list with the enquiryCategoryMsg and subEnquiryCategoryMsg" in {}
+  "creating an VOADataTransfer object from a contact results in a case class containing a categories list with the enquiryCategoryMsg and subEnquiryCategoryMsg" in {
+    val cats = VOADataTransfer(ctContact).categories
+    cats.size mustBe 2
+    cats(0) mustBe enquiryCategoryMsg
+    cats(1) mustBe subEnquiryCategoryMsg
+  }
 
   "creating an VOADataTransfer object from a contact results in a case class containing a firstName equal to the firstName in the contact" in {}
 
@@ -71,5 +86,5 @@ class VOADataTransferSpec extends SpecBase {
   "creating an VOADataTransfer object from a contact results in a case class containing a property address equal to the property address in the contact" in {}
 
   "creating an VOADataTransfer object from a contact results in a case class containing a message equal to the message in the contact" in {}
-  
+
 }
