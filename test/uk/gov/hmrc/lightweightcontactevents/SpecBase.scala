@@ -16,14 +16,22 @@
 
 package uk.gov.hmrc.lightweightcontactevents
 
+import org.mockito.Matchers.{any, anyString}
+import org.mockito.Mockito.when
+import org.scalatest.mockito.MockitoSugar
 import org.scalatestplus.play.PlaySpec
 import org.scalatestplus.play.guice._
 import play.api.i18n.{Messages, MessagesApi}
 import play.api.inject.Injector
+import play.api.libs.json.{JsValue, Writes}
 import play.api.mvc.AnyContentAsEmpty
 import play.api.test.FakeRequest
+import uk.gov.hmrc.http.{HeaderCarrier, HttpReads, HttpResponse}
+import uk.gov.hmrc.play.bootstrap.http.HttpClient
 
-trait SpecBase extends PlaySpec with GuiceOneAppPerSuite {
+import scala.concurrent.Future
+
+trait SpecBase extends PlaySpec with GuiceOneAppPerSuite with MockitoSugar {
 
   def injector: Injector = app.injector
 
@@ -32,4 +40,12 @@ trait SpecBase extends PlaySpec with GuiceOneAppPerSuite {
   def fakeRequest: FakeRequest[AnyContentAsEmpty.type] = FakeRequest("", "")
 
   def messages: Messages = messagesApi.preferred(fakeRequest)
+
+  def getHttpMock(returnedStatus: Int): HttpClient = {
+    val httpMock = mock[HttpClient]
+    when(httpMock.POST(anyString, any[JsValue], any[Seq[(String, String)]])(any[Writes[Any]], any[HttpReads[Any]],
+      any[HeaderCarrier], any())) thenReturn Future.successful(HttpResponse(returnedStatus, None))
+    when(httpMock.GET(anyString)(any[HttpReads[Any]], any[HeaderCarrier], any())) thenReturn Future.successful(HttpResponse(returnedStatus, None))
+    httpMock
+  }
 }
