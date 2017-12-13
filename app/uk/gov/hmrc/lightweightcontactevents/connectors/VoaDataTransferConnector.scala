@@ -16,49 +16,48 @@
 
 package uk.gov.hmrc.lightweightcontactevents.connectors
 
-import javax.inject.{Inject, Singleton}
-import play.api.{Configuration, Environment, Logger}
+import javax.inject.Inject
+
+import play.api.Mode.Mode
 import play.api.libs.json.{JsValue, Json}
+import play.api.{Configuration, Environment, Logger}
 import uk.gov.hmrc.http.HeaderCarrier
-import uk.gov.hmrc.lightweightcontactevents.models.Email
+import uk.gov.hmrc.lightweightcontactevents.models.VOADataTransfer
 import uk.gov.hmrc.play.bootstrap.http.HttpClient
 import uk.gov.hmrc.play.config.ServicesConfig
-
 import scala.concurrent.ExecutionContext.Implicits.global
+
 import scala.concurrent.Future
 import scala.util.{Failure, Success, Try}
-import play.api.Mode.Mode
 
-@Singleton
-class EmailConnector @Inject()(val http: HttpClient,
-                               val configuration: Configuration,
-                               environment: Environment) extends ServicesConfig {
+class VoaDataTransferConnector @Inject()(val http: HttpClient,
+                                         val configuration: Configuration,
+                                         environment: Environment) extends ServicesConfig {
+
   implicit val hc: HeaderCarrier = HeaderCarrier()
 
   override protected def mode: Mode = environment.mode
 
   override protected def runModeConfiguration: Configuration = configuration
 
-  val domain = "/hmrc/"
-
   val jsonContentTypeHeader = ("Content-Type", "application/json")
 
-  val serviceUrl = baseUrl("email")
+  val serviceUrl = baseUrl("voa-data-transfer")
 
-  private[connectors] def sendJson(json: JsValue): Future[Try[Int]] =
-    http.POST(s"$serviceUrl${domain}email", json, Seq(jsonContentTypeHeader)).map { response =>
-      response.status match {
-        case 202 =>
-          Success(200)
-        case status =>
-          Logger.warn("Email service fails with status " + status)
-          Failure(new RuntimeException("Email service fails with status " + status))
-      }
-    } recover {
+  def transfer(dataTransfer: VOADataTransfer): Future[Try[Int]] = sendJson(Json.toJson(dataTransfer))
+
+  private[connectors] def sendJson(json: JsValue): Future[Try[Int]] =  http.POST(s"$serviceUrl/contact", json, Seq(jsonContentTypeHeader)).map { response =>
+    response.status match {
+      case 202 =>
+        Success(200)
+      case status =>
+        Logger.warn("Data transfer service fails with status " + status)
+        Failure(new RuntimeException("Data transfer service fails with status " + status))
+    }
+  } recover {
       case ex =>
-        Logger.warn("Email service fails with exception " + ex.getMessage)
-        Failure(new RuntimeException("Email service fails with exception " + ex.getMessage))
+        Logger.warn("Data transfer service fails with exception " + ex.getMessage)
+        Failure(new RuntimeException("Data transfer service fails with exception " + ex.getMessage))
     }
 
-  def sendEmail(email: Email): Future[Try[Int]] = sendJson(Json.toJson(email))
 }

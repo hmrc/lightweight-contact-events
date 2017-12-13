@@ -18,6 +18,8 @@ package uk.gov.hmrc.lightweightcontactevents.models
 
 import java.time.LocalDateTime
 
+import play.api.libs.json.Json
+
 case class VOADataTransfer(version: Int,
                            timestamp: String,
                            domain: String,
@@ -30,6 +32,8 @@ case class VOADataTransfer(version: Int,
                            message: String)
 
 object VOADataTransfer {
+  implicit val writer = Json.writes[VOADataTransfer]
+
   def apply(ctc: Contact): VOADataTransfer =
     VOADataTransfer(0,
       LocalDateTime.now().toString,
