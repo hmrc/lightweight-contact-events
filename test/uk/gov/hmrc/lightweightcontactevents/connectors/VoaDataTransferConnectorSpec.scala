@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 HM Revenue & Customs
+ * Copyright 2018 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,7 +24,6 @@ import play.api.{Configuration, Environment}
 import uk.gov.hmrc.http.{HeaderCarrier, HttpReads}
 import uk.gov.hmrc.lightweightcontactevents.SpecBase
 import uk.gov.hmrc.lightweightcontactevents.models.{ConfirmedContactDetails, Contact, PropertyAddress, VOADataTransfer}
-import uk.gov.hmrc.lightweightcontactevents.utils.Initialize
 import uk.gov.hmrc.play.bootstrap.http.HttpClient
 
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -35,7 +34,6 @@ class VoaDataTransferConnectorSpec extends SpecBase {
 
   val configuration = injector.instanceOf[Configuration]
   val environment = injector.instanceOf[Environment]
-  val init = injector.instanceOf[Initialize]
 
   val message = "MSG"
   val enquiryCategoryMsg = "Council Tax"
