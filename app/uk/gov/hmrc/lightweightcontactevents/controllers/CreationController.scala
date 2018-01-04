@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 HM Revenue & Customs
+ * Copyright 2018 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,16 +23,11 @@ import play.api.mvc.{Action, AnyContent}
 
 import scala.concurrent.Future
 import play.api.libs.json._
-import uk.gov.hmrc.lightweightcontactevents.connectors.EmailConnector
-import uk.gov.hmrc.lightweightcontactevents.models.{Contact, Email}
-import uk.gov.hmrc.lightweightcontactevents.utils.Initialize
+import uk.gov.hmrc.lightweightcontactevents.models.{Contact}
 import uk.gov.hmrc.play.bootstrap.controller.BaseController
 
-import scala.concurrent.ExecutionContext.Implicits.global
-import scala.util.{Failure, Success, Try}
-
 @Singleton
-class CreationController @Inject()(val emailConnector: EmailConnector, val init: Initialize) extends BaseController {
+class CreationController @Inject()() extends BaseController {
   def createContact(json: Option[JsValue]): Either[String, Contact] = {
     json match {
       case Some(value) => {
@@ -49,15 +44,16 @@ class CreationController @Inject()(val emailConnector: EmailConnector, val init:
   def create(): Action[AnyContent] = Action.async {implicit request =>
     createContact(request.body.asJson) match {
       case Right(contact) => {
-        val email = Email(contact, init)
-        val result: Future[Try[Int]] = emailConnector.sendEmail(email)
-        result map {
-          case Success(s) =>
-            Ok
-          case Failure(ex) =>
-            Logger.warn("Sending contact email fails with message " + ex.getMessage)
-            BadRequest("Sending contact email fails with message " + ex.getMessage)
-          }
+//        val email = Email(contact, init)
+//        val result: Future[Try[Int]] = emailConnector.sendEmail(email)
+//        result map {
+//          case Success(s) =>
+//            Ok
+//          case Failure(ex) =>
+//            Logger.warn("Sending contact email fails with message " + ex.getMessage)
+//            BadRequest("Sending contact email fails with message " + ex.getMessage)
+//          }
+        Future.successful(Ok)
       }
       case Left(error) => {
         Logger.warn(error)
