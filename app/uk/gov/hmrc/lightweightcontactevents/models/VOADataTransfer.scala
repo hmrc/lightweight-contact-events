@@ -31,6 +31,8 @@ case class VOADataTransfer(version: Int,
                            propertyAddress: PropertyAddress,
                            message: String)
 
+/**/
+
 object VOADataTransfer {
   implicit val writer = Json.writes[VOADataTransfer]
 
