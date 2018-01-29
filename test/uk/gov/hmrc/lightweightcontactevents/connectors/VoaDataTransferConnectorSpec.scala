@@ -19,6 +19,7 @@ package uk.gov.hmrc.lightweightcontactevents.connectors
 import org.mockito.ArgumentCaptor
 import org.mockito.Matchers.{any, anyString}
 import org.mockito.Mockito.{verify, when}
+import org.scalatest.Assertion
 import play.api.libs.json.{JsValue, Json, Writes}
 import play.api.{Configuration, Environment}
 import uk.gov.hmrc.http.{HeaderCarrier, HttpReads}
@@ -28,7 +29,8 @@ import uk.gov.hmrc.play.bootstrap.http.HttpClient
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
-import scala.util.{Failure, Success}
+import scala.util.{Failure, Success, Try}
+import play.api.test.Helpers.{status, _}
 
 class VoaDataTransferConnectorSpec extends SpecBase {
 
@@ -51,9 +53,12 @@ class VoaDataTransferConnectorSpec extends SpecBase {
     "provided with Voa Data Transfer Model" must {
 
       "Send the contact details returning a 200 when it succeeds" in {
-        val httpMock = getHttpMock(200)
+        val httpMock = getHttpMock(202)
         val connector = new VoaDataTransferConnector(httpMock, configuration, environment)
-        connector.transfer(ctDataTransfer).map {
+
+        val result = await(connector.transfer(ctDataTransfer))
+
+        result match {
           case Success(status) => status mustBe 200
           case Failure(_) => assert(false)
         }
@@ -62,9 +67,9 @@ class VoaDataTransferConnectorSpec extends SpecBase {
       "return a failure representing the error when send method fails" in {
         val httpMock = getHttpMock(500)
         val connector = new VoaDataTransferConnector(httpMock, configuration, environment)
-        connector.transfer(ctDataTransfer).map { result =>
-          assert(result.isFailure)
-        }
+        val result = await(connector.transfer(ctDataTransfer))
+
+        assert(result.isFailure)
       }
     }
 
@@ -89,27 +94,30 @@ class VoaDataTransferConnectorSpec extends SpecBase {
       }
 
       "return a 200 if the data transfer call is successful" in {
-        new VoaDataTransferConnector(getHttpMock(202), configuration, environment).sendJson(minimalJson).map { status =>
-          status mustBe Success(200)
+        val connector = new VoaDataTransferConnector(getHttpMock(202), configuration, environment)
+        val result = await(connector.sendJson(minimalJson))
+        result match {
+          case Success(status) =>
+            status mustBe 200
+          case _ => assert(false)
         }
       }
 
       "throw an failure if the data transfer call fails" in {
-        new VoaDataTransferConnector(getHttpMock(500), configuration, environment).sendJson(minimalJson).map { f =>
-          assert(f.isFailure)
-        }
+        val connector = new VoaDataTransferConnector(getHttpMock(500), configuration, environment)
+        val result = await(connector.sendJson(minimalJson))
+        assert(result.isFailure)
       }
 
       "return a failure if the data transfer call throws an exception" in {
         val httpMock = mock[HttpClient]
         when(httpMock.POST(anyString, any[JsValue], any[Seq[(String, String)]])(any[Writes[Any]], any[HttpReads[Any]],
           any[HeaderCarrier], any())) thenReturn Future.successful(new RuntimeException)
-        new VoaDataTransferConnector(httpMock, configuration, environment).sendJson(minimalJson).map { f =>
-          assert(f.isFailure)
+          val connector = new VoaDataTransferConnector(httpMock, configuration, environment)
+          val result = await(connector.sendJson(minimalJson))
+          assert(result.isFailure)
         }
       }
     }
-
-  }
 }
 
