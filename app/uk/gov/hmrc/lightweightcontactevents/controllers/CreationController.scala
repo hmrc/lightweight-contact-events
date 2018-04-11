@@ -17,17 +17,21 @@
 package uk.gov.hmrc.lightweightcontactevents.controllers
 
 import javax.inject.{Inject, Singleton}
-
 import play.api.Logger
 import play.api.mvc.{Action, AnyContent}
 
 import scala.concurrent.Future
 import play.api.libs.json._
-import uk.gov.hmrc.lightweightcontactevents.models.{Contact}
+import uk.gov.hmrc.lightweightcontactevents.connectors.VoaDataTransferConnector
+import uk.gov.hmrc.lightweightcontactevents.models.{Contact, VOADataTransfer}
+import uk.gov.hmrc.lightweightcontactevents.utils.Initialize
 import uk.gov.hmrc.play.bootstrap.controller.BaseController
 
+import scala.util.{Failure, Success, Try}
+import scala.concurrent.ExecutionContext.Implicits.global
+
 @Singleton
-class CreationController @Inject()() extends BaseController {
+class CreationController @Inject()(val dataTransferConnector: VoaDataTransferConnector, val init: Initialize) extends BaseController {
   def createContact(json: Option[JsValue]): Either[String, Contact] = {
     json match {
       case Some(value) => {
@@ -44,15 +48,15 @@ class CreationController @Inject()() extends BaseController {
   def create(): Action[AnyContent] = Action.async {implicit request =>
     createContact(request.body.asJson) match {
       case Right(contact) => {
-//        val email = Email(contact, init)
-//        val result: Future[Try[Int]] = emailConnector.sendEmail(email)
-//        result map {
-//          case Success(s) =>
-//            Ok
-//          case Failure(ex) =>
-//            Logger.warn("Sending contact email fails with message " + ex.getMessage)
-//            BadRequest("Sending contact email fails with message " + ex.getMessage)
-//          }
+        val jsonData = VOADataTransfer(contact, init)
+        val result: Future[Try[Int]] = dataTransferConnector.transfer(jsonData)
+        result map {
+          case Success(s) =>
+            Ok
+          case Failure(ex) =>
+            Logger.warn("Sending contact email fails with message " + ex.getMessage)
+            BadRequest("Sending contact email fails with message " + ex.getMessage)
+          }
         Future.successful(Ok)
       }
       case Left(error) => {
