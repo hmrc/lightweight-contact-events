@@ -52,7 +52,6 @@ class CreationController @Inject()(val dataTransferConnector: VoaDataTransferCon
         val result: Future[Try[Int]] = dataTransferConnector.transfer(jsonData)
         result map {
           case Success(s) =>
-            Logger.warn("Sending contact email successful")
             Ok
           case Failure(ex) =>
             Logger.warn("Sending contact email fails with message " + ex.getMessage)
