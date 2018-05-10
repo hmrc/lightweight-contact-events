@@ -16,19 +16,16 @@
 
 package uk.gov.hmrc.lightweightcontactevents.models
 
-import java.time.LocalDateTime
-
 import play.api.libs.json.Json
+import uk.gov.hmrc.lightweightcontactevents.utils.Initialize
 
-case class VOADataTransfer(version: Int,
-                           timestamp: String,
-                           domain: String,
-                           categories: Seq[String],
-                           firstName: String,
-                           lastName: String,
-                           email: String,
-                           phone: String,
+case class VOADataTransfer(contact: ConfirmedContactDetails,
                            propertyAddress: PropertyAddress,
+                           isCouncilTaxEnquiry: Boolean,
+                           subject: String,
+                           recipientEmailAddress: String,
+                           enquiryCategoryMsg: String,
+                           subEnquiryCategoryMsg: String,
                            message: String)
 
 /**/
@@ -36,15 +33,13 @@ case class VOADataTransfer(version: Int,
 object VOADataTransfer {
   implicit val writer = Json.writes[VOADataTransfer]
 
-  def apply(ctc: Contact): VOADataTransfer =
-    VOADataTransfer(0,
-      LocalDateTime.now().toString,
-      if (ctc.isCouncilTaxEnquiry) "CT" else "NDR",
-      Seq(ctc.enquiryCategoryMsg, ctc.subEnquiryCategoryMsg),
-      ctc.contact.firstName,
-      ctc.contact.lastName,
-      ctc.contact.email,
-      ctc.contact.contactNumber,
+  def apply(ctc: Contact, init: Initialize): VOADataTransfer =
+    VOADataTransfer(ctc.contact,
       ctc.propertyAddress,
+      ctc.isCouncilTaxEnquiry,
+      init.subjectTxt,
+      if (ctc.isCouncilTaxEnquiry) init.councilTaxEmail else init.businessRatesEmail,
+      ctc.enquiryCategoryMsg,
+      ctc.subEnquiryCategoryMsg,
       ctc.message)
 }

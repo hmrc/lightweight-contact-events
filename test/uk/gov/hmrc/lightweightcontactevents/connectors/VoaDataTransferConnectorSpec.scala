@@ -19,18 +19,16 @@ package uk.gov.hmrc.lightweightcontactevents.connectors
 import org.mockito.ArgumentCaptor
 import org.mockito.Matchers.{any, anyString}
 import org.mockito.Mockito.{verify, when}
-import org.scalatest.Assertion
 import play.api.libs.json.{JsValue, Json, Writes}
+import play.api.test.Helpers._
 import play.api.{Configuration, Environment}
 import uk.gov.hmrc.http.{HeaderCarrier, HttpReads}
 import uk.gov.hmrc.lightweightcontactevents.SpecBase
-import uk.gov.hmrc.lightweightcontactevents.models.{ConfirmedContactDetails, Contact, PropertyAddress, VOADataTransfer}
+import uk.gov.hmrc.lightweightcontactevents.models.{ConfirmedContactDetails, PropertyAddress, VOADataTransfer}
 import uk.gov.hmrc.play.bootstrap.http.HttpClient
 
-import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
-import scala.util.{Failure, Success, Try}
-import play.api.test.Helpers.{status, _}
+import scala.util.{Failure, Success}
 
 class VoaDataTransferConnectorSpec extends SpecBase {
 
@@ -38,15 +36,15 @@ class VoaDataTransferConnectorSpec extends SpecBase {
   val environment = injector.instanceOf[Environment]
 
   val message = "MSG"
+  val subject = "Valuation Office Agency Contact Form"
+  val ctEmail = "ct.email@voa.gsi.gov.uk"
+  val ndrEmail = "ndr.email@voa.gsi.gov.uk"
   val enquiryCategoryMsg = "Council Tax"
   val subEnquiryCategoryMsg = "My property is in poor repair or uninhabitable"
   val confirmedContactDetails = ConfirmedContactDetails("first", "last", "email", "07777777")
   val propertyAddress = PropertyAddress("line1", Some("line2"), "town", Some("county"), "AA1 1AA")
-  val ctContact = Contact(confirmedContactDetails, propertyAddress, true, enquiryCategoryMsg, subEnquiryCategoryMsg, message)
-  val ctDataTransfer = VOADataTransfer(ctContact)
-
+  val ctDataTransfer = VOADataTransfer(confirmedContactDetails, propertyAddress, true, subject, ctEmail, enquiryCategoryMsg, subEnquiryCategoryMsg, message)
   val minimalJson = Json.toJson(ctDataTransfer)
-
 
   "Voa Data Transfer Connector" when {
 
@@ -88,7 +86,7 @@ class VoaDataTransferConnectorSpec extends SpecBase {
 
         verify(httpMock).POST(urlCaptor.capture, bodyCaptor.capture, headersCaptor.capture)(jsonWritesNapper.capture,
           httpReadsNapper.capture, headerCarrierNapper.capture, any())
-        urlCaptor.getValue must endWith("contact")
+        urlCaptor.getValue must endWith("contact-process-api/contact/sendemail")
         bodyCaptor.getValue mustBe minimalJson
         headersCaptor.getValue mustBe Seq(connector.jsonContentTypeHeader)
       }

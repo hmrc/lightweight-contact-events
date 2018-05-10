@@ -27,6 +27,7 @@ import uk.gov.hmrc.play.bootstrap.http.HttpClient
 import uk.gov.hmrc.play.config.ServicesConfig
 import scala.concurrent.ExecutionContext.Implicits.global
 
+
 import scala.concurrent.Future
 import scala.util.{Failure, Success, Try}
 
@@ -42,14 +43,17 @@ class VoaDataTransferConnector @Inject()(val http: HttpClient,
 
   val jsonContentTypeHeader = ("Content-Type", "application/json")
 
-  val serviceUrl = baseUrl("voa-data-transfer")
+  val serviceUrl: String = baseUrl("voa-data-transfer")
+  val RETURN_200: Int = 200
+  val RETURN_202: Int = 202
 
   def transfer(dataTransfer: VOADataTransfer): Future[Try[Int]] = sendJson(Json.toJson(dataTransfer))
 
-  private[connectors] def sendJson(json: JsValue): Future[Try[Int]] =  http.POST(s"$serviceUrl/contact", json, Seq(jsonContentTypeHeader)).map { response =>
+  private[connectors] def sendJson(json: JsValue): Future[Try[Int]] =
+    http.POST(s"$serviceUrl/contact-process-api/contact/sendemail", json, Seq(jsonContentTypeHeader)).map { response =>
     response.status match {
-      case 202 =>
-        Success(200)
+      case RETURN_202 =>
+        Success(RETURN_200)
       case status =>
         Logger.warn("Data transfer service fails with status " + status)
         Failure(new RuntimeException("Data transfer service fails with status " + status))

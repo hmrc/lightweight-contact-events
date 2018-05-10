@@ -20,62 +20,87 @@ import uk.gov.hmrc.lightweightcontactevents.SpecBase
 
 class VOADataTransferSpec extends SpecBase {
   val message = "MSG"
+  val subject = "Valuation Office Agency Contact Form"
+  val ctEmail = "ct.email@voa.gsi.gov.uk"
+  val ndrEmail = "ndr.email@voa.gsi.gov.uk"
   val enquiryCategoryMsg = "Council Tax"
   val subEnquiryCategoryMsg = "My property is in poor repair or uninhabitable"
   val confirmedContactDetails = ConfirmedContactDetails("first", "last", "email", "07777777")
   val propertyAddress = PropertyAddress("line1", Some("line2"), "town", Some("county"), "AA1 1AA")
   val ctContact = Contact(confirmedContactDetails, propertyAddress, true, enquiryCategoryMsg, subEnquiryCategoryMsg, message)
   val ndrContact = Contact(confirmedContactDetails, propertyAddress, false, enquiryCategoryMsg, subEnquiryCategoryMsg, message)
-  val ctDataTransfer = VOADataTransfer(ctContact)
+  val ctDataTransfer = VOADataTransfer(confirmedContactDetails, propertyAddress, true, subject, ctEmail, enquiryCategoryMsg, subEnquiryCategoryMsg, message)
+  val ndrDataTransfer = VOADataTransfer(confirmedContactDetails, propertyAddress, false, subject, ndrEmail, enquiryCategoryMsg, subEnquiryCategoryMsg, message)
 
-  "creating an VOADataTransfer object from a contact results in a map of parameters containing a version key set to a value of 0" in {
-    ctDataTransfer.version mustBe 0
+  /* VOADataTransfer Contact Tests */
+
+  "creating a contact case class containing contact details set to confirmed contact details" in {
+    ctContact.contact mustBe confirmedContactDetails
   }
 
-  "creating an VOADataTransfer object from a contact results in a case class containing a timestamp key where the time is approximately the current time" in {
-    val timestamp = ctDataTransfer.timestamp
-    val creationTime = java.time.LocalDateTime.parse(timestamp)
-    val between = java.time.LocalDateTime.now().toEpochSecond(java.time.ZoneOffset.UTC) - creationTime.toEpochSecond(java.time.ZoneOffset.UTC)
-    between < 100 mustBe true
+  "creating a contact case class containing property address set to confirmed property address" in {
+    ctContact.propertyAddress mustBe propertyAddress
   }
 
-  "creating an VOADataTransfer object from a contact results in a case class containing a domain key set to CT if this is a contact relating to council tax" in {
-    ctDataTransfer.domain mustBe "CT"
+  "creating a contact case class containing a isCouncilTaxEnquiry boolean set to true" in {
+    ctContact.isCouncilTaxEnquiry mustBe true
   }
 
-  "creating an VOADataTransfer object from a contact results in a case class containing a domain key set to NDR if this is a contact relating to business rates" in {
-    VOADataTransfer(ndrContact).domain mustBe "NDR"
+  "creating a contact case class containing a isCouncilTaxEnquiry boolean set to false" in {
+    ndrContact.isCouncilTaxEnquiry mustBe false
   }
 
-  "creating an VOADataTransfer object from a contact results in a case class containing a categories list with the enquiryCategoryMsg and subEnquiryCategoryMsg" in {
-    val cats = ctDataTransfer.categories
-    cats.size mustBe 2
-    cats(0) mustBe enquiryCategoryMsg
-    cats(1) mustBe subEnquiryCategoryMsg
+  "creating a contact case class containing a enquiryCategoryMsg string set to enquiryCategoryMsg" in {
+    ctContact.enquiryCategoryMsg mustBe enquiryCategoryMsg
   }
 
-  "creating an VOADataTransfer object from a contact results in a case class containing a firstName equal to the firstName in the contact" in {
-    ctDataTransfer.firstName mustBe ctContact.contact.firstName
+  "creating a contact case class containing a subEnquiryCategoryMsg string set to subEnquiryCategoryMsg" in {
+    ctContact.subEnquiryCategoryMsg mustBe subEnquiryCategoryMsg
   }
 
-  "creating an VOADataTransfer object from a contact results in a case class containing a lastName equal to the lastName in the contact" in {
-    ctDataTransfer.lastName mustBe ctContact.contact.lastName
+  "creating a contact case class containing a message string set to message" in {
+    ctContact.message mustBe message
   }
 
-  "creating an VOADataTransfer object from a contact results in a case class containing an email address equal to the emailAddress in the contact" in {
-    ctDataTransfer.email mustBe ctContact.contact.email
+  /* VOADataTransfer Tests */
+
+  "creating an VOADataTransfer object from values containing a contact details equal to the contact details" in {
+    ctDataTransfer.contact mustBe confirmedContactDetails
   }
 
-  "creating an VOADataTransfer object from a contact results in a case class containing a phone equal to the phone in the contact address" in {
-    ctDataTransfer.phone mustBe ctContact.contact.contactNumber
-
-  }
-
-  "creating an VOADataTransfer object from a contact results in a case class containing a property address equal to the property address in the contact" in {
+  "creating an VOADataTransfer object from values containing a property address equal to the property address" in {
     ctDataTransfer.propertyAddress mustBe propertyAddress
   }
 
-  "creating an VOADataTransfer object from a contact results in a case class containing a message equal to the message in the contact" in {
+  "creating an VOADataTransfer object from values containing a isCouncilTaxEnquiry equal true" in {
+    ctDataTransfer.isCouncilTaxEnquiry mustBe true
+  }
+
+  "creating an VOADataTransfer object from values containing a isCouncilTaxEnquiry equal false" in {
+    ndrDataTransfer.isCouncilTaxEnquiry mustBe false
+  }
+
+  "creating an VOADataTransfer object from values containing a subject equal subject" in {
+    ctDataTransfer.subject mustBe subject
+  }
+
+  "creating an VOADataTransfer object from values containing a recipientEmailAddress equal ctEmail" in {
+    ctDataTransfer.recipientEmailAddress mustBe ctEmail
+  }
+
+  "creating an VOADataTransfer object from values containing a recipientEmailAddress equal ndrEmail" in {
+    ndrDataTransfer.recipientEmailAddress mustBe ndrEmail
+  }
+
+  "creating an VOADataTransfer object from values containing a enquiryCategoryMsg equal enquiryCategoryMsg" in {
+    ctDataTransfer.enquiryCategoryMsg mustBe enquiryCategoryMsg
+  }
+
+  "creating an VOADataTransfer object from values containing a subEnquiryCategoryMsg equal subEnquiryCategoryMsg" in {
+    ndrDataTransfer.subEnquiryCategoryMsg mustBe subEnquiryCategoryMsg
+  }
+
+  "creating an VOADataTransfer object from values containing a message equal message" in {
     ctDataTransfer.message mustBe ctContact.message
   }
 
