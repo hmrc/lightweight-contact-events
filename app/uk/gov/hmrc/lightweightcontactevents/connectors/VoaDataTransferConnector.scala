@@ -45,14 +45,13 @@ class VoaDataTransferConnector @Inject()(val http: HttpClient,
 
   val serviceUrl: String = baseUrl("voa-data-transfer")
   val RETURN_200: Int = 200
-  val RETURN_202: Int = 202
 
   def transfer(dataTransfer: VOADataTransfer): Future[Try[Int]] = sendJson(Json.toJson(dataTransfer))
 
   private[connectors] def sendJson(json: JsValue): Future[Try[Int]] =
     http.POST(s"$serviceUrl/contact-process-api/contact/sendemail", json, Seq(jsonContentTypeHeader)).map { response =>
     response.status match {
-      case RETURN_202 =>
+      case RETURN_200 =>
         Success(RETURN_200)
       case status =>
         Logger.warn("Data transfer service fails with status " + status)
