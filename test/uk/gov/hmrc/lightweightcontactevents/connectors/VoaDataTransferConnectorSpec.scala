@@ -51,7 +51,7 @@ class VoaDataTransferConnectorSpec extends SpecBase {
     "provided with Voa Data Transfer Model" must {
 
       "Send the contact details returning a 200 when it succeeds" in {
-        val httpMock = getHttpMock(202)
+        val httpMock = getHttpMock(200)
         val connector = new VoaDataTransferConnector(httpMock, configuration, environment)
 
         val result = await(connector.transfer(ctDataTransfer))
@@ -92,7 +92,7 @@ class VoaDataTransferConnectorSpec extends SpecBase {
       }
 
       "return a 200 if the data transfer call is successful" in {
-        val connector = new VoaDataTransferConnector(getHttpMock(202), configuration, environment)
+        val connector = new VoaDataTransferConnector(getHttpMock(200), configuration, environment)
         val result = await(connector.sendJson(minimalJson))
         result match {
           case Success(status) =>
