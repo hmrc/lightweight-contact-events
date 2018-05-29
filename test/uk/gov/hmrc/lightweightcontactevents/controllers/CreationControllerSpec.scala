@@ -99,7 +99,7 @@ class CreationControllerSpec extends SpecBase with MockitoSugar {
   val propertyAddress = PropertyAddress("line1", Some("line2"), "town", Some("county"), "postcode")
 
   "Given some Json representing a Contact with an enquiry, the createContact method creates a Right(Contact) with council tax address details" in {
-    val connector = new VoaDataTransferConnector(getHttpMock(202), configuration, environment)
+    val connector = new VoaDataTransferConnector(getHttpMock(200), configuration, environment)
     val controller = new CreationController(connector, initialize)
     val result = controller.createContact(Some(Json.parse(contactJson)))
 
@@ -112,14 +112,14 @@ class CreationControllerSpec extends SpecBase with MockitoSugar {
   }
 
   "return 200 for a POST carrying an enquiry" in {
-    val connector = new VoaDataTransferConnector(getHttpMock(202), configuration, environment)
+    val connector = new VoaDataTransferConnector(getHttpMock(200), configuration, environment)
 
     val result = new CreationController(connector, initialize).create()(fakeRequestWithJson(contactJson))
     status(result) mustBe OK
   }
 
   "return 200 for a POST carrying an enquiry for NDR" in {
-    val connector = new VoaDataTransferConnector(getHttpMock(202), configuration, environment)
+    val connector = new VoaDataTransferConnector(getHttpMock(200), configuration, environment)
 
     val result = new CreationController(connector, initialize).create()(fakeRequestWithJson(ndrContactJson))
     status(result) mustBe OK
