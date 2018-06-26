@@ -1,16 +1,11 @@
 import sbt._
-import play.sbt.PlayImport._
-import play.core.PlayVersion
-import uk.gov.hmrc.SbtAutoBuildPlugin
-import uk.gov.hmrc.sbtdistributables.SbtDistributablesPlugin
-import uk.gov.hmrc.versioning.SbtGitVersioning
 
 object MicroServiceBuild extends Build with MicroService {
 
   val appName = "lightweight-contact-events"
 
-  import play.sbt.PlayImport._
   import play.core.PlayVersion
+  import play.sbt.PlayImport._
 
   private val playHealthVersion = "2.1.0"
   private val logbackJsonLoggerVersion = "3.1.0"
@@ -27,11 +22,13 @@ object MicroServiceBuild extends Build with MicroService {
   private val playLanguageVersion = "3.4.0"
   private val bootstrapVersion = "1.4.0"
   private val reactiveMongoVersion = "6.1.0"
+  private val frontendBootstrapVersion = "8.23.0"
 
   override lazy val appDependencies: Seq[ModuleID] = compile ++ Test()
 
   val compile = Seq(
     ws,
+    "uk.gov.hmrc" %% "frontend-bootstrap" % frontendBootstrapVersion,
     "uk.gov.hmrc" %% "bootstrap-play-25" % bootstrapVersion,
     "uk.gov.hmrc" %% "play-reactivemongo" % reactiveMongoVersion
   )
