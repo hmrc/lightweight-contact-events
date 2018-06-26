@@ -16,9 +16,11 @@
 
 package uk.gov.hmrc.lightweightcontactevents.utils
 
-import javax.inject.{Singleton, Inject}
+import javax.inject.{Inject, Singleton}
 import com.google.inject.AbstractModule
 import play.api.Configuration
+import uk.gov.hmrc.play.audit.http.connector.AuditConnector
+import uk.gov.hmrc.play.frontend.config.LoadAuditingConfig
 
 @Singleton
 class Initialize @Inject()(conf: Configuration) {
@@ -31,4 +33,8 @@ class StartupModule extends AbstractModule {
   def configure(): Unit = {
     bind(classOf[Initialize]).asEagerSingleton()
   }
+}
+
+object AuditServiceConnector extends AuditConnector {
+  override lazy val auditingConfig = LoadAuditingConfig("auditing")
 }
