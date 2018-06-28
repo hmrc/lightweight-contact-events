@@ -40,9 +40,9 @@ trait AuditingService {
 
   private def eventFor(auditType: String, json: JsValue)(implicit hc: HeaderCarrier) = {
     ExtendedDataEvent(
-      auditSource = "lightweight-contact-events",
+      auditSource = "send-contact-email-api",
       auditType = auditType,
-      tags = hc.headers.toMap,
+      tags = (hc.headers :+ "transactionName" -> "send-contact-to-VOA").toMap,
       detail = json
     )
   }

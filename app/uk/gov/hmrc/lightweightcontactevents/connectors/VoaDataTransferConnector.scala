@@ -50,7 +50,7 @@ class VoaDataTransferConnector @Inject()(val http: HttpClient,
 
   private[connectors] def sendJson(json: JsValue): Future[Try[Int]] =
     http.POST(s"$serviceUrl/contact-process-api/contact/sendemail", json, Seq(jsonContentTypeHeader)).map { response =>
-      AuditingService.sendEvent("Send email to notify via VOA", json)
+      AuditingService.sendEvent("sendcontactemailtoVOA", json)
     response.status match {
       case RETURN_200 =>
         Success(RETURN_200)
