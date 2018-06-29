@@ -48,7 +48,7 @@ class VoaDataTransferConnector @Inject()(val http: HttpClient,
 
   def transfer(dataTransfer: VOADataTransfer): Future[Try[Int]] = sendJson(Json.toJson(dataTransfer))
 
-  private[connectors] def sendJson(json: JsValue): Future[Try[Int]] =
+  private[connectors] def sendJson(json: JsValue)(implicit hc: HeaderCarrier): Future[Try[Int]] =
     http.POST(s"$serviceUrl/contact-process-api/contact/sendemail", json, Seq(jsonContentTypeHeader)).map { response =>
       AuditingService.sendEvent("sendcontactemailtoVOA", json)
     response.status match {
