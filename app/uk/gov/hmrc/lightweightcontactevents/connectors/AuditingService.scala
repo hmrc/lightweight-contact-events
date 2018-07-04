@@ -46,8 +46,8 @@ trait AuditingService {
         :+ "clientIP" -> hc.trueClientIp.getOrElse("")
         :+ "clientPort" -> hc.trueClientPort.getOrElse("")).toMap-("X-Request-Chain",
         "x-forwarded-for",
-        "trueClientIp",
-        "trueClientPort"),
+        "True-Client-IP",
+        "True-Client-Port"),
       detail = json
     )
   }
