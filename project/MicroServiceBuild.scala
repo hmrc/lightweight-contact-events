@@ -20,9 +20,9 @@ object MicroServiceBuild extends Build with MicroService {
   private val playReactivemongoVersion = "5.2.0"
   private val playConditionalFormMappingVersion = "0.2.0"
   private val playLanguageVersion = "3.4.0"
-  private val bootstrapVersion = "1.4.0"
-  private val reactiveMongoVersion = "6.1.0"
-  private val frontendBootstrapVersion = "8.23.0"
+  private val bootstrapVersion = "3.14.0"
+  private val reactiveMongoVersion = "6.2.0"
+  private val frontendBootstrapVersion = "10.7.0"
 
   override lazy val appDependencies: Seq[ModuleID] = compile ++ Test()
 
