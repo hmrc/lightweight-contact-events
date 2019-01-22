@@ -7,11 +7,11 @@ object MicroServiceBuild extends Build with MicroService {
   import play.core.PlayVersion
   import play.sbt.PlayImport._
 
-  private val playHealthVersion = "2.1.0"
+  private val playHealthVersion = "3.9.0-play-25"
   private val logbackJsonLoggerVersion = "3.1.0"
-  private val govukTemplateVersion = "5.3.0"
-  private val playUiVersion = "7.8.0"
-  private val hmrcTestVersion = "3.0.0"
+  private val govukTemplateVersion = "5.26.0-play-25"
+  private val playUiVersion = "7.27.0-play-25"
+  private val hmrcTestVersion = "3.3.0"
   private val scalaTestVersion = "3.0.1"
   private val scalaTestPlusPlayVersion = "2.0.1"
   private val pegdownVersion = "1.6.0"
@@ -20,9 +20,9 @@ object MicroServiceBuild extends Build with MicroService {
   private val playReactivemongoVersion = "5.2.0"
   private val playConditionalFormMappingVersion = "0.2.0"
   private val playLanguageVersion = "3.4.0"
-  private val bootstrapVersion = "3.14.0"
+  private val bootstrapVersion = "4.3.0"
   private val reactiveMongoVersion = "6.2.0"
-  private val frontendBootstrapVersion = "10.7.0"
+  private val frontendBootstrapVersion = "11.3.0"
 
   override lazy val appDependencies: Seq[ModuleID] = compile ++ Test()
 
