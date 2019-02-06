@@ -33,7 +33,8 @@ import scala.util.{Failure, Success, Try}
 
 class VoaDataTransferConnector @Inject()(val http: HttpClient,
                                          val configuration: Configuration,
-                                         environment: Environment) extends ServicesConfig {
+                                         environment: Environment,
+                                          auditService:AuditingService) extends ServicesConfig {
 
   implicit val hc: HeaderCarrier = HeaderCarrier()
 
@@ -50,7 +51,7 @@ class VoaDataTransferConnector @Inject()(val http: HttpClient,
 
   private[connectors] def sendJson(json: JsValue)(implicit hc: HeaderCarrier): Future[Try[Int]] =
     http.POST(s"$serviceUrl/contact-process-api/contact/sendemail", json, Seq(jsonContentTypeHeader)).map { response =>
-      AuditingService.sendEvent("sendcontactemailtoVOA", json)
+      auditService.sendEvent("sendcontactemailtoVOA", json)
     response.status match {
       case RETURN_200 =>
         Success(RETURN_200)

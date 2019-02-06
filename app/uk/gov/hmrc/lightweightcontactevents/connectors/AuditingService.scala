@@ -16,6 +16,8 @@
 
 package uk.gov.hmrc.lightweightcontactevents.connectors
 
+import javax.inject.Inject
+
 import play.api.libs.json.JsValue
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.lightweightcontactevents.utils.AuditServiceConnector
@@ -25,13 +27,8 @@ import uk.gov.hmrc.play.audit.model.ExtendedDataEvent
 import scala.concurrent.ExecutionContext
 
 
-object AuditingService extends AuditingService {
-  protected val auditConnector = AuditServiceConnector
-}
+class AuditingService @Inject()(auditConnector:AuditServiceConnector){
 
-trait AuditingService {
-
-  protected def auditConnector: AuditConnector
 
   def sendEvent(auditType: String, json: JsValue)(implicit ec: ExecutionContext, hc: HeaderCarrier): Unit = {
     val event = eventFor(auditType, json)
