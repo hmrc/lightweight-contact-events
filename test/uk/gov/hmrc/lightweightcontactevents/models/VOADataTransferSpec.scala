@@ -21,8 +21,8 @@ import uk.gov.hmrc.lightweightcontactevents.SpecBase
 class VOADataTransferSpec extends SpecBase {
   val message = "MSG"
   val subject = "Valuation Office Agency Contact Form"
-  val ctEmail = "ct.email@voa.gov.uk"
-  val ndrEmail = "ndr.email@voa.gov.uk"
+  val ctEmail = "ct.email@voa.gsi.gov.uk"
+  val ndrEmail = "ndr.email@voa.gsi.gov.uk"
   val enquiryCategoryMsg = "Council Tax"
   val subEnquiryCategoryMsg = "My property is in poor repair or uninhabitable"
   val confirmedContactDetails = ConfirmedContactDetails("first", "last", "email", "07777777")
