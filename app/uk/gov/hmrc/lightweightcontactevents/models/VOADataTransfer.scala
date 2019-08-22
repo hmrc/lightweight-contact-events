@@ -31,7 +31,7 @@ case class VOADataTransfer(contact: ConfirmedContactDetails,
 /**/
 
 object VOADataTransfer {
-  implicit val writer = Json.writes[VOADataTransfer]
+  implicit val format = Json.format[VOADataTransfer]
 
   def apply(ctc: Contact, init: Initialize): VOADataTransfer =
     VOADataTransfer(ctc.contact,
