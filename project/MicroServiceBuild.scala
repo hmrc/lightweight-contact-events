@@ -14,13 +14,15 @@ object MicroServiceBuild extends Build with MicroService {
   private val mockitoAllVersion = "1.10.19"
   private val bootstrapVersion = "4.14.0"
   private val simpleReactivemongoVersion = "7.20.0-play-25"
+  private val hmrcMongoLock = "6.15.0-play-25"
 
   override lazy val appDependencies: Seq[ModuleID] = compile ++ Test() ++ IntegrationTest() ++ tmpMacWorkaround()
 
   val compile = Seq(
     ws,
     "uk.gov.hmrc" %% "bootstrap-play-25" % bootstrapVersion,
-    "uk.gov.hmrc" %% "simple-reactivemongo" % simpleReactivemongoVersion
+    "uk.gov.hmrc" %% "simple-reactivemongo" % simpleReactivemongoVersion,
+    "uk.gov.hmrc" %% "mongo-lock" % hmrcMongoLock
   )
 
   trait TestDependencies {

@@ -16,12 +16,20 @@
 
 package uk.gov.hmrc.lightweightcontactevents.repository
 
+import java.time.Instant
+
 import javax.inject.{Inject, Singleton}
 import play.modules.reactivemongo.ReactiveMongoComponent
 import reactivemongo.bson.BSONObjectID
 import uk.gov.hmrc.lightweightcontactevents.models.QueuedDataTransfer
 import uk.gov.hmrc.mongo.ReactiveRepository
 import uk.gov.hmrc.mongo.json.ReactiveMongoFormats
+import play.api.libs.json.{JsObject, Json}
+import reactivemongo.api.Cursor.FailOnError
+import reactivemongo.api.{QueryOpts, ReadPreference}
+import reactivemongo.play.json._
+
+import scala.concurrent.{ExecutionContext, Future}
 
 
 @Singleton
@@ -30,6 +38,30 @@ class QueuedDataTransferRepository @Inject() (mongo: ReactiveMongoComponent) ext
   mongo = mongo.mongoConnector.db,
   domainFormat = QueuedDataTransfer.format,
   idFormat = ReactiveMongoFormats.objectIdFormats) {
+
+  val defaultBatchSize = 10
+
+  def updateTime(id: BSONObjectID, time: Instant)(implicit ec: ExecutionContext): Future[Unit] = {
+    val selector = _id(id)
+
+    val update = Json.obj(
+      "$set" -> Json.obj(
+        "fistError" -> time
+      )
+    )
+
+    findAndUpdate(selector, update).map(_ => ())
+  }
+
+  def findBatch(batchSize: Int = defaultBatchSize,
+                readPreference: ReadPreference = ReadPreference.primaryPreferred
+               )(implicit ec: ExecutionContext):Future[List[QueuedDataTransfer]] = {
+
+    collection.find(Json.obj(), Option.empty[JsObject]).options(QueryOpts().batchSize(batchSize))
+        .cursor[QueuedDataTransfer](readPreference)
+        .collect[List](batchSize, FailOnError[List[QueuedDataTransfer]]())
+
+  }
 
 
 }
