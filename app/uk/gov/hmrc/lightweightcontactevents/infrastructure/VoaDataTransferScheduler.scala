@@ -19,17 +19,20 @@ package uk.gov.hmrc.lightweightcontactevents.infrastructure
 import akka.actor.Scheduler
 import akka.event.EventStream
 import javax.inject.{Inject, Singleton}
-import uk.gov.hmrc.lightweightcontactevents.connectors.VoaDataTransferConnector
-import uk.gov.hmrc.lightweightcontactevents.repository.QueuedDataTransferRepository
+import org.joda.time.Duration
+import play.modules.reactivemongo.ReactiveMongoComponent
+import uk.gov.hmrc.lock.{LockKeeper, LockRepository}
 
 import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
 class VoaDataTransferScheduler @Inject() (scheduler: Scheduler, eventStream: EventStream,
-                                          val schedule: DefaultRegularSchedule, voaDataTransferExporter: VoaDataTransferExporter
+                                          val schedule: DefaultRegularSchedule, voaDataTransferExporter: VoaDataTransferExporter,
+                                          reactiveMongoComponent: ReactiveMongoComponent, lock: VoaDataTransferLockKeeper
                                          )(implicit val ec: ExecutionContext)
 
-  extends LockedJobScheduler[ExportEvent](???, scheduler, eventStream) {
+  extends LockedJobScheduler[ExportEvent](lock, scheduler, eventStream) {
+
 
   override val name: String = this.getClass.getName
 
@@ -38,4 +41,19 @@ class VoaDataTransferScheduler @Inject() (scheduler: Scheduler, eventStream: Eve
 
     Future.successful(ExportSucess)
   }
+}
+
+@Singleton
+class VoaDataTransferLockKeeper @Inject()(reactiveMongoComponent: ReactiveMongoComponent) extends LockKeeper {
+
+  val lockRepository =  {
+    implicit val db = reactiveMongoComponent.mongoConnector.db
+    new LockRepository()
+  }
+
+  override def lockId: String = this.getClass.getName
+
+  override val forceLockReleaseAfter: Duration = Duration.standardHours(1)
+
+  override def repo: LockRepository = lockRepository
 }

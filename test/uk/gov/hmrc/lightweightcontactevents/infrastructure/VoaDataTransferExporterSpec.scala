@@ -43,7 +43,7 @@ class VoaDataTransferExporterSpec extends FlatSpec with Matchers with MockitoSug
   with DefaultAwaitTimeout {
   val now = Instant.now()
 
-  val nowMinu12Days = now.minusSeconds(60 * 60 * 24 * 12)
+  val nowMinus12Days = now.minusSeconds(60 * 60 * 24 * 12)
 
   val clock = new Clock {
     var now = Instant.now()
@@ -107,7 +107,7 @@ class VoaDataTransferExporterSpec extends FlatSpec with Matchers with MockitoSug
 
     val voaDataTransferExporter = new VoaDataTransferExporter(dataTransferConnector, dataTransferRepository, clock)
 
-    val transfer = aQueuedDataTransfer().copy(fistError = Option(nowMinu12Days))
+    val transfer = aQueuedDataTransfer().copy(fistError = Option(nowMinus12Days))
     val data = List(transfer)
 
     when(dataTransferConnector.transfer(any(classOf[VOADataTransfer]))(any(classOf[HeaderCarrier]))).thenReturn(Future.successful(Success(404)))
