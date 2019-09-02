@@ -15,6 +15,7 @@ object MicroServiceBuild extends Build with MicroService {
   private val bootstrapVersion = "4.14.0"
   private val simpleReactivemongoVersion = "7.20.0-play-25"
   private val hmrcMongoLock = "6.15.0-play-25"
+  private val akkaVersion = "2.5.18"
 
   override lazy val appDependencies: Seq[ModuleID] = compile ++ Test() ++ IntegrationTest() ++ tmpMacWorkaround()
 
@@ -22,7 +23,10 @@ object MicroServiceBuild extends Build with MicroService {
     ws,
     "uk.gov.hmrc" %% "bootstrap-play-25" % bootstrapVersion,
     "uk.gov.hmrc" %% "simple-reactivemongo" % simpleReactivemongoVersion,
-    "uk.gov.hmrc" %% "mongo-lock" % hmrcMongoLock
+    "uk.gov.hmrc" %% "mongo-lock" % hmrcMongoLock,
+    "com.typesafe.akka" %% "akka-actor"  % akkaVersion,
+    "com.typesafe.akka" %% "akka-stream" % akkaVersion,
+    "com.typesafe.akka" %% "akka-slf4j"  % akkaVersion
   )
 
   trait TestDependencies {
@@ -52,8 +56,9 @@ object MicroServiceBuild extends Build with MicroService {
         "org.scalatest" %% "scalatest" % scalaTestVersion % scope,
         "org.scalatestplus.play" %% "scalatestplus-play" % scalaTestPlusPlayVersion % scope,
         "org.pegdown" % "pegdown" % pegdownVersion % scope,
-        "com.typesafe.play" %% "play-test" % PlayVersion.current % scope
-        //"com.typesafe.akka" %% "akka-testkit" % "2.5.18" % scope
+        "com.typesafe.play" %% "play-test" % PlayVersion.current % scope,
+        "com.typesafe.akka" %% "akka-testkit" % akkaVersion % scope,
+        "net.codingwell" %% "scala-guice" % "4.2.6" % scope
       )
     }.test
   }

@@ -37,9 +37,11 @@ class VoaDataTransferScheduler @Inject() (scheduler: Scheduler, eventStream: Eve
   override val name: String = this.getClass.getName
 
   override def runJob()(implicit ec: ExecutionContext): Future[ExportEvent] = {
-    voaDataTransferExporter.exportBatch()
+    voaDataTransferExporter.exportBatch().map(_ => ExportSucess).recover {
+      case ex: Exception => ExportFailed
+    }
 
-    Future.successful(ExportSucess)
+    //Future.successful(ExportSucess)
   }
 }
 
