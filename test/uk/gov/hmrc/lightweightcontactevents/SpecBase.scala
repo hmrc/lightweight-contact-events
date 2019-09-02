@@ -26,10 +26,13 @@ import play.api.inject.Injector
 import play.api.libs.json.{JsValue, Writes}
 import play.api.mvc.AnyContentAsEmpty
 import play.api.test.FakeRequest
+import reactivemongo.api.commands.WriteResult
 import uk.gov.hmrc.http.{HeaderCarrier, HttpReads, HttpResponse}
+import uk.gov.hmrc.lightweightcontactevents.models.QueuedDataTransfer
+import uk.gov.hmrc.lightweightcontactevents.repository.QueuedDataTransferRepository
 import uk.gov.hmrc.play.bootstrap.http.HttpClient
 
-import scala.concurrent.Future
+import scala.concurrent.{ExecutionContext, Future}
 
 trait SpecBase extends PlaySpec with GuiceOneAppPerSuite with MockitoSugar {
 
@@ -48,4 +51,11 @@ trait SpecBase extends PlaySpec with GuiceOneAppPerSuite with MockitoSugar {
     when(httpMock.GET(anyString)(any[HttpReads[Any]], any[HeaderCarrier], any())) thenReturn Future.successful(HttpResponse(returnedStatus, None))
     httpMock
   }
+
+  def getQueuedDataTransferRepository(): QueuedDataTransferRepository = {
+    val repositoryMock = mock[QueuedDataTransferRepository]
+    when(repositoryMock.insert(any[QueuedDataTransfer])(any[ExecutionContext])).thenReturn(Future.successful(mock[WriteResult]))
+    repositoryMock
+  }
+
 }

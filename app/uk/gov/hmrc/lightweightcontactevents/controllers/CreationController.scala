@@ -22,16 +22,15 @@ import play.api.mvc.{Action, AnyContent}
 
 import scala.concurrent.Future
 import play.api.libs.json._
-import uk.gov.hmrc.lightweightcontactevents.connectors.VoaDataTransferConnector
-import uk.gov.hmrc.lightweightcontactevents.models.{Contact, VOADataTransfer}
+import uk.gov.hmrc.lightweightcontactevents.models.{Contact, QueuedDataTransfer, VOADataTransfer}
+import uk.gov.hmrc.lightweightcontactevents.repository.QueuedDataTransferRepository
 import uk.gov.hmrc.lightweightcontactevents.utils.Initialize
 import uk.gov.hmrc.play.bootstrap.controller.BaseController
 
-import scala.util.{Failure, Success, Try}
 import scala.concurrent.ExecutionContext.Implicits.global
 
 @Singleton
-class CreationController @Inject()(val dataTransferConnector: VoaDataTransferConnector, val init: Initialize) extends BaseController {
+class CreationController @Inject()(val queueRepository: QueuedDataTransferRepository, val init: Initialize) extends BaseController {
   def createContact(json: Option[JsValue]): Either[String, Contact] = {
     json match {
       case Some(value) => {
@@ -49,14 +48,15 @@ class CreationController @Inject()(val dataTransferConnector: VoaDataTransferCon
     createContact(request.body.asJson) match {
       case Right(contact) => {
         val jsonData = VOADataTransfer(contact, init)
-        val result: Future[Try[Int]] = dataTransferConnector.transfer(jsonData)
-        result map {
-          case Success(s) =>
-            Ok
-          case Failure(ex) =>
-            Logger.warn("Sending contact email fails with message " + ex.getMessage)
-            BadRequest("Sending contact email fails with message " + ex.getMessage)
-        }
+        val result = queueRepository.insert(QueuedDataTransfer(jsonData))
+
+        result.map( _ => Ok)
+            .recover {
+              case ex: Exception => {
+                Logger.warn("Unable to store email to mongo Queue", ex)
+                InternalServerError(s"Unable to store email to mongo Queue: ${ex.getMessage}")
+              }
+            }
       }
       case Left(error) => {
         Logger.warn(error)
