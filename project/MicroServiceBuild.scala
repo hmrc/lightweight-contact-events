@@ -12,8 +12,8 @@ object MicroServiceBuild extends Build with MicroService {
   private val scalaTestPlusPlayVersion = "2.0.1"
   private val pegdownVersion = "1.6.0"
   private val mockitoAllVersion = "1.10.19"
-  private val bootstrapVersion = "4.14.0"
-  private val simpleReactivemongoVersion = "7.20.0-play-25"
+  private val bootstrapVersion = "5.1.0"
+  private val simpleReactivemongoVersion = "7.21.0-play-25"
   private val hmrcMongoLock = "6.15.0-play-25"
   private val akkaVersion = "2.5.18"
 
@@ -65,7 +65,7 @@ object MicroServiceBuild extends Build with MicroService {
 
   def tmpMacWorkaround(): Seq[ModuleID] =
     if (sys.props.get("os.name").fold(false)(_.toLowerCase.contains("mac")))
-      Seq("org.reactivemongo" % "reactivemongo-shaded-native" % "0.17.1-osx-x86-64" % "runtime,test,it")
+      Seq("org.reactivemongo" % "reactivemongo-shaded-native" % "0.18.8-osx-x86-64" % "runtime,test,it")
     else Seq()
 
 }
