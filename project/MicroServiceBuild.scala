@@ -7,14 +7,13 @@ object MicroServiceBuild extends Build with MicroService {
   import play.core.PlayVersion
   import play.sbt.PlayImport._
 
-  private val hmrcTestVersion = "3.4.0-play-25"
   private val scalaTestVersion = "3.0.4"
   private val scalaTestPlusPlayVersion = "2.0.1"
   private val pegdownVersion = "1.6.0"
   private val mockitoAllVersion = "1.10.19"
-  private val bootstrapVersion = "5.1.0"
-  private val simpleReactivemongoVersion = "7.21.0-play-25"
-  private val hmrcMongoLock = "6.15.0-play-25"
+  private val bootstrapVersion = "1.9.0"
+  private val simpleReactivemongoVersion = "7.21.0-play-26"
+  private val hmrcMongoLock = "6.21.0-play-26"
   private val akkaVersion = "2.5.18"
 
   override lazy val appDependencies: Seq[ModuleID] = compile ++ Test() ++ IntegrationTest() ++ tmpMacWorkaround()
@@ -22,7 +21,7 @@ object MicroServiceBuild extends Build with MicroService {
   val compile = Seq(
     ws,
     guice,
-    "uk.gov.hmrc" %% "bootstrap-play-25" % bootstrapVersion,
+    "uk.gov.hmrc" %% "bootstrap-play-26" % bootstrapVersion,
     "uk.gov.hmrc" %% "simple-reactivemongo" % simpleReactivemongoVersion,
     "uk.gov.hmrc" %% "mongo-lock" % hmrcMongoLock,
     "com.typesafe.akka" %% "akka-actor"  % akkaVersion,

@@ -30,7 +30,7 @@ import scala.concurrent.ExecutionContext
 class SchedulerModule extends Module {
 
   override def bindings(environment: Environment, configuration: Configuration): Seq[Binding[_]] = {
-    if (configuration.getString("voaExport.enable").map(_.toBoolean).getOrElse(false)) {
+    if (configuration.getOptional[String]("voaExport.enable").exists(_.toBoolean)) {
       Seq(
         bind[VoaDataTransferScheduler].toProvider[VoaDataTransferSchedulerProvider].eagerly(),
         bind[Clock].toInstance(Clock.systemUTC()).in[Singleton]

@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 HM Revenue & Customs
+ * Copyright 2020 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,6 +25,7 @@ import play.api.{Configuration, Environment}
 import uk.gov.hmrc.http.{HeaderCarrier, HttpReads}
 import uk.gov.hmrc.lightweightcontactevents.SpecBase
 import uk.gov.hmrc.lightweightcontactevents.models.{ConfirmedContactDetails, PropertyAddress, VOADataTransfer}
+import uk.gov.hmrc.play.bootstrap.config.ServicesConfig
 import uk.gov.hmrc.play.bootstrap.http.HttpClient
 
 import scala.concurrent.Future
@@ -35,6 +36,7 @@ class VoaDataTransferConnectorSpec extends SpecBase {
   val configuration = injector.instanceOf[Configuration]
   val auditService = injector.instanceOf[AuditingService]
   val environment = injector.instanceOf[Environment]
+  val servicesConfig = injector.instanceOf[ServicesConfig]
 
   val message = "MSG"
   val subject = "Valuation Office Agency Contact Form"
@@ -53,7 +55,7 @@ class VoaDataTransferConnectorSpec extends SpecBase {
 
       "Send the contact details returning a 200 when it succeeds" in {
         val httpMock = getHttpMock(200)
-        val connector = new VoaDataTransferConnector(httpMock, configuration, environment,auditService)
+        val connector = new VoaDataTransferConnector(httpMock, configuration, environment,auditService, servicesConfig)
 
         val result = await(connector.transfer(ctDataTransfer)(HeaderCarrier()))
 
@@ -65,7 +67,7 @@ class VoaDataTransferConnectorSpec extends SpecBase {
 
       "return a failure representing the error when send method fails" in {
         val httpMock = getHttpMock(500)
-        val connector = new VoaDataTransferConnector(httpMock, configuration, environment,auditService)
+        val connector = new VoaDataTransferConnector(httpMock, configuration, environment,auditService, servicesConfig)
         val result = await(connector.transfer(ctDataTransfer)(HeaderCarrier()))
 
         assert(result.isFailure)
@@ -82,7 +84,7 @@ class VoaDataTransferConnectorSpec extends SpecBase {
         val headersCaptor = ArgumentCaptor.forClass(classOf[Seq[(String, String)]])
         val httpMock = getHttpMock(200)
 
-        val connector = new VoaDataTransferConnector(httpMock, configuration, environment,auditService)
+        val connector = new VoaDataTransferConnector(httpMock, configuration, environment,auditService, servicesConfig)
         connector.sendJson(minimalJson)(HeaderCarrier())
 
         verify(httpMock).POST(urlCaptor.capture, bodyCaptor.capture, headersCaptor.capture)(jsonWritesNapper.capture,
@@ -93,7 +95,7 @@ class VoaDataTransferConnectorSpec extends SpecBase {
       }
 
       "return a 200 if the data transfer call is successful" in {
-        val connector = new VoaDataTransferConnector(getHttpMock(200), configuration, environment,auditService)
+        val connector = new VoaDataTransferConnector(getHttpMock(200), configuration, environment,auditService, servicesConfig)
         val result = await(connector.sendJson(minimalJson)(HeaderCarrier()))
         result match {
           case Success(status) =>
@@ -103,7 +105,7 @@ class VoaDataTransferConnectorSpec extends SpecBase {
       }
 
       "throw an failure if the data transfer call fails" in {
-        val connector = new VoaDataTransferConnector(getHttpMock(500), configuration, environment,auditService)
+        val connector = new VoaDataTransferConnector(getHttpMock(500), configuration, environment,auditService, servicesConfig)
         val result = await(connector.sendJson(minimalJson)(HeaderCarrier()))
         assert(result.isFailure)
       }
@@ -112,7 +114,7 @@ class VoaDataTransferConnectorSpec extends SpecBase {
         val httpMock = mock[HttpClient]
         when(httpMock.POST(anyString, any[JsValue], any[Seq[(String, String)]])(any[Writes[Any]], any[HttpReads[Any]],
           any[HeaderCarrier], any())) thenReturn Future.successful(new RuntimeException)
-          val connector = new VoaDataTransferConnector(httpMock, configuration, environment,auditService)
+          val connector = new VoaDataTransferConnector(httpMock, configuration, environment,auditService, servicesConfig)
           val result = await(connector.sendJson(minimalJson)(HeaderCarrier()))
           assert(result.isFailure)
         }

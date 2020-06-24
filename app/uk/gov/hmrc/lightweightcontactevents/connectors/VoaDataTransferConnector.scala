@@ -18,13 +18,12 @@ package uk.gov.hmrc.lightweightcontactevents.connectors
 
 import javax.inject.Inject
 
-import play.api.Mode.Mode
 import play.api.libs.json.{JsValue, Json}
 import play.api.{Configuration, Environment, Logger}
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.lightweightcontactevents.models.VOADataTransfer
 import uk.gov.hmrc.play.bootstrap.http.HttpClient
-import uk.gov.hmrc.play.config.ServicesConfig
+import uk.gov.hmrc.play.bootstrap.config.ServicesConfig
 import scala.concurrent.ExecutionContext.Implicits.global
 
 
@@ -34,17 +33,15 @@ import scala.util.{Failure, Success, Try}
 class VoaDataTransferConnector @Inject()(val http: HttpClient,
                                          val configuration: Configuration,
                                          environment: Environment,
-                                          auditService:AuditingService) extends ServicesConfig {
+                                          auditService:AuditingService,
+                                         servicesConfig: ServicesConfig
+                                        ) {
 
   implicit val hc: HeaderCarrier = HeaderCarrier()
 
-  override protected def mode: Mode = environment.mode
-
-  override protected def runModeConfiguration: Configuration = configuration
-
   val jsonContentTypeHeader = ("Content-Type", "application/json")
 
-  val serviceUrl: String = baseUrl("voa-data-transfer")
+  val serviceUrl: String = servicesConfig.baseUrl("voa-data-transfer")
   val RETURN_200: Int = 200
 
   def transfer(dataTransfer: VOADataTransfer)(implicit hc: HeaderCarrier): Future[Try[Int]] = sendJson(Json.toJson(dataTransfer))

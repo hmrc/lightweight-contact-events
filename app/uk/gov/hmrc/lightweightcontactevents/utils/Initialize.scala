@@ -18,11 +18,10 @@ package uk.gov.hmrc.lightweightcontactevents.utils
 
 import javax.inject.{Inject, Singleton}
 import com.google.inject.AbstractModule
-import play.api.Mode._
-import play.api.{Environment,Configuration}
+import play.api.{Configuration, Environment}
+import uk.gov.hmrc.play.audit.http.config.AuditingConfig
 import uk.gov.hmrc.play.audit.http.connector.AuditConnector
-import uk.gov.hmrc.play.bootstrap.config.LoadAuditingConfig
-import uk.gov.hmrc.play.config.ServicesConfig
+import uk.gov.hmrc.play.bootstrap.config.ServicesConfig
 
 
 @Singleton
@@ -39,8 +38,6 @@ class StartupModule extends AbstractModule {
 }
 
 class AuditServiceConnector @Inject()(val configuration: Configuration,
-                                      environment: Environment)  extends AuditConnector with ServicesConfig {
-  override protected def mode: Mode = environment.mode
-  override protected def runModeConfiguration: Configuration = configuration
-  override lazy val auditingConfig = LoadAuditingConfig(runModeConfiguration,mode,"auditing")
-}
+                                      environment: Environment,
+                                      val auditingConfig: AuditingConfig,
+                                      servicesConfig: ServicesConfig)  extends AuditConnector
