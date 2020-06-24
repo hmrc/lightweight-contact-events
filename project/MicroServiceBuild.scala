@@ -21,6 +21,7 @@ object MicroServiceBuild extends Build with MicroService {
 
   val compile = Seq(
     ws,
+    guice,
     "uk.gov.hmrc" %% "bootstrap-play-25" % bootstrapVersion,
     "uk.gov.hmrc" %% "simple-reactivemongo" % simpleReactivemongoVersion,
     "uk.gov.hmrc" %% "mongo-lock" % hmrcMongoLock,
