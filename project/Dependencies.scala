@@ -1,8 +1,7 @@
 import sbt._
 
-object MicroServiceBuild extends Build with MicroService {
 
-  val appName = "lightweight-contact-events"
+object Dependencies {
 
   import play.core.PlayVersion
   import play.sbt.PlayImport._
@@ -16,7 +15,7 @@ object MicroServiceBuild extends Build with MicroService {
   private val hmrcMongoLock = "6.21.0-play-26"
   private val akkaVersion = "2.5.18"
 
-  override lazy val appDependencies: Seq[ModuleID] = compile ++ Test() ++ IntegrationTest() ++ tmpMacWorkaround()
+  lazy val appDependencies: Seq[ModuleID] = compile ++ Test() ++ IntegrationTest() ++ tmpMacWorkaround()
 
   val compile = Seq(
     ws,
