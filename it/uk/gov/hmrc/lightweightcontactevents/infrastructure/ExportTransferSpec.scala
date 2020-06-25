@@ -20,6 +20,7 @@ import scala.concurrent.{ExecutionContext, Future}
 import scala.concurrent.duration.FiniteDuration
 import scala.concurrent.duration._
 import uk.gov.hmrc.lightweightcontactevents.infrastructure._
+import uk.gov.hmrc.play.bootstrap.config.ServicesConfig
 import uk.gov.hmrc.play.bootstrap.http.HttpClient
 
 import scala.util.{Success, Try}
@@ -147,8 +148,9 @@ class ScheduleEvery1Second extends DefaultRegularSchedule {
 class ExportTestDataTransferConnector @Inject() (http: HttpClient,
                                                   configuration: Configuration,
                                                   environment: Environment,
-                                                  auditService:AuditingService)
-  extends VoaDataTransferConnector(http, configuration, environment, auditService) {
+                                                  auditService:AuditingService,
+                                                 servicesConfig: ServicesConfig)
+  extends VoaDataTransferConnector(http, configuration, environment, auditService, servicesConfig) {
 
   var transfer = List[VOADataTransfer]()
 
