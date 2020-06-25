@@ -32,7 +32,7 @@ class Initialize @Inject()(conf: Configuration) {
 }
 
 class StartupModule extends AbstractModule {
-  def configure(): Unit = {
+  override def configure(): Unit = {
     bind(classOf[Initialize]).asEagerSingleton()
   }
 }

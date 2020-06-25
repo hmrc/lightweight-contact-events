@@ -6,14 +6,14 @@ object Dependencies {
   import play.core.PlayVersion
   import play.sbt.PlayImport._
 
-  private val scalaTestVersion = "3.0.4"
-  private val scalaTestPlusPlayVersion = "2.0.1"
+  private val scalaTestVersion = "3.0.8"
+  private val scalaTestPlusPlayVersion = "3.1.3"
   private val pegdownVersion = "1.6.0"
   private val mockitoAllVersion = "1.10.19"
   private val bootstrapVersion = "1.9.0"
-  private val simpleReactivemongoVersion = "7.21.0-play-26"
+  private val simpleReactivemongoVersion = "7.27.0-play-26"
   private val hmrcMongoLock = "6.21.0-play-26"
-  private val akkaVersion = "2.5.18"
+  private val akkaVersion = "2.5.23"
 
   lazy val appDependencies: Seq[ModuleID] = compile ++ Test() ++ IntegrationTest() ++ tmpMacWorkaround()
 
@@ -26,6 +26,12 @@ object Dependencies {
     "com.typesafe.akka" %% "akka-actor"  % akkaVersion,
     "com.typesafe.akka" %% "akka-stream" % akkaVersion,
     "com.typesafe.akka" %% "akka-slf4j"  % akkaVersion
+  )
+
+  lazy val appDependencyOverrides: Seq[ModuleID] = Seq(
+    "com.typesafe.akka" %% "akka-stream"    % akkaVersion     force(),
+    "com.typesafe.akka" %% "akka-slf4j"     % akkaVersion     force(),
+    "com.typesafe.akka" %% "akka-actor"     % akkaVersion     force(),
   )
 
   trait TestDependencies {
