@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 HM Revenue & Customs
+ * Copyright 2020 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,19 +18,23 @@ package uk.gov.hmrc.lightweightcontactevents.controllers
 
 import javax.inject.{Inject, Singleton}
 import play.api.Logger
-import play.api.mvc.{Action, AnyContent}
+import play.api.mvc.{Action, AnyContent, ControllerComponents, DefaultActionBuilder}
 
 import scala.concurrent.Future
 import play.api.libs.json._
 import uk.gov.hmrc.lightweightcontactevents.models.{Contact, QueuedDataTransfer, VOADataTransfer}
 import uk.gov.hmrc.lightweightcontactevents.repository.QueuedDataTransferRepository
 import uk.gov.hmrc.lightweightcontactevents.utils.Initialize
-import uk.gov.hmrc.play.bootstrap.controller.BaseController
+import uk.gov.hmrc.play.bootstrap.controller.BackendController
 
 import scala.concurrent.ExecutionContext.Implicits.global
 
 @Singleton
-class CreationController @Inject()(val queueRepository: QueuedDataTransferRepository, val init: Initialize) extends BaseController {
+class CreationController @Inject()(
+   val queueRepository: QueuedDataTransferRepository,
+   val init: Initialize,
+   val action: DefaultActionBuilder,
+   override val controllerComponents: ControllerComponents) extends BackendController(controllerComponents) {
   def createContact(json: Option[JsValue]): Either[String, Contact] = {
     json match {
       case Some(value) => {
@@ -44,7 +48,7 @@ class CreationController @Inject()(val queueRepository: QueuedDataTransferReposi
     }
   }
 
-  def create(): Action[AnyContent] = Action.async {implicit request =>
+  def create(): Action[AnyContent] = action.async {implicit request =>
     createContact(request.body.asJson) match {
       case Right(contact) => {
         val jsonData = VOADataTransfer(contact, init)

@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 HM Revenue & Customs
+ * Copyright 2020 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,8 +19,7 @@ package uk.gov.hmrc.lightweightcontactevents
 import java.time.Clock
 
 import akka.actor.ActorSystem
-import com.google.inject.Provider
-import javax.inject.{Inject, Singleton}
+import javax.inject.{Inject, Singleton, Provider}
 import play.api.inject._
 import play.api.{Configuration, Environment, Logger}
 import play.modules.reactivemongo.ReactiveMongoComponent
@@ -31,7 +30,7 @@ import scala.concurrent.ExecutionContext
 class SchedulerModule extends Module {
 
   override def bindings(environment: Environment, configuration: Configuration): Seq[Binding[_]] = {
-    if (configuration.getString("voaExport.enable").map(_.toBoolean).getOrElse(false)) {
+    if (configuration.getOptional[String]("voaExport.enable").exists(_.toBoolean)) {
       Seq(
         bind[VoaDataTransferScheduler].toProvider[VoaDataTransferSchedulerProvider].eagerly(),
         bind[Clock].toInstance(Clock.systemUTC()).in[Singleton]
