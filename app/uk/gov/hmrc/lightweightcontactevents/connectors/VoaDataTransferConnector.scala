@@ -53,12 +53,12 @@ class VoaDataTransferConnector @Inject()(val http: HttpClient,
       case RETURN_200 =>
         Success(RETURN_200)
       case status =>
-        Logger.warn("Data transfer service fails with status " + status)
+        Logger(getClass).warn("Data transfer service fails with status " + status)
         Failure(new RuntimeException("Data transfer service fails with status " + status))
     }
   } recover {
       case ex =>
-        Logger.warn("Data transfer service fails with exception " + ex.getMessage)
+        Logger(getClass).warn("Data transfer service fails with exception " + ex.getMessage)
         Failure(new RuntimeException("Data transfer service fails with exception " + ex.getMessage))
     }
 
