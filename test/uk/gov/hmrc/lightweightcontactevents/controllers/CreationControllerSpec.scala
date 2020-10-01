@@ -19,7 +19,7 @@ package uk.gov.hmrc.lightweightcontactevents.controllers
 
 import org.mockito.Matchers.any
 import org.mockito.Mockito.when
-import org.scalatest.mockito.MockitoSugar
+import org.scalatestplus.mockito.MockitoSugar
 import play.api.{Configuration, Environment}
 import play.api.libs.json.Json
 import play.api.mvc.DefaultActionBuilder

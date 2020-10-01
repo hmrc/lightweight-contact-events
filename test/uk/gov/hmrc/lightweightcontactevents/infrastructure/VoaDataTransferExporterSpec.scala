@@ -20,7 +20,7 @@ import java.time.temporal.ChronoUnit
 import java.time.{Clock, Instant, ZoneId}
 
 import akka.util.Timeout
-import org.scalatest.mockito.MockitoSugar
+import org.scalatestplus.mockito.MockitoSugar
 import org.scalatest.{FlatSpec, Matchers}
 import uk.gov.hmrc.lightweightcontactevents.connectors.VoaDataTransferConnector
 import uk.gov.hmrc.lightweightcontactevents.repository.QueuedDataTransferRepository
