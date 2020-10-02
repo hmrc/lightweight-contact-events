@@ -25,7 +25,7 @@ import uk.gov.hmrc.lightweightcontactevents.models.VOADataTransfer
 import uk.gov.hmrc.play.bootstrap.http.HttpClient
 import uk.gov.hmrc.play.bootstrap.config.ServicesConfig
 import scala.concurrent.ExecutionContext.Implicits.global
-
+import uk.gov.hmrc.http.HttpReads.Implicits._
 
 import scala.concurrent.Future
 import scala.util.{Failure, Success, Try}
