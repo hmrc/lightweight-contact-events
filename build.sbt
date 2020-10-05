@@ -5,6 +5,9 @@ import scoverage.ScoverageKeys
 import uk.gov.hmrc.DefaultBuildSettings.{addTestReportOption, defaultSettings, scalaSettings}
 import uk.gov.hmrc.sbtdistributables.SbtDistributablesPlugin.publishingSettings
 
+import play.sbt.routes.RoutesKeys
+RoutesKeys.routesImport := Seq.empty
+
 val appName = "lightweight-contact-events"
 
 lazy val root = Project(appName, file("."))
@@ -27,7 +30,8 @@ lazy val root = Project(appName, file("."))
     libraryDependencies ++= appDependencies,
     dependencyOverrides ++= appDependencyOverrides,
     retrieveManaged := true,
-    evictionWarningOptions in update := EvictionWarningOptions.default.withWarnScalaVersionEviction(false)
+    evictionWarningOptions in update := EvictionWarningOptions.default.withWarnScalaVersionEviction(false),
+    scalaVersion := "2.12.12"
   )
   .configs(IntegrationTest)
   .settings(inConfig(IntegrationTest)(Defaults.itSettings): _*)

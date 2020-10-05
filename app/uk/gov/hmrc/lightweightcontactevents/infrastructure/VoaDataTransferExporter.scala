@@ -16,7 +16,6 @@
 
 package uk.gov.hmrc.lightweightcontactevents.infrastructure
 
-import java.time.temporal.{ChronoUnit, TemporalUnit}
 import java.time.{Clock, Duration, Instant}
 
 import javax.inject.{Inject, Singleton}
