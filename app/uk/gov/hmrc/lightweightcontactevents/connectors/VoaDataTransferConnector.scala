@@ -19,13 +19,13 @@ package uk.gov.hmrc.lightweightcontactevents.connectors
 import javax.inject.Inject
 import play.api.libs.json.{JsValue, Json}
 import play.api.{Configuration, Environment, Logger}
-import uk.gov.hmrc.http.HeaderCarrier
+import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse}
 import uk.gov.hmrc.lightweightcontactevents.models.VOADataTransfer
 import uk.gov.hmrc.play.bootstrap.http.HttpClient
 import uk.gov.hmrc.play.bootstrap.config.ServicesConfig
+import uk.gov.hmrc.http.HttpReads.Implicits._
 
 import scala.concurrent.ExecutionContext.Implicits.global
-
 import scala.concurrent.Future
 import scala.util.{Failure, Success, Try}
 
@@ -46,7 +46,7 @@ class VoaDataTransferConnector @Inject()(val http: HttpClient,
   def transfer(dataTransfer: VOADataTransfer)(implicit hc: HeaderCarrier): Future[Try[Int]] = sendJson(Json.toJson(dataTransfer))
 
   private[connectors] def sendJson(json: JsValue)(implicit hc: HeaderCarrier): Future[Try[Int]] =
-    http.POST(s"$serviceUrl/contact-process-api/contact/sendemail", json, Seq(jsonContentTypeHeader)).map { response =>
+    http.POST[JsValue, HttpResponse](s"$serviceUrl/contact-process-api/contact/sendemail", json, Seq(jsonContentTypeHeader)).map { response =>
       auditService.sendEvent("sendcontactemailtoVOA", json)
     response.status match {
       case RETURN_200 =>
