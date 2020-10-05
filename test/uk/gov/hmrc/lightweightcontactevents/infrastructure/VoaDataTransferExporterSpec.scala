@@ -33,6 +33,7 @@ import reactivemongo.bson.BSONObjectID
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.lightweightcontactevents.models.{ConfirmedContactDetails, PropertyAddress, QueuedDataTransfer, VOADataTransfer}
 
+import scala.language.reflectiveCalls
 import scala.concurrent.{ExecutionContext, Future}
 import scala.util.Success
 

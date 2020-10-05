@@ -22,6 +22,7 @@ import akka.util.Timeout
 import play.api.Logger
 import uk.gov.hmrc.lock.LockKeeper
 import scala.concurrent.duration._
+import scala.language.postfixOps
 
 import scala.concurrent.{ExecutionContext, Future}
 

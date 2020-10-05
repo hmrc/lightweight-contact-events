@@ -16,10 +16,10 @@ import uk.gov.hmrc.lightweightcontactevents.connectors.{AuditingService, VoaData
 import uk.gov.hmrc.lightweightcontactevents.models.{ConfirmedContactDetails, PropertyAddress, QueuedDataTransfer, VOADataTransfer}
 import uk.gov.hmrc.lightweightcontactevents.repository.QueuedDataTransferRepository
 
+import scala.language.postfixOps
 import scala.concurrent.{ExecutionContext, Future}
 import scala.concurrent.duration.FiniteDuration
 import scala.concurrent.duration._
-import uk.gov.hmrc.lightweightcontactevents.infrastructure._
 import uk.gov.hmrc.play.bootstrap.config.ServicesConfig
 import uk.gov.hmrc.play.bootstrap.http.HttpClient
 

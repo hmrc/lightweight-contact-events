@@ -18,6 +18,7 @@ package uk.gov.hmrc.lightweightcontactevents.infrastructure
 
 import javax.inject.Singleton
 import scala.concurrent.duration._
+import scala.language.postfixOps
 
 import scala.concurrent.duration.FiniteDuration
 
