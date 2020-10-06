@@ -3,9 +3,8 @@ package uk.gov.hmrc.lightweightcontactevents.repository
 import java.time.Instant
 
 import org.scalatest.OptionValues
-import reactivemongo.bson.BSONObjectID
 import uk.gov.hmrc.lightweightcontactevents.DiAcceptanceTest
-import uk.gov.hmrc.lightweightcontactevents.models.{ConfirmedContactDetails, Contact, PropertyAddress, QueuedDataTransfer, VOADataTransfer}
+import uk.gov.hmrc.lightweightcontactevents.models.{ConfirmedContactDetails, PropertyAddress, QueuedDataTransfer, VOADataTransfer}
 
 import scala.concurrent.ExecutionContext.Implicits.global
 
@@ -19,7 +18,7 @@ class QueuedDataTransferRepositorySpec extends DiAcceptanceTest with OptionValue
     "save item to DB and read it back" in {
 
       val item = aQueuedDataTransfer()
-      val insertResult = await(mongoRepository().insert(item))
+      await(mongoRepository().insert(item))
 
       val itemFromDb = await(mongoRepository().findById(item.id)).get
 

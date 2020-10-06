@@ -16,11 +16,9 @@
 
 package uk.gov.hmrc.lightweightcontactevents.infrastructure
 
-import java.time.temporal.ChronoUnit
 import java.time.{Clock, Instant, ZoneId}
 
-import akka.util.Timeout
-import org.scalatest.mockito.MockitoSugar
+import org.scalatestplus.mockito.MockitoSugar
 import org.scalatest.{FlatSpec, Matchers}
 import uk.gov.hmrc.lightweightcontactevents.connectors.VoaDataTransferConnector
 import uk.gov.hmrc.lightweightcontactevents.repository.QueuedDataTransferRepository
@@ -35,9 +33,9 @@ import reactivemongo.bson.BSONObjectID
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.lightweightcontactevents.models.{ConfirmedContactDetails, PropertyAddress, QueuedDataTransfer, VOADataTransfer}
 
+import scala.language.reflectiveCalls
 import scala.concurrent.{ExecutionContext, Future}
-import scala.concurrent.duration._
-import scala.util.{Success, Try}
+import scala.util.Success
 
 class VoaDataTransferExporterSpec extends FlatSpec with Matchers with MockitoSugar with FutureAwaits
   with DefaultAwaitTimeout {

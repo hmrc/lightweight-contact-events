@@ -2,8 +2,11 @@ import sbt.Keys._
 import sbt._
 import Dependencies.{appDependencies, appDependencyOverrides}
 import scoverage.ScoverageKeys
-import uk.gov.hmrc.DefaultBuildSettings.{addTestReportOption, defaultSettings, scalaSettings}
+import uk.gov.hmrc.DefaultBuildSettings.{defaultSettings, scalaSettings, integrationTestSettings}
 import uk.gov.hmrc.sbtdistributables.SbtDistributablesPlugin.publishingSettings
+
+import play.sbt.routes.RoutesKeys
+RoutesKeys.routesImport := Seq.empty
 
 val appName = "lightweight-contact-events"
 
@@ -27,15 +30,12 @@ lazy val root = Project(appName, file("."))
     libraryDependencies ++= appDependencies,
     dependencyOverrides ++= appDependencyOverrides,
     retrieveManaged := true,
-    evictionWarningOptions in update := EvictionWarningOptions.default.withWarnScalaVersionEviction(false)
+    evictionWarningOptions in update := EvictionWarningOptions.default.withWarnScalaVersionEviction(false),
+    scalaVersion := "2.12.12"
   )
   .configs(IntegrationTest)
   .settings(inConfig(IntegrationTest)(Defaults.itSettings): _*)
-  .settings(
-    Keys.fork in IntegrationTest := false,
-    unmanagedSourceDirectories in IntegrationTest := Seq((baseDirectory in IntegrationTest).value / "it"),
-    addTestReportOption(IntegrationTest, "int-test-reports"),
-    parallelExecution in IntegrationTest := false)
+  .settings(integrationTestSettings(): _*)
   .settings(resolvers ++= Seq(
     Resolver.bintrayRepo("hmrc", "releases"),
     Resolver.jcenterRepo

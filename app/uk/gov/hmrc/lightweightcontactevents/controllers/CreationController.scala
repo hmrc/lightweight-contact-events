@@ -57,13 +57,13 @@ class CreationController @Inject()(
         result.map( _ => Ok)
             .recover {
               case ex: Exception => {
-                Logger.warn("Unable to store email to mongo Queue", ex)
+                Logger(getClass).warn("Unable to store email to mongo Queue", ex)
                 InternalServerError(s"Unable to store email to mongo Queue: ${ex.getMessage}")
               }
             }
       }
       case Left(error) => {
-        Logger.warn(error)
+        Logger(getClass).warn(error)
         Future.successful(BadRequest(error))
       }
     }

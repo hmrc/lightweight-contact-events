@@ -16,7 +16,6 @@
 
 package uk.gov.hmrc.lightweightcontactevents.infrastructure
 
-import java.time.temporal.{ChronoUnit, TemporalUnit}
 import java.time.{Clock, Duration, Instant}
 
 import javax.inject.{Inject, Singleton}
@@ -39,7 +38,7 @@ class VoaDataTransferExporter @Inject() (dataTransferConnector: VoaDataTransferC
 
   def exportBatch()(implicit ec: ExecutionContext): Future[Unit] = {
     dataTransferRepository.findBatch().flatMap(x => {
-      Logger.info(s"Found ${x.size} transfer(s) to export")
+      Logger(getClass).info(s"Found ${x.size} transfer(s) to export")
       processSequentially(x)})
   }
 
@@ -70,7 +69,7 @@ class VoaDataTransferExporter @Inject() (dataTransferConnector: VoaDataTransferC
   }
 
   def removeTransferWithError(transfer: QueuedDataTransfer)(implicit ec: ExecutionContext): Future[Unit] = {
-    Logger.warn(s"removing element with permanent error : ${transfer}")//TODO - send details only to SPLUNK
+    Logger(getClass).warn(s"removing element with permanent error : ${transfer}")//TODO - send details only to SPLUNK
     dataTransferRepository.removeById(transfer.id).map(_ => ())
   }
 

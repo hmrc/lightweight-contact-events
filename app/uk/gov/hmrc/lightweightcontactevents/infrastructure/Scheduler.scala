@@ -22,6 +22,7 @@ import akka.util.Timeout
 import play.api.Logger
 import uk.gov.hmrc.lock.LockKeeper
 import scala.concurrent.duration._
+import scala.language.postfixOps
 
 import scala.concurrent.{ExecutionContext, Future}
 
@@ -37,19 +38,19 @@ abstract class LockedJobScheduler[Event <: AnyRef](lock: LockKeeper, scheduler: 
   }
 
   private def run()(implicit ec: ExecutionContext) = {
-    Logger.info(s"Starting job: $name")
+    Logger(getClass).info(s"Starting job: $name")
     runJob().map { event =>
       eventStream.publish(event)
     } recoverWith {
       case e: Exception =>
-        Logger.error(s"Error running job: $name", e)
+        Logger(getClass).error(s"Error running job: $name", e)
         Future.failed(e)
     }
   }
 
   private def scheduleNextImport()(implicit ec: ExecutionContext) {
     val t = schedule.timeUntilNextRun
-    Logger.info(s"Scheduling $name to run in: $t")
+    Logger(getClass).info(s"Scheduling $name to run in: $t")
     scheduler.scheduleOnce(t) {
       lock.tryLock { run } onComplete { _ => scheduleNextImport() }
     }

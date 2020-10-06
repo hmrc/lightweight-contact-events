@@ -36,7 +36,7 @@ class SchedulerModule extends Module {
         bind[Clock].toInstance(Clock.systemUTC()).in[Singleton]
       )
     } else {
-      Logger.warn("Export disabled, transfers won't be exported to VOA")
+      Logger(getClass).warn("Export disabled, transfers won't be exported to VOA")
       Seq.empty[Binding[_]]
     }
   }

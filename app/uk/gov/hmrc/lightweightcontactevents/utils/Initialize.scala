@@ -16,13 +16,13 @@
 
 package uk.gov.hmrc.lightweightcontactevents.utils
 
+import akka.stream.Materializer
 import javax.inject.{Inject, Singleton}
 import com.google.inject.AbstractModule
-import play.api.{Configuration, Environment}
+import play.api.inject.ApplicationLifecycle
+import play.api.Configuration
 import uk.gov.hmrc.play.audit.http.config.AuditingConfig
 import uk.gov.hmrc.play.audit.http.connector.AuditConnector
-import uk.gov.hmrc.play.bootstrap.config.ServicesConfig
-
 
 @Singleton
 class Initialize @Inject()(conf: Configuration) {
@@ -38,6 +38,6 @@ class StartupModule extends AbstractModule {
 }
 
 class AuditServiceConnector @Inject()(val configuration: Configuration,
-                                      environment: Environment,
+                                      val materializer: Materializer,
                                       val auditingConfig: AuditingConfig,
-                                      servicesConfig: ServicesConfig)  extends AuditConnector
+                                      val lifecycle: ApplicationLifecycle)  extends AuditConnector

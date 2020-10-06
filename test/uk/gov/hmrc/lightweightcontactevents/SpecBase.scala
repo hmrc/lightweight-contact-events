@@ -18,7 +18,7 @@ package uk.gov.hmrc.lightweightcontactevents
 
 import org.mockito.Matchers.{any, anyString}
 import org.mockito.Mockito.when
-import org.scalatest.mockito.MockitoSugar
+import org.scalatestplus.mockito.MockitoSugar
 import org.scalatestplus.play.PlaySpec
 import org.scalatestplus.play.guice._
 import play.api.i18n.{Messages, MessagesApi}
