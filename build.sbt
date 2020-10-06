@@ -22,7 +22,7 @@ lazy val root = Project(appName, file("."))
     ScoverageKeys.coverageHighlighting := true,
     parallelExecution in sbt.Test := false
   )
-  .settings(majorVersion := 0)
+  .settings(majorVersion := 1)
   .settings(scalaSettings: _*)
   .settings(publishingSettings: _*)
   .settings(defaultSettings(): _*)
