@@ -4,7 +4,7 @@ import java.time.Instant
 
 import org.scalatest.OptionValues
 import uk.gov.hmrc.lightweightcontactevents.DiAcceptanceTest
-import uk.gov.hmrc.lightweightcontactevents.models.{ConfirmedContactDetails, PropertyAddress, QueuedDataTransfer, VOADataTransfer}
+import uk.gov.hmrc.lightweightcontactevents.utils.LightweightFixture._
 
 import scala.concurrent.ExecutionContext.Implicits.global
 
@@ -38,7 +38,7 @@ class QueuedDataTransferRepositorySpec extends DiAcceptanceTest with OptionValue
 
       val itemFromDatabase = await(mongoRepository().findById(item.id))
 
-      itemFromDatabase.value.fistError.value mustBe(errorTime)
+      itemFromDatabase.value.fistError.value mustBe (errorTime)
 
     }
 
@@ -53,36 +53,11 @@ class QueuedDataTransferRepositorySpec extends DiAcceptanceTest with OptionValue
 
       res must have size 10
 
-      items must contain allElementsOf(res)
+      items must contain allElementsOf (res)
 
     }
 
 
-  }
-
-
-
-  def aQueuedDataTransfer() = {
-    QueuedDataTransfer(aVoaDataTransfer())
-  }
-
-  def aVoaDataTransfer() = {
-    VOADataTransfer(aConfirmedContactDetails(), aPropertyAddress(), true,
-    "Subject", "email@email.com", "category", "subCategory", "Free text message")
-  }
-
-  def aPropertyAddress() = {
-    PropertyAddress("Some stree", None, "Some town", Some("Some county"), "BN12 4AX")
-  }
-
-
-  def aConfirmedContactDetails()  = {
-    ConfirmedContactDetails(
-      "John",
-      "Doe",
-      "email@noreply.voa.gov.uk",
-      "0123456789"
-    )
   }
 
 

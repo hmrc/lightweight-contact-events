@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 HM Revenue & Customs
+ * Copyright 2021 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,20 +17,10 @@
 package uk.gov.hmrc.lightweightcontactevents.models
 
 import uk.gov.hmrc.lightweightcontactevents.SpecBase
+import uk.gov.hmrc.lightweightcontactevents.utils.LightweightFixture
+import uk.gov.hmrc.lightweightcontactevents.utils.LightweightFixture._
 
 class VOADataTransferSpec extends SpecBase {
-  val message = "MSG"
-  val subject = "Valuation Office Agency Contact Form"
-  val ctEmail = "ct.email@voa.gsi.gov.uk"
-  val ndrEmail = "ndr.email@voa.gsi.gov.uk"
-  val enquiryCategoryMsg = "Council Tax"
-  val subEnquiryCategoryMsg = "My property is in poor repair or uninhabitable"
-  val confirmedContactDetails = ConfirmedContactDetails("first", "last", "email", "07777777")
-  val propertyAddress = PropertyAddress("line1", Some("line2"), "town", Some("county"), "AA1 1AA")
-  val ctContact = Contact(confirmedContactDetails, propertyAddress, true, enquiryCategoryMsg, subEnquiryCategoryMsg, message)
-  val ndrContact = Contact(confirmedContactDetails, propertyAddress, false, enquiryCategoryMsg, subEnquiryCategoryMsg, message)
-  val ctDataTransfer = VOADataTransfer(confirmedContactDetails, propertyAddress, true, subject, ctEmail, enquiryCategoryMsg, subEnquiryCategoryMsg, message)
-  val ndrDataTransfer = VOADataTransfer(confirmedContactDetails, propertyAddress, false, subject, ndrEmail, enquiryCategoryMsg, subEnquiryCategoryMsg, message)
 
   /* VOADataTransfer Contact Tests */
 
@@ -59,7 +49,7 @@ class VOADataTransferSpec extends SpecBase {
   }
 
   "creating a contact case class containing a message string set to message" in {
-    ctContact.message mustBe message
+    ctContact.message mustBe LightweightFixture.message
   }
 
   /* VOADataTransfer Tests */
