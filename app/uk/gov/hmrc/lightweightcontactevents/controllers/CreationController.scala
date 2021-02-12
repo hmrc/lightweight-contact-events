@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 HM Revenue & Customs
+ * Copyright 2021 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,11 +31,33 @@ import scala.concurrent.ExecutionContext.Implicits.global
 
 @Singleton
 class CreationController @Inject()(
-   val queueRepository: QueuedDataTransferRepository,
-   val init: Initialize,
-   val action: DefaultActionBuilder,
-   override val controllerComponents: ControllerComponents) extends BackendController(controllerComponents) {
-  def createContact(json: Option[JsValue]): Either[String, Contact] = {
+                                    val queueRepository: QueuedDataTransferRepository,
+                                    val init: Initialize,
+                                    val action: DefaultActionBuilder,
+                                    override val controllerComponents: ControllerComponents) extends BackendController(controllerComponents) {
+
+  def create(): Action[AnyContent] = action.async { implicit request =>
+    createContact(request.body.asJson) match {
+      case Right(contact) => {
+        val jsonData = VOADataTransfer(contact, init)
+        val result = queueRepository.insert(QueuedDataTransfer(jsonData))
+
+        result.map(_ => Ok)
+          .recover {
+            case ex: Exception => {
+              Logger(getClass).warn("Unable to store email to mongo Queue", ex)
+              InternalServerError(s"Unable to store email to mongo Queue: ${ex.getMessage}")
+            }
+          }
+      }
+      case Left(error) => {
+        Logger(getClass).warn(error)
+        Future.successful(BadRequest(error))
+      }
+    }
+  }
+
+  private[controllers] def createContact(json: Option[JsValue]): Either[String, Contact] = {
     json match {
       case Some(value) => {
         val model = Json.fromJson[Contact](value)
@@ -45,27 +67,6 @@ class CreationController @Inject()(
         }
       }
       case None => Left("No Json available")
-    }
-  }
-
-  def create(): Action[AnyContent] = action.async {implicit request =>
-    createContact(request.body.asJson) match {
-      case Right(contact) => {
-        val jsonData = VOADataTransfer(contact, init)
-        val result = queueRepository.insert(QueuedDataTransfer(jsonData))
-
-        result.map( _ => Ok)
-            .recover {
-              case ex: Exception => {
-                Logger(getClass).warn("Unable to store email to mongo Queue", ex)
-                InternalServerError(s"Unable to store email to mongo Queue: ${ex.getMessage}")
-              }
-            }
-      }
-      case Left(error) => {
-        Logger(getClass).warn(error)
-        Future.successful(BadRequest(error))
-      }
     }
   }
 }

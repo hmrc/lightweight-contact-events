@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 HM Revenue & Customs
+ * Copyright 2021 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,25 +16,22 @@
 
 package uk.gov.hmrc.lightweightcontactevents.infrastructure
 
-import java.time.{Clock, Instant, ZoneId}
-
-import org.scalatestplus.mockito.MockitoSugar
-import org.scalatest.{FlatSpec, Matchers}
-import uk.gov.hmrc.lightweightcontactevents.connectors.VoaDataTransferConnector
-import uk.gov.hmrc.lightweightcontactevents.repository.QueuedDataTransferRepository
-
-import scala.concurrent.ExecutionContext.Implicits.global
+import org.mockito.Matchers.{any, eq => eqTo}
 import org.mockito.Mockito.{times, verify, when}
-import org.mockito.Matchers.any
-import org.mockito.Matchers.{eq => eqTo}
+import org.scalatest.{FlatSpec, Matchers}
+import org.scalatestplus.mockito.MockitoSugar
 import play.api.test.{DefaultAwaitTimeout, FutureAwaits}
 import reactivemongo.api.commands.{GetLastError, WriteResult}
 import reactivemongo.bson.BSONObjectID
 import uk.gov.hmrc.http.HeaderCarrier
-import uk.gov.hmrc.lightweightcontactevents.models.{ConfirmedContactDetails, PropertyAddress, QueuedDataTransfer, VOADataTransfer}
-
-import scala.language.reflectiveCalls
+import uk.gov.hmrc.lightweightcontactevents.connectors.VoaDataTransferConnector
+import uk.gov.hmrc.lightweightcontactevents.models.VOADataTransfer
+import uk.gov.hmrc.lightweightcontactevents.repository.QueuedDataTransferRepository
+import uk.gov.hmrc.lightweightcontactevents.utils.LightweightFixture._
+import java.time.{Clock, Instant, ZoneId}
+import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.{ExecutionContext, Future}
+import scala.language.reflectiveCalls
 import scala.util.Success
 
 class VoaDataTransferExporterSpec extends FlatSpec with Matchers with MockitoSugar with FutureAwaits
@@ -121,28 +118,4 @@ class VoaDataTransferExporterSpec extends FlatSpec with Matchers with MockitoSug
     verify(dataTransferRepository, times(0)).updateTime(eqTo(transfer.id), eqTo(clock.now))(any(classOf[ExecutionContext]))
 
   }
-
-  def aQueuedDataTransfer() = {
-    QueuedDataTransfer(aVoaDataTransfer())
-  }
-
-  def aVoaDataTransfer() = {
-    VOADataTransfer(aConfirmedContactDetails(), aPropertyAddress(), true,
-      "Subject", "email@email.com", "category", "subCategory", "Free text message")
-  }
-
-  def aPropertyAddress() = {
-    PropertyAddress("Some stree", None, "Some town", Some("Some county"), "BN12 4AX")
-  }
-
-  def aConfirmedContactDetails()  = {
-    ConfirmedContactDetails(
-      "John",
-      "Doe",
-      "email@noreply.voa.gov.uk",
-      "0123456789"
-    )
-  }
-
-
 }

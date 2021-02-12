@@ -1,28 +1,26 @@
 package uk.gov.hmrc.lightweightcontactevents.infrastructure
 
-import java.time.Clock
-import java.util.concurrent.TimeUnit
-
 import akka.actor.ActorSystem
 import akka.testkit.TestProbe
 import com.google.inject.AbstractModule
-import javax.inject.{Inject, Singleton}
 import net.codingwell.scalaguice.ScalaModule
-import play.api.{Configuration, Environment}
 import play.api.inject.guice.GuiceApplicationBuilder
+import play.api.{Configuration, Environment}
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.lightweightcontactevents.DiAcceptanceTest
 import uk.gov.hmrc.lightweightcontactevents.connectors.{AuditingService, VoaDataTransferConnector}
-import uk.gov.hmrc.lightweightcontactevents.models.{ConfirmedContactDetails, PropertyAddress, QueuedDataTransfer, VOADataTransfer}
+import uk.gov.hmrc.lightweightcontactevents.models.VOADataTransfer
 import uk.gov.hmrc.lightweightcontactevents.repository.QueuedDataTransferRepository
-
-import scala.language.postfixOps
-import scala.concurrent.{ExecutionContext, Future}
-import scala.concurrent.duration.FiniteDuration
-import scala.concurrent.duration._
+import uk.gov.hmrc.lightweightcontactevents.utils.LightweightFixture._
 import uk.gov.hmrc.play.bootstrap.config.ServicesConfig
 import uk.gov.hmrc.play.bootstrap.http.HttpClient
 
+import java.time.Clock
+import java.util.concurrent.TimeUnit
+import javax.inject.{Inject, Singleton}
+import scala.concurrent.duration.{FiniteDuration, _}
+import scala.concurrent.{ExecutionContext, Future}
+import scala.language.postfixOps
 import scala.util.{Success, Try}
 
 class ExportTransferSpec extends DiAcceptanceTest {
@@ -111,32 +109,6 @@ class ExportTransferSpec extends DiAcceptanceTest {
       app.injector.instanceOf[VoaDataTransferLockKeeper]
     )
   }
-
-
-
-  def aQueuedDataTransfer() = {
-    QueuedDataTransfer(aVoaDataTransfer())
-  }
-
-  def aVoaDataTransfer() = {
-    VOADataTransfer(aConfirmedContactDetails(), aPropertyAddress(), true,
-      "Subject", "email@email.com", "category", "subCategory", "Free text message")
-  }
-
-  def aPropertyAddress() = {
-    PropertyAddress("Some stree", None, "Some town", Some("Some county"), "BN12 4AX")
-  }
-
-
-  def aConfirmedContactDetails()  = {
-    ConfirmedContactDetails(
-      "John",
-      "Doe",
-      "email@noreply.voa.gov.uk",
-      "0123456789"
-    )
-  }
-
 
 }
 

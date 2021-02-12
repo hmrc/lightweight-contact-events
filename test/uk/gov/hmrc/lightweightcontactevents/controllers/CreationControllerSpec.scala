@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 HM Revenue & Customs
+ * Copyright 2021 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -51,8 +51,7 @@ class CreationControllerSpec extends SpecBase with MockitoSugar {
   val contactJson =
     """{
     "contact": {
-      "firstName": "first",
-      "lastName": "last",
+      "fullName": "full name",
       "email": "email",
       "contactNumber": "tel"
     },
@@ -72,8 +71,7 @@ class CreationControllerSpec extends SpecBase with MockitoSugar {
   val ndrContactJson =
     """{
     "contact": {
-      "firstName": "first",
-      "lastName": "last",
+      "fullName": "full name",
       "email": "email",
       "contactNumber": "tel"
     },
@@ -93,8 +91,7 @@ class CreationControllerSpec extends SpecBase with MockitoSugar {
   val wrongJson =
     """{
     "contact": {
-      "firstName": "first",
-      "lastName": "last",
+      "fullName": "full name",
       "email": "email"
     },
     "propertyAddress": {
@@ -105,16 +102,13 @@ class CreationControllerSpec extends SpecBase with MockitoSugar {
     "message": "message"
   }""""
 
-  val confirmedContactDetails = ConfirmedContactDetails("a", "b", "c", "d")
-  val propertyAddress = PropertyAddress("line1", Some("line2"), "town", Some("county"), "postcode")
-
   "Given some Json representing a Contact with an enquiry, the createContact method creates a Right(Contact) with council tax address details" in {
     val repository = getQueuedDataTransferRepository()
     val controller = new CreationController(repository, initialize, action, stub)
     val result = controller.createContact(Some(Json.parse(contactJson)))
 
     result.isRight mustBe true
-    result.right.get.contact mustBe ConfirmedContactDetails("first", "last", "email", "tel")
+    result.right.get.contact mustBe ConfirmedContactDetails("full name", "email", "tel")
     result.right.get.propertyAddress mustBe PropertyAddress("line1", Some("line2"), "town", Some("county"), "postcode")
     result.right.get.enquiryCategoryMsg mustBe "eq"
     result.right.get.subEnquiryCategoryMsg mustBe "seq"
