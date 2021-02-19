@@ -16,6 +16,7 @@
 
 package uk.gov.hmrc.lightweightcontactevents.models
 
+import play.api.Logger
 import play.api.libs.json.Json
 import uk.gov.hmrc.lightweightcontactevents.utils.Initialize
 
@@ -38,8 +39,19 @@ object VOADataTransfer {
       ctc.propertyAddress,
       ctc.isCouncilTaxEnquiry,
       init.subjectTxt,
-      if (ctc.isCouncilTaxEnquiry) init.councilTaxEmail else init.businessRatesEmail,
+      getEmailAddress(ctc.enquiryCategoryMsg, init),
       ctc.enquiryCategoryMsg,
       ctc.subEnquiryCategoryMsg,
       ctc.message)
+
+  private def getEmailAddress(enquiryCategory: String, init: Initialize): String =
+    enquiryCategory match {
+      case "council_tax" => init.councilTaxEmail
+      case "business_rates" => init.businessRatesEmail
+      case "housing_allowance" => init.housingAllowanceEmail
+      case "other" => init.otherEmail
+      case _ =>
+        Logger.error(s"Email address not found for enquiryCategory : $enquiryCategory")
+        throw new RuntimeException(s"Email address not found for enquiryCategory : $enquiryCategory")
+    }
 }

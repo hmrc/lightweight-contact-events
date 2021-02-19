@@ -37,7 +37,7 @@ class VOADataTransferSpec extends SpecBase {
   }
 
   "creating a contact case class containing a isCouncilTaxEnquiry boolean set to false" in {
-    ndrContact.isCouncilTaxEnquiry mustBe false
+    brContact.isCouncilTaxEnquiry mustBe false
   }
 
   "creating a contact case class containing a enquiryCategoryMsg string set to enquiryCategoryMsg" in {
@@ -67,7 +67,7 @@ class VOADataTransferSpec extends SpecBase {
   }
 
   "creating an VOADataTransfer object from values containing a isCouncilTaxEnquiry equal false" in {
-    ndrDataTransfer.isCouncilTaxEnquiry mustBe false
+    brDataTransfer.isCouncilTaxEnquiry mustBe false
   }
 
   "creating an VOADataTransfer object from values containing a subject equal subject" in {
@@ -79,7 +79,7 @@ class VOADataTransferSpec extends SpecBase {
   }
 
   "creating an VOADataTransfer object from values containing a recipientEmailAddress equal ndrEmail" in {
-    ndrDataTransfer.recipientEmailAddress mustBe ndrEmail
+    brDataTransfer.recipientEmailAddress mustBe brEmail
   }
 
   "creating an VOADataTransfer object from values containing a enquiryCategoryMsg equal enquiryCategoryMsg" in {
@@ -87,7 +87,7 @@ class VOADataTransferSpec extends SpecBase {
   }
 
   "creating an VOADataTransfer object from values containing a subEnquiryCategoryMsg equal subEnquiryCategoryMsg" in {
-    ndrDataTransfer.subEnquiryCategoryMsg mustBe subEnquiryCategoryMsg
+    brDataTransfer.subEnquiryCategoryMsg mustBe subEnquiryCategoryMsg
   }
 
   "creating an VOADataTransfer object from values containing a message equal message" in {

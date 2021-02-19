@@ -23,15 +23,15 @@ object LightweightFixture {
   val message = "MSG"
   val subject = "Valuation Office Agency Contact Form"
   val ctEmail = "ct.email@voa.gsi.gov.uk"
-  val ndrEmail = "ndr.email@voa.gsi.gov.uk"
+  val brEmail = "br.email@voa.gsi.gov.uk"
   val enquiryCategoryMsg = "Council Tax"
   val subEnquiryCategoryMsg = "My property is in poor repair or uninhabitable"
   val confirmedContactDetails = ConfirmedContactDetails("full name", "email", "07777777")
   val propertyAddress = PropertyAddress("line1", Some("line2"), "town", Some("county"), "AA1 1AA")
   val ctContact = Contact(confirmedContactDetails, propertyAddress, true, enquiryCategoryMsg, subEnquiryCategoryMsg, message)
-  val ndrContact = Contact(confirmedContactDetails, propertyAddress, false, enquiryCategoryMsg, subEnquiryCategoryMsg, message)
+  val brContact = Contact(confirmedContactDetails, propertyAddress, false, enquiryCategoryMsg, subEnquiryCategoryMsg, message)
   val ctDataTransfer = VOADataTransfer(confirmedContactDetails, propertyAddress, true, subject, ctEmail, enquiryCategoryMsg, subEnquiryCategoryMsg, message)
-  val ndrDataTransfer = VOADataTransfer(confirmedContactDetails, propertyAddress, false, subject, ndrEmail, enquiryCategoryMsg, subEnquiryCategoryMsg, message)
+  val brDataTransfer = VOADataTransfer(confirmedContactDetails, propertyAddress, false, subject, brEmail, enquiryCategoryMsg, subEnquiryCategoryMsg, message)
 
 
   def aQueuedDataTransfer(): QueuedDataTransfer = {
@@ -40,7 +40,12 @@ object LightweightFixture {
 
   def aVoaDataTransfer(): VOADataTransfer = {
     VOADataTransfer(aConfirmedContactDetails(), aPropertyAddress(), true,
-      "Subject", "email@email.com", "category", "subCategory", "Free text message")
+      "Subject", "email@email.com", "council-tax", "subCategory", "Free text message")
+  }
+
+  def brVoaDataTransfer(): VOADataTransfer = {
+    VOADataTransfer(aConfirmedContactDetails(), aPropertyAddress(), true,
+      "Subject", "email@email.com", "business-rates", "subCategory", "Free text message")
   }
 
   def aPropertyAddress(): PropertyAddress = {

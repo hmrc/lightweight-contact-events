@@ -63,12 +63,12 @@ class CreationControllerSpec extends SpecBase with MockitoSugar {
       "postcode": "postcode"
     },
     "isCouncilTaxEnquiry": true,
-    "enquiryCategoryMsg": "eq",
+    "enquiryCategoryMsg": "council_tax",
     "subEnquiryCategoryMsg": "seq",
     "message": "message"
   }""""
 
-  val ndrContactJson =
+  val brContactJson =
     """{
     "contact": {
       "fullName": "full name",
@@ -83,7 +83,67 @@ class CreationControllerSpec extends SpecBase with MockitoSugar {
       "postcode": "postcode"
     },
     "isCouncilTaxEnquiry": false,
-    "enquiryCategoryMsg": "eq",
+    "enquiryCategoryMsg": "business_rates",
+    "subEnquiryCategoryMsg": "seq",
+    "message": "message"
+  }""""
+
+  val haContactJson =
+    """{
+    "contact": {
+      "fullName": "full name",
+      "email": "email",
+      "contactNumber": "tel"
+    },
+    "propertyAddress": {
+      "addressLine1": "line1",
+      "addressLine2": "line2",
+      "town": "town",
+      "county": "county",
+      "postcode": "postcode"
+    },
+    "isCouncilTaxEnquiry": false,
+    "enquiryCategoryMsg": "housing_allowance",
+    "subEnquiryCategoryMsg": "seq",
+    "message": "message"
+  }""""
+
+  val oContactJson =
+    """{
+    "contact": {
+      "fullName": "full name",
+      "email": "email",
+      "contactNumber": "tel"
+    },
+    "propertyAddress": {
+      "addressLine1": "line1",
+      "addressLine2": "line2",
+      "town": "town",
+      "county": "county",
+      "postcode": "postcode"
+    },
+    "isCouncilTaxEnquiry": false,
+    "enquiryCategoryMsg": "other",
+    "subEnquiryCategoryMsg": "seq",
+    "message": "message"
+  }""""
+
+  val wrongEnquiryCategoryJson =
+    """{
+    "contact": {
+      "fullName": "full name",
+      "email": "email",
+      "contactNumber": "tel"
+    },
+    "propertyAddress": {
+      "addressLine1": "line1",
+      "addressLine2": "line2",
+      "town": "town",
+      "county": "county",
+      "postcode": "postcode"
+    },
+    "isCouncilTaxEnquiry": false,
+    "enquiryCategoryMsg": "other",
     "subEnquiryCategoryMsg": "seq",
     "message": "message"
   }""""
@@ -110,22 +170,36 @@ class CreationControllerSpec extends SpecBase with MockitoSugar {
     result.isRight mustBe true
     result.right.get.contact mustBe ConfirmedContactDetails("full name", "email", "tel")
     result.right.get.propertyAddress mustBe PropertyAddress("line1", Some("line2"), "town", Some("county"), "postcode")
-    result.right.get.enquiryCategoryMsg mustBe "eq"
+    result.right.get.enquiryCategoryMsg mustBe "council_tax"
     result.right.get.subEnquiryCategoryMsg mustBe "seq"
     result.right.get.message mustBe "message"
   }
 
-  "return 200 for a POST carrying an enquiry" in {
+  "return 200 for a POST carrying an enquiry for council tax" in {
     val repository = getQueuedDataTransferRepository()
 
     val result = new CreationController(repository, initialize, action, stub).create()(fakeRequestWithJson(contactJson))
     status(result) mustBe OK
   }
 
-  "return 200 for a POST carrying an enquiry for NDR" in {
+  "return 200 for a POST carrying an enquiry for business rates" in {
     val repository = getQueuedDataTransferRepository()
 
-    val result = new CreationController(repository, initialize, action, stub).create()(fakeRequestWithJson(ndrContactJson))
+    val result = new CreationController(repository, initialize, action, stub).create()(fakeRequestWithJson(brContactJson))
+    status(result) mustBe OK
+  }
+
+  "return 200 for a POST carrying an enquiry for housing allowance" in {
+    val repository = getQueuedDataTransferRepository()
+
+    val result = new CreationController(repository, initialize, action, stub).create()(fakeRequestWithJson(haContactJson))
+    status(result) mustBe OK
+  }
+
+  "return 200 for a POST carrying an enquiry for other" in {
+    val repository = getQueuedDataTransferRepository()
+
+    val result = new CreationController(repository, initialize, action, stub).create()(fakeRequestWithJson(oContactJson))
     status(result) mustBe OK
   }
 
@@ -153,7 +227,6 @@ class CreationControllerSpec extends SpecBase with MockitoSugar {
     status(result) mustBe INTERNAL_SERVER_ERROR
 
   }
-
 
   "Given some wrong Json format, the createContact method returns a Left(Unable to parse)" in {
     val repository = getQueuedDataTransferRepository()
