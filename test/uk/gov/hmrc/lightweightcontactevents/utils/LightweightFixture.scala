@@ -32,7 +32,7 @@ object LightweightFixture {
   val brContact = Contact(confirmedContactDetails, propertyAddress, false, enquiryCategoryMsg, subEnquiryCategoryMsg, message)
   val ctDataTransfer = VOADataTransfer(confirmedContactDetails, propertyAddress, true, subject, ctEmail, enquiryCategoryMsg, subEnquiryCategoryMsg, message)
   val brDataTransfer = VOADataTransfer(confirmedContactDetails, propertyAddress, false, subject, brEmail, enquiryCategoryMsg, subEnquiryCategoryMsg, message)
-
+  val wrongContact = Contact(confirmedContactDetails, propertyAddress, false, "", subEnquiryCategoryMsg, message)
 
   def aQueuedDataTransfer(): QueuedDataTransfer = {
     QueuedDataTransfer(aVoaDataTransfer())

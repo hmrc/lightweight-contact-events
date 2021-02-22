@@ -44,14 +44,14 @@ object VOADataTransfer {
       ctc.subEnquiryCategoryMsg,
       ctc.message)
 
-  private def getEmailAddress(enquiryCategory: String, init: Initialize): String =
-    enquiryCategory match {
-      case "council_tax" => init.councilTaxEmail
-      case "business_rates" => init.businessRatesEmail
-      case "housing_allowance" => init.housingAllowanceEmail
-      case "other" => init.otherEmail
+  private def getEmailAddress(enquiryCategoryMsg: String, init: Initialize): String =
+    enquiryCategoryMsg match {
+      case "Council Tax" => init.councilTaxEmail
+      case "Business rates" => init.businessRatesEmail
+      case "Housing Allowance or fair rents" => init.housingAllowanceEmail
+      case "Other" => init.otherEmail
       case _ =>
-        Logger.error(s"Email address not found for enquiryCategory : $enquiryCategory")
-        throw new RuntimeException(s"Email address not found for enquiryCategory : $enquiryCategory")
+        Logger.error(s"Email address not found for enquiryCategory : $enquiryCategoryMsg")
+        throw new RuntimeException(s"Email address not found for enquiryCategory : $enquiryCategoryMsg")
     }
 }

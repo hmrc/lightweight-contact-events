@@ -63,7 +63,7 @@ class CreationControllerSpec extends SpecBase with MockitoSugar {
       "postcode": "postcode"
     },
     "isCouncilTaxEnquiry": true,
-    "enquiryCategoryMsg": "council_tax",
+    "enquiryCategoryMsg": "Council Tax",
     "subEnquiryCategoryMsg": "seq",
     "message": "message"
   }""""
@@ -83,7 +83,7 @@ class CreationControllerSpec extends SpecBase with MockitoSugar {
       "postcode": "postcode"
     },
     "isCouncilTaxEnquiry": false,
-    "enquiryCategoryMsg": "business_rates",
+    "enquiryCategoryMsg": "Business rates",
     "subEnquiryCategoryMsg": "seq",
     "message": "message"
   }""""
@@ -103,7 +103,7 @@ class CreationControllerSpec extends SpecBase with MockitoSugar {
       "postcode": "postcode"
     },
     "isCouncilTaxEnquiry": false,
-    "enquiryCategoryMsg": "housing_allowance",
+    "enquiryCategoryMsg": "Housing Allowance or fair rents",
     "subEnquiryCategoryMsg": "seq",
     "message": "message"
   }""""
@@ -123,7 +123,7 @@ class CreationControllerSpec extends SpecBase with MockitoSugar {
       "postcode": "postcode"
     },
     "isCouncilTaxEnquiry": false,
-    "enquiryCategoryMsg": "other",
+    "enquiryCategoryMsg": "Other",
     "subEnquiryCategoryMsg": "seq",
     "message": "message"
   }""""
@@ -170,7 +170,7 @@ class CreationControllerSpec extends SpecBase with MockitoSugar {
     result.isRight mustBe true
     result.right.get.contact mustBe ConfirmedContactDetails("full name", "email", "tel")
     result.right.get.propertyAddress mustBe PropertyAddress("line1", Some("line2"), "town", Some("county"), "postcode")
-    result.right.get.enquiryCategoryMsg mustBe "council_tax"
+    result.right.get.enquiryCategoryMsg mustBe "Council Tax"
     result.right.get.subEnquiryCategoryMsg mustBe "seq"
     result.right.get.message mustBe "message"
   }

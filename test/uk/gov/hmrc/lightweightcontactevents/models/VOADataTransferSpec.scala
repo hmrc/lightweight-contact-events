@@ -16,11 +16,15 @@
 
 package uk.gov.hmrc.lightweightcontactevents.models
 
+import org.mockito.Matchers.anyString
+import org.mockito.Mockito.when
+import org.scalatestplus.mockito.MockitoSugar
+import play.api.Configuration
 import uk.gov.hmrc.lightweightcontactevents.SpecBase
-import uk.gov.hmrc.lightweightcontactevents.utils.LightweightFixture
-import uk.gov.hmrc.lightweightcontactevents.utils.LightweightFixture._
+import uk.gov.hmrc.lightweightcontactevents.utils.{Initialize, LightweightFixture}
+import uk.gov.hmrc.lightweightcontactevents.utils.LightweightFixture.{message, _}
 
-class VOADataTransferSpec extends SpecBase {
+class VOADataTransferSpec extends SpecBase with MockitoSugar {
 
   /* VOADataTransfer Contact Tests */
 
@@ -94,4 +98,11 @@ class VOADataTransferSpec extends SpecBase {
     ctDataTransfer.message mustBe ctContact.message
   }
 
+  "should return an exception when VOADataTransfer object contains a wrong enquiry category" in {
+    val init = mock[Initialize]
+
+    intercept[RuntimeException] {
+      val wrongDataTransfer = VOADataTransfer(wrongContact, init)
+    }
+  }
 }
