@@ -16,11 +16,15 @@
 
 package uk.gov.hmrc.lightweightcontactevents.models
 
+import org.mockito.Matchers.anyString
+import org.mockito.Mockito.when
+import org.scalatestplus.mockito.MockitoSugar
+import play.api.Configuration
 import uk.gov.hmrc.lightweightcontactevents.SpecBase
-import uk.gov.hmrc.lightweightcontactevents.utils.LightweightFixture
-import uk.gov.hmrc.lightweightcontactevents.utils.LightweightFixture._
+import uk.gov.hmrc.lightweightcontactevents.utils.{Initialize, LightweightFixture}
+import uk.gov.hmrc.lightweightcontactevents.utils.LightweightFixture.{message, _}
 
-class VOADataTransferSpec extends SpecBase {
+class VOADataTransferSpec extends SpecBase with MockitoSugar {
 
   /* VOADataTransfer Contact Tests */
 
@@ -37,7 +41,7 @@ class VOADataTransferSpec extends SpecBase {
   }
 
   "creating a contact case class containing a isCouncilTaxEnquiry boolean set to false" in {
-    ndrContact.isCouncilTaxEnquiry mustBe false
+    brContact.isCouncilTaxEnquiry mustBe false
   }
 
   "creating a contact case class containing a enquiryCategoryMsg string set to enquiryCategoryMsg" in {
@@ -67,7 +71,7 @@ class VOADataTransferSpec extends SpecBase {
   }
 
   "creating an VOADataTransfer object from values containing a isCouncilTaxEnquiry equal false" in {
-    ndrDataTransfer.isCouncilTaxEnquiry mustBe false
+    brDataTransfer.isCouncilTaxEnquiry mustBe false
   }
 
   "creating an VOADataTransfer object from values containing a subject equal subject" in {
@@ -79,7 +83,7 @@ class VOADataTransferSpec extends SpecBase {
   }
 
   "creating an VOADataTransfer object from values containing a recipientEmailAddress equal ndrEmail" in {
-    ndrDataTransfer.recipientEmailAddress mustBe ndrEmail
+    brDataTransfer.recipientEmailAddress mustBe brEmail
   }
 
   "creating an VOADataTransfer object from values containing a enquiryCategoryMsg equal enquiryCategoryMsg" in {
@@ -87,11 +91,18 @@ class VOADataTransferSpec extends SpecBase {
   }
 
   "creating an VOADataTransfer object from values containing a subEnquiryCategoryMsg equal subEnquiryCategoryMsg" in {
-    ndrDataTransfer.subEnquiryCategoryMsg mustBe subEnquiryCategoryMsg
+    brDataTransfer.subEnquiryCategoryMsg mustBe subEnquiryCategoryMsg
   }
 
   "creating an VOADataTransfer object from values containing a message equal message" in {
     ctDataTransfer.message mustBe ctContact.message
   }
 
+  "should return an exception when VOADataTransfer object contains a wrong enquiry category" in {
+    val init = mock[Initialize]
+
+    intercept[RuntimeException] {
+      val wrongDataTransfer = VOADataTransfer(wrongContact, init)
+    }
+  }
 }

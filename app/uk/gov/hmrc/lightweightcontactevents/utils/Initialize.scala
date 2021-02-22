@@ -28,7 +28,9 @@ import uk.gov.hmrc.play.audit.http.connector.AuditConnector
 class Initialize @Inject()(conf: Configuration) {
   val subjectTxt = conf.underlying.getString("subject.text")
   val councilTaxEmail = conf.underlying.getString("email.council-tax")
-  val businessRatesEmail = conf.underlying.getString("email.non-domestic-rates")
+  val businessRatesEmail = conf.underlying.getString("email.business-rates")
+  val housingAllowanceEmail = conf.underlying.getString("email.housing-allowance")
+  val otherEmail = conf.underlying.getString("email.other")
 }
 
 class StartupModule extends AbstractModule {
