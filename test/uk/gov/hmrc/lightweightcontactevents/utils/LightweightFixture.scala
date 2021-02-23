@@ -25,26 +25,28 @@ object LightweightFixture {
   val ctEmail = "ct.email@voa.gsi.gov.uk"
   val brEmail = "br.email@voa.gsi.gov.uk"
   val enquiryCategoryMsg = "Council Tax"
+  val contactReason = "more_details"
   val subEnquiryCategoryMsg = "My property is in poor repair or uninhabitable"
   val confirmedContactDetails = ConfirmedContactDetails("full name", "email", "07777777")
   val propertyAddress = PropertyAddress("line1", Some("line2"), "town", Some("county"), "AA1 1AA")
-  val ctContact = Contact(confirmedContactDetails, propertyAddress, true, enquiryCategoryMsg, subEnquiryCategoryMsg, message)
-  val brContact = Contact(confirmedContactDetails, propertyAddress, false, enquiryCategoryMsg, subEnquiryCategoryMsg, message)
-  val ctDataTransfer = VOADataTransfer(confirmedContactDetails, propertyAddress, true, subject, ctEmail, enquiryCategoryMsg, subEnquiryCategoryMsg, message)
-  val brDataTransfer = VOADataTransfer(confirmedContactDetails, propertyAddress, false, subject, brEmail, enquiryCategoryMsg, subEnquiryCategoryMsg, message)
-  val wrongContact = Contact(confirmedContactDetails, propertyAddress, false, "", subEnquiryCategoryMsg, message)
+  val postCode = propertyAddress.postcode.replaceAll("\\s+","").toUpperCase
+  val ctContact = Contact(confirmedContactDetails, propertyAddress, contactReason, enquiryCategoryMsg, subEnquiryCategoryMsg, message)
+  val brContact = Contact(confirmedContactDetails, propertyAddress, contactReason, enquiryCategoryMsg, subEnquiryCategoryMsg, message)
+  val ctDataTransfer = VOADataTransfer(confirmedContactDetails, propertyAddress, subject, ctEmail, enquiryCategoryMsg, subEnquiryCategoryMsg, message)
+  val brDataTransfer = VOADataTransfer(confirmedContactDetails, propertyAddress, subject, brEmail, enquiryCategoryMsg, subEnquiryCategoryMsg, message)
+  val wrongContact = Contact(confirmedContactDetails, propertyAddress, contactReason, "", subEnquiryCategoryMsg, message)
 
   def aQueuedDataTransfer(): QueuedDataTransfer = {
     QueuedDataTransfer(aVoaDataTransfer())
   }
 
   def aVoaDataTransfer(): VOADataTransfer = {
-    VOADataTransfer(aConfirmedContactDetails(), aPropertyAddress(), true,
+    VOADataTransfer(aConfirmedContactDetails(), aPropertyAddress(),
       "Subject", "email@email.com", "council-tax", "subCategory", "Free text message")
   }
 
   def brVoaDataTransfer(): VOADataTransfer = {
-    VOADataTransfer(aConfirmedContactDetails(), aPropertyAddress(), true,
+    VOADataTransfer(aConfirmedContactDetails(), aPropertyAddress(),
       "Subject", "email@email.com", "business-rates", "subCategory", "Free text message")
   }
 

@@ -43,9 +43,11 @@ class VoaDataTransferConnectorSpec extends SpecBase {
   val ndrEmail = "ndr.email@voa.gsi.gov.uk"
   val enquiryCategoryMsg = "Council Tax"
   val subEnquiryCategoryMsg = "My property is in poor repair or uninhabitable"
+  val contactReason = "more_details"
   val confirmedContactDetails = ConfirmedContactDetails("full name", "email", "07777777")
   val propertyAddress = PropertyAddress("line1", Some("line2"), "town", Some("county"), "AA1 1AA")
-  val ctDataTransfer = VOADataTransfer(confirmedContactDetails, propertyAddress, true, subject, ctEmail, enquiryCategoryMsg, subEnquiryCategoryMsg, message)
+  val ctDataTransfer = VOADataTransfer(confirmedContactDetails, propertyAddress, subject, ctEmail,
+    enquiryCategoryMsg, subEnquiryCategoryMsg, message)
   val minimalJson = Json.toJson(ctDataTransfer)
 
   "Voa Data Transfer Connector" when {
@@ -113,11 +115,11 @@ class VoaDataTransferConnectorSpec extends SpecBase {
         val httpMock = mock[HttpClient]
         when(httpMock.POST(anyString, any[JsValue], any[Seq[(String, String)]])(any[Writes[Any]], any[HttpReads[Any]],
           any[HeaderCarrier], any())) thenReturn Future.successful(new RuntimeException)
-          val connector = new VoaDataTransferConnector(httpMock, configuration, environment,auditService, servicesConfig)
-          val result = await(connector.sendJson(minimalJson)(HeaderCarrier()))
-          assert(result.isFailure)
-        }
+        val connector = new VoaDataTransferConnector(httpMock, configuration, environment,auditService, servicesConfig)
+        val result = await(connector.sendJson(minimalJson)(HeaderCarrier()))
+        assert(result.isFailure)
       }
     }
+  }
 }
 

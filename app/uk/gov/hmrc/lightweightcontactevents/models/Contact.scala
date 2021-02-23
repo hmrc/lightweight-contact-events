@@ -20,7 +20,7 @@ import play.api.libs.json.Json
 
 case class Contact(contact: ConfirmedContactDetails,
                    propertyAddress: PropertyAddress,
-                   isCouncilTaxEnquiry: Boolean,
+                   contactReason: String,
                    enquiryCategoryMsg: String,
                    subEnquiryCategoryMsg: String,
                    message: String)
