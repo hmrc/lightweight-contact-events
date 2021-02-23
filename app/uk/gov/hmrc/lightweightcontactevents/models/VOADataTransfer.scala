@@ -22,7 +22,6 @@ import uk.gov.hmrc.lightweightcontactevents.utils.Initialize
 
 case class VOADataTransfer(contact: ConfirmedContactDetails,
                            propertyAddress: PropertyAddress,
-                           isCouncilTaxEnquiry: Boolean,
                            subject: String,
                            recipientEmailAddress: String,
                            enquiryCategoryMsg: String,
@@ -34,15 +33,16 @@ case class VOADataTransfer(contact: ConfirmedContactDetails,
 object VOADataTransfer {
   implicit val format = Json.format[VOADataTransfer]
 
-  def apply(ctc: Contact, init: Initialize): VOADataTransfer =
+  def apply(ctc: Contact, init: Initialize): VOADataTransfer = {
     VOADataTransfer(ctc.contact,
       ctc.propertyAddress,
-      ctc.isCouncilTaxEnquiry,
-      init.subjectTxt,
+      getSubjectText(ctc.contactReason,ctc.enquiryCategoryMsg,
+        ctc.propertyAddress.postcode,init),
       getEmailAddress(ctc.enquiryCategoryMsg, init),
       ctc.enquiryCategoryMsg,
       ctc.subEnquiryCategoryMsg,
       ctc.message)
+  }
 
   private def getEmailAddress(enquiryCategoryMsg: String, init: Initialize): String =
     enquiryCategoryMsg match {
@@ -54,4 +54,15 @@ object VOADataTransfer {
         Logger.error(s"Email address not found for enquiryCategory : $enquiryCategoryMsg")
         throw new RuntimeException(s"Email address not found for enquiryCategory : $enquiryCategoryMsg")
     }
+
+  private def getSubjectText(contactReason: String, enquiryCategoryMsg: String, postCode: String, init: Initialize):String = {
+    val ucPostCode = postCode.replaceAll("\\s+","").toUpperCase
+    (contactReason, enquiryCategoryMsg) match {
+      case ("more_details", "Other") => s"${init.subjectOtherAddInfo} $ucPostCode"
+      case ("update_existing", "Other") => s"${init.subjectOtherChase} $ucPostCode"
+      case ("more_details", _ ) => s"${init.subjectAddInfo} $ucPostCode"
+      case ("update_existing", _) => s"${init.subjectChase} $ucPostCode"
+      case _ => s"${init.subjectText}"
+    }
+  }
 }

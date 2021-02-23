@@ -26,7 +26,11 @@ import uk.gov.hmrc.play.audit.http.connector.AuditConnector
 
 @Singleton
 class Initialize @Inject()(conf: Configuration) {
-  val subjectTxt = conf.underlying.getString("subject.text")
+  val subjectText = conf.underlying.getString("subject.text")
+  val subjectAddInfo = conf.underlying.getString("subject.additional-info.text")
+  val subjectChase = conf.underlying.getString("subject.chase.text")
+  val subjectOtherAddInfo = conf.underlying.getString("subject.other-additional-info.text")
+  val subjectOtherChase = conf.underlying.getString("subject.other-chase.text")
   val councilTaxEmail = conf.underlying.getString("email.council-tax")
   val businessRatesEmail = conf.underlying.getString("email.business-rates")
   val housingAllowanceEmail = conf.underlying.getString("email.housing-allowance")

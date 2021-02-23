@@ -62,7 +62,7 @@ class CreationControllerSpec extends SpecBase with MockitoSugar {
       "county": "county",
       "postcode": "postcode"
     },
-    "isCouncilTaxEnquiry": true,
+    "contactReason": "more_details",
     "enquiryCategoryMsg": "Council Tax",
     "subEnquiryCategoryMsg": "seq",
     "message": "message"
@@ -82,7 +82,7 @@ class CreationControllerSpec extends SpecBase with MockitoSugar {
       "county": "county",
       "postcode": "postcode"
     },
-    "isCouncilTaxEnquiry": false,
+    "contactReason": "more_details",
     "enquiryCategoryMsg": "Business rates",
     "subEnquiryCategoryMsg": "seq",
     "message": "message"
@@ -102,7 +102,7 @@ class CreationControllerSpec extends SpecBase with MockitoSugar {
       "county": "county",
       "postcode": "postcode"
     },
-    "isCouncilTaxEnquiry": false,
+    "contactReason": "more_details",
     "enquiryCategoryMsg": "Housing Allowance or fair rents",
     "subEnquiryCategoryMsg": "seq",
     "message": "message"
@@ -122,7 +122,7 @@ class CreationControllerSpec extends SpecBase with MockitoSugar {
       "county": "county",
       "postcode": "postcode"
     },
-    "isCouncilTaxEnquiry": false,
+    "contactReason": "more_details",
     "enquiryCategoryMsg": "Other",
     "subEnquiryCategoryMsg": "seq",
     "message": "message"
@@ -142,7 +142,7 @@ class CreationControllerSpec extends SpecBase with MockitoSugar {
       "county": "county",
       "postcode": "postcode"
     },
-    "isCouncilTaxEnquiry": false,
+    "contactReason": "more_details",
     "enquiryCategoryMsg": "other",
     "subEnquiryCategoryMsg": "seq",
     "message": "message"

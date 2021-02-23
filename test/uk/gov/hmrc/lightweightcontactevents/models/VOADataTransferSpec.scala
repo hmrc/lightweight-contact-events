@@ -16,15 +16,15 @@
 
 package uk.gov.hmrc.lightweightcontactevents.models
 
-import org.mockito.Matchers.anyString
 import org.mockito.Mockito.when
 import org.scalatestplus.mockito.MockitoSugar
-import play.api.Configuration
 import uk.gov.hmrc.lightweightcontactevents.SpecBase
+import uk.gov.hmrc.lightweightcontactevents.utils.LightweightFixture._
 import uk.gov.hmrc.lightweightcontactevents.utils.{Initialize, LightweightFixture}
-import uk.gov.hmrc.lightweightcontactevents.utils.LightweightFixture.{message, _}
 
 class VOADataTransferSpec extends SpecBase with MockitoSugar {
+
+  val init = mock[Initialize]
 
   /* VOADataTransfer Contact Tests */
 
@@ -36,12 +36,8 @@ class VOADataTransferSpec extends SpecBase with MockitoSugar {
     ctContact.propertyAddress mustBe propertyAddress
   }
 
-  "creating a contact case class containing a isCouncilTaxEnquiry boolean set to true" in {
-    ctContact.isCouncilTaxEnquiry mustBe true
-  }
-
-  "creating a contact case class containing a isCouncilTaxEnquiry boolean set to false" in {
-    brContact.isCouncilTaxEnquiry mustBe false
+  "creating a contact case class containing a contactReason set to more_details" in {
+    ctContact.contactReason mustBe contactReason
   }
 
   "creating a contact case class containing a enquiryCategoryMsg string set to enquiryCategoryMsg" in {
@@ -64,14 +60,6 @@ class VOADataTransferSpec extends SpecBase with MockitoSugar {
 
   "creating an VOADataTransfer object from values containing a property address equal to the property address" in {
     ctDataTransfer.propertyAddress mustBe propertyAddress
-  }
-
-  "creating an VOADataTransfer object from values containing a isCouncilTaxEnquiry equal true" in {
-    ctDataTransfer.isCouncilTaxEnquiry mustBe true
-  }
-
-  "creating an VOADataTransfer object from values containing a isCouncilTaxEnquiry equal false" in {
-    brDataTransfer.isCouncilTaxEnquiry mustBe false
   }
 
   "creating an VOADataTransfer object from values containing a subject equal subject" in {
@@ -98,11 +86,71 @@ class VOADataTransferSpec extends SpecBase with MockitoSugar {
     ctDataTransfer.message mustBe ctContact.message
   }
 
-  "should return an exception when VOADataTransfer object contains a wrong enquiry category" in {
+  "return an exception when VOADataTransfer object contains a wrong enquiry category" in {
     val init = mock[Initialize]
 
     intercept[RuntimeException] {
-      val wrongDataTransfer = VOADataTransfer(wrongContact, init)
+      VOADataTransfer(wrongContact, init)
     }
+  }
+
+  "return the correct subject and email address when the contact reason is equal to 'new_enquiry'" in {
+    val contact = brContact.copy(contactReason = "new_enquiry", enquiryCategoryMsg =  "Council Tax")
+    when(init.subjectText).thenReturn(subject)
+    when(init.councilTaxEmail).thenReturn(brEmail)
+
+    val voaDataTransfer = VOADataTransfer(contact, init)
+    voaDataTransfer.subject mustBe subject
+    voaDataTransfer.recipientEmailAddress mustBe brEmail
+  }
+
+  "return the correct subject and email address when the contact reason is equal to 'new_enquiry' and the enquiry category is equal to 'Other'" in {
+    val contact = Contact(confirmedContactDetails, propertyAddress, "new_enquiry", "Other", subEnquiryCategoryMsg, "message")
+    when(init.subjectText).thenReturn(subject)
+    when(init.otherEmail).thenReturn(brEmail)
+
+    val voaDataTransfer = VOADataTransfer(contact, init)
+    voaDataTransfer.subject mustBe subject
+    voaDataTransfer.recipientEmailAddress mustBe brEmail
+  }
+
+  "return the correct subject and email address when the contact reason is equal to 'more_details'" in {
+    val contact = brContact.copy(contactReason = "more_details", enquiryCategoryMsg =  "Council Tax")
+    when(init.subjectAddInfo).thenReturn(subject)
+    when(init.councilTaxEmail).thenReturn(brEmail)
+
+    val voaDataTransfer = VOADataTransfer(contact, init)
+    voaDataTransfer.subject mustBe s"$subject $postCode"
+    voaDataTransfer.recipientEmailAddress mustBe brEmail
+  }
+
+  "return the correct subject and email address when the contact reason is equal to 'more_details' and the enquiry category is equal to 'Other'" in {
+    val contact = brContact.copy(contactReason = "more_details", enquiryCategoryMsg =  "Other")
+    when(init.subjectOtherAddInfo).thenReturn(subject)
+    when(init.otherEmail).thenReturn(brEmail)
+
+    val voaDataTransfer = VOADataTransfer(contact, init)
+    voaDataTransfer.subject mustBe s"$subject $postCode"
+    voaDataTransfer.recipientEmailAddress mustBe brEmail
+  }
+
+  "return the correct subject and email address when the contact reason is equal to 'update_existing'" in {
+    val contact = brContact.copy(contactReason = "update_existing", enquiryCategoryMsg =  "Council Tax")
+    when(init.subjectChase).thenReturn(subject)
+    when(init.councilTaxEmail).thenReturn(brEmail)
+
+    val voaDataTransfer = VOADataTransfer(contact, init)
+    voaDataTransfer.subject mustBe s"$subject $postCode"
+    voaDataTransfer.recipientEmailAddress mustBe brEmail
+  }
+
+  "return the correct subject and email address when the contact reason is equal to 'update_existing' and the enquiry category is equal to 'Other'" in {
+    val contact = brContact.copy(contactReason = "update_existing", enquiryCategoryMsg =  "Other")
+    when(init.subjectOtherChase).thenReturn(subject)
+    when(init.otherEmail).thenReturn(brEmail)
+
+    val voaDataTransfer = VOADataTransfer(contact, init)
+    voaDataTransfer.subject mustBe s"$subject $postCode"
+    voaDataTransfer.recipientEmailAddress mustBe brEmail
   }
 }
