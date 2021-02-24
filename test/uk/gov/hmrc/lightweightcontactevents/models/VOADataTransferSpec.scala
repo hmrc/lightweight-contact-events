@@ -55,7 +55,7 @@ class VOADataTransferSpec extends SpecBase with MockitoSugar {
   /* VOADataTransfer Tests */
 
   "creating an VOADataTransfer object from values containing a contact details equal to the contact details" in {
-    ctDataTransfer.contact mustBe confirmedContactDetails
+    ctDataTransfer.contact mustBe ConfirmedContactDetailsLegacy("full name", lastName = "", "email", "07777777")
   }
 
   "creating an VOADataTransfer object from values containing a property address equal to the property address" in {

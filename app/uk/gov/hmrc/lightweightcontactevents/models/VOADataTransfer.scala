@@ -18,9 +18,10 @@ package uk.gov.hmrc.lightweightcontactevents.models
 
 import play.api.Logger
 import play.api.libs.json.Json
+import uk.gov.hmrc.lightweightcontactevents.models.ConfirmedContactDetails.toLegacyContact
 import uk.gov.hmrc.lightweightcontactevents.utils.Initialize
 
-case class VOADataTransfer(contact: ConfirmedContactDetails,
+case class VOADataTransfer(contact: ConfirmedContactDetailsLegacy,
                            propertyAddress: PropertyAddress,
                            subject: String,
                            recipientEmailAddress: String,
@@ -34,10 +35,10 @@ object VOADataTransfer {
   implicit val format = Json.format[VOADataTransfer]
 
   def apply(ctc: Contact, init: Initialize): VOADataTransfer = {
-    VOADataTransfer(ctc.contact,
+    VOADataTransfer(toLegacyContact(ctc.contact),
       ctc.propertyAddress,
-      getSubjectText(ctc.contactReason,ctc.enquiryCategoryMsg,
-        ctc.propertyAddress.postcode,init),
+      getSubjectText(ctc.contactReason, ctc.enquiryCategoryMsg,
+        ctc.propertyAddress.postcode, init),
       getEmailAddress(ctc.enquiryCategoryMsg, init),
       ctc.enquiryCategoryMsg,
       ctc.subEnquiryCategoryMsg,
