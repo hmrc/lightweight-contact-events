@@ -23,6 +23,19 @@ case class ConfirmedContactDetails(fullName: String,
                                    contactNumber: String
                                   )
 
+// TODO - remove ConfirmedContactDetailsLegacy once modernised platform is ready to update to fullName
+final case class ConfirmedContactDetailsLegacy(firstName: String,
+                                               lastName: String,
+                                               email: String,
+                                               contactNumber: String)
+
 object ConfirmedContactDetails {
   implicit val format = Json.format[ConfirmedContactDetails]
+
+  def toLegacyContact(ct: ConfirmedContactDetails) =
+    ConfirmedContactDetailsLegacy(ct.fullName, lastName = "", ct.email, ct.contactNumber)
+}
+
+object ConfirmedContactDetailsLegacy {
+  implicit val format = Json.format[ConfirmedContactDetailsLegacy]
 }

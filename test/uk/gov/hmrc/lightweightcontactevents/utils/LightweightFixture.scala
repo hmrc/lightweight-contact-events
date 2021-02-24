@@ -16,6 +16,7 @@
 
 package uk.gov.hmrc.lightweightcontactevents.utils
 
+import uk.gov.hmrc.lightweightcontactevents.models.ConfirmedContactDetails.toLegacyContact
 import uk.gov.hmrc.lightweightcontactevents.models.{ConfirmedContactDetails, Contact, PropertyAddress, QueuedDataTransfer, VOADataTransfer}
 
 object LightweightFixture {
@@ -30,23 +31,23 @@ object LightweightFixture {
   val confirmedContactDetails = ConfirmedContactDetails("full name", "email", "07777777")
   val propertyAddress = PropertyAddress("line1", Some("line2"), "town", Some("county"), "AA1 1AA")
   val postCode = propertyAddress.postcode.replaceAll("\\s+","").toUpperCase
-  val ctContact = Contact(confirmedContactDetails, propertyAddress, true, contactReason, enquiryCategoryMsg, subEnquiryCategoryMsg, message)
-  val brContact = Contact(confirmedContactDetails, propertyAddress, false, contactReason, enquiryCategoryMsg, subEnquiryCategoryMsg, message)
-  val ctDataTransfer = VOADataTransfer(confirmedContactDetails, propertyAddress, true, subject, ctEmail, enquiryCategoryMsg, subEnquiryCategoryMsg, message)
-  val brDataTransfer = VOADataTransfer(confirmedContactDetails, propertyAddress, true, subject, brEmail, enquiryCategoryMsg, subEnquiryCategoryMsg, message)
-  val wrongContact = Contact(confirmedContactDetails, propertyAddress, true, contactReason, "", subEnquiryCategoryMsg, message)
+  val ctContact = Contact(confirmedContactDetails, propertyAddress, contactReason, enquiryCategoryMsg, subEnquiryCategoryMsg, message)
+  val brContact = Contact(confirmedContactDetails, propertyAddress, contactReason, enquiryCategoryMsg, subEnquiryCategoryMsg, message)
+  val ctDataTransfer = VOADataTransfer(toLegacyContact(confirmedContactDetails), propertyAddress, subject, ctEmail, enquiryCategoryMsg, subEnquiryCategoryMsg, message)
+  val brDataTransfer = VOADataTransfer(toLegacyContact(confirmedContactDetails), propertyAddress, subject, brEmail, enquiryCategoryMsg, subEnquiryCategoryMsg, message)
+  val wrongContact = Contact(confirmedContactDetails, propertyAddress, contactReason, "", subEnquiryCategoryMsg, message)
 
   def aQueuedDataTransfer(): QueuedDataTransfer = {
     QueuedDataTransfer(aVoaDataTransfer())
   }
 
   def aVoaDataTransfer(): VOADataTransfer = {
-    VOADataTransfer(aConfirmedContactDetails(), aPropertyAddress(), true,
+    VOADataTransfer(toLegacyContact(aConfirmedContactDetails()), aPropertyAddress(),
       "Subject", "email@email.com", "council-tax", "subCategory", "Free text message")
   }
 
   def brVoaDataTransfer(): VOADataTransfer = {
-    VOADataTransfer(aConfirmedContactDetails(), aPropertyAddress(), false,
+    VOADataTransfer(toLegacyContact(aConfirmedContactDetails()), aPropertyAddress(),
       "Subject", "email@email.com", "business-rates", "subCategory", "Free text message")
   }
 

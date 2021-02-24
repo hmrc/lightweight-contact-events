@@ -24,9 +24,11 @@ import play.api.test.Helpers._
 import play.api.{Configuration, Environment}
 import uk.gov.hmrc.http.{HeaderCarrier, HttpReads}
 import uk.gov.hmrc.lightweightcontactevents.SpecBase
+import uk.gov.hmrc.lightweightcontactevents.models.ConfirmedContactDetails.toLegacyContact
 import uk.gov.hmrc.lightweightcontactevents.models.{ConfirmedContactDetails, PropertyAddress, VOADataTransfer}
 import uk.gov.hmrc.play.bootstrap.config.ServicesConfig
 import uk.gov.hmrc.play.bootstrap.http.HttpClient
+
 import scala.concurrent.Future
 import scala.util.{Failure, Success}
 
@@ -46,7 +48,7 @@ class VoaDataTransferConnectorSpec extends SpecBase {
   val contactReason = "more_details"
   val confirmedContactDetails = ConfirmedContactDetails("full name", "email", "07777777")
   val propertyAddress = PropertyAddress("line1", Some("line2"), "town", Some("county"), "AA1 1AA")
-  val ctDataTransfer = VOADataTransfer(confirmedContactDetails, propertyAddress, true, subject, ctEmail,
+  val ctDataTransfer = VOADataTransfer(toLegacyContact(confirmedContactDetails), propertyAddress, subject, ctEmail,
     enquiryCategoryMsg, subEnquiryCategoryMsg, message)
   val minimalJson = Json.toJson(ctDataTransfer)
 
