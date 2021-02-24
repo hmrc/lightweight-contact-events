@@ -46,7 +46,7 @@ class VoaDataTransferConnectorSpec extends SpecBase {
   val contactReason = "more_details"
   val confirmedContactDetails = ConfirmedContactDetails("full name", "email", "07777777")
   val propertyAddress = PropertyAddress("line1", Some("line2"), "town", Some("county"), "AA1 1AA")
-  val ctDataTransfer = VOADataTransfer(confirmedContactDetails, propertyAddress, subject, ctEmail,
+  val ctDataTransfer = VOADataTransfer(confirmedContactDetails, propertyAddress, true, subject, ctEmail,
     enquiryCategoryMsg, subEnquiryCategoryMsg, message)
   val minimalJson = Json.toJson(ctDataTransfer)
 

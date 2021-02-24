@@ -36,6 +36,14 @@ class VOADataTransferSpec extends SpecBase with MockitoSugar {
     ctContact.propertyAddress mustBe propertyAddress
   }
 
+  "creating a contact case class containing a isCouncilTaxEnquiry boolean set to true" in {
+    ctContact.isCouncilTaxEnquiry mustBe true
+  }
+
+  "creating a contact case class containing a isCouncilTaxEnquiry boolean set to false" in {
+    brContact.isCouncilTaxEnquiry mustBe false
+  }
+
   "creating a contact case class containing a contactReason set to more_details" in {
     ctContact.contactReason mustBe contactReason
   }
@@ -105,7 +113,7 @@ class VOADataTransferSpec extends SpecBase with MockitoSugar {
   }
 
   "return the correct subject and email address when the contact reason is equal to 'new_enquiry' and the enquiry category is equal to 'Other'" in {
-    val contact = Contact(confirmedContactDetails, propertyAddress, "new_enquiry", "Other", subEnquiryCategoryMsg, "message")
+    val contact = brContact.copy(contactReason = "new_enquiry", enquiryCategoryMsg =  "Other")
     when(init.subjectText).thenReturn(subject)
     when(init.otherEmail).thenReturn(brEmail)
 

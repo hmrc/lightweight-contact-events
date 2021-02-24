@@ -22,6 +22,7 @@ import uk.gov.hmrc.lightweightcontactevents.utils.Initialize
 
 case class VOADataTransfer(contact: ConfirmedContactDetails,
                            propertyAddress: PropertyAddress,
+                           isCouncilTaxEnquiry: Boolean,
                            subject: String,
                            recipientEmailAddress: String,
                            enquiryCategoryMsg: String,
@@ -36,6 +37,7 @@ object VOADataTransfer {
   def apply(ctc: Contact, init: Initialize): VOADataTransfer = {
     VOADataTransfer(ctc.contact,
       ctc.propertyAddress,
+      ctc.isCouncilTaxEnquiry,
       getSubjectText(ctc.contactReason,ctc.enquiryCategoryMsg,
         ctc.propertyAddress.postcode,init),
       getEmailAddress(ctc.enquiryCategoryMsg, init),
