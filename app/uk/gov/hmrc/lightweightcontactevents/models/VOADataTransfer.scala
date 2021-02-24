@@ -18,6 +18,7 @@ package uk.gov.hmrc.lightweightcontactevents.models
 
 import play.api.Logger
 import play.api.libs.json.Json
+import uk.gov.hmrc.lightweightcontactevents.models.ConfirmedContactDetails.toLegacyContact
 import uk.gov.hmrc.lightweightcontactevents.utils.Initialize
 
 case class VOADataTransfer(contact: ConfirmedContactDetailsLegacy,
