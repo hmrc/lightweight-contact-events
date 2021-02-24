@@ -16,6 +16,7 @@
 
 package uk.gov.hmrc.lightweightcontactevents.utils
 
+import uk.gov.hmrc.lightweightcontactevents.models.ConfirmedContactDetails.toLegacyContact
 import uk.gov.hmrc.lightweightcontactevents.models.{ConfirmedContactDetails, Contact, PropertyAddress, QueuedDataTransfer, VOADataTransfer}
 
 object LightweightFixture {
@@ -32,8 +33,8 @@ object LightweightFixture {
   val postCode = propertyAddress.postcode.replaceAll("\\s+","").toUpperCase
   val ctContact = Contact(confirmedContactDetails, propertyAddress, contactReason, enquiryCategoryMsg, subEnquiryCategoryMsg, message)
   val brContact = Contact(confirmedContactDetails, propertyAddress, contactReason, enquiryCategoryMsg, subEnquiryCategoryMsg, message)
-  val ctDataTransfer = VOADataTransfer(confirmedContactDetails, propertyAddress, subject, ctEmail, enquiryCategoryMsg, subEnquiryCategoryMsg, message)
-  val brDataTransfer = VOADataTransfer(confirmedContactDetails, propertyAddress, subject, brEmail, enquiryCategoryMsg, subEnquiryCategoryMsg, message)
+  val ctDataTransfer = VOADataTransfer(toLegacyContact(confirmedContactDetails), propertyAddress, subject, ctEmail, enquiryCategoryMsg, subEnquiryCategoryMsg, message)
+  val brDataTransfer = VOADataTransfer(toLegacyContact(confirmedContactDetails), propertyAddress, subject, brEmail, enquiryCategoryMsg, subEnquiryCategoryMsg, message)
   val wrongContact = Contact(confirmedContactDetails, propertyAddress, contactReason, "", subEnquiryCategoryMsg, message)
 
   def aQueuedDataTransfer(): QueuedDataTransfer = {
@@ -41,12 +42,12 @@ object LightweightFixture {
   }
 
   def aVoaDataTransfer(): VOADataTransfer = {
-    VOADataTransfer(aConfirmedContactDetails(), aPropertyAddress(),
+    VOADataTransfer(toLegacyContact(aConfirmedContactDetails()), aPropertyAddress(),
       "Subject", "email@email.com", "council-tax", "subCategory", "Free text message")
   }
 
   def brVoaDataTransfer(): VOADataTransfer = {
-    VOADataTransfer(aConfirmedContactDetails(), aPropertyAddress(),
+    VOADataTransfer(toLegacyContact(aConfirmedContactDetails()), aPropertyAddress(),
       "Subject", "email@email.com", "business-rates", "subCategory", "Free text message")
   }
 
