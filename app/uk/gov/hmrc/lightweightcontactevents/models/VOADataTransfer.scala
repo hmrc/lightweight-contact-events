@@ -40,6 +40,7 @@ object VOADataTransfer {
       ctc.propertyAddress,
       ctc.isCouncilTaxEnquiry,
       getSubjectText(ctc.contactReason,ctc.enquiryCategoryMsg,
+        ctc.subEnquiryCategoryMsg,
         ctc.propertyAddress.postcode,init),
       getEmailAddress(ctc.enquiryCategoryMsg, init),
       ctc.enquiryCategoryMsg,
@@ -58,13 +59,14 @@ object VOADataTransfer {
         throw new RuntimeException(s"Email address not found for enquiryCategory : $enquiryCategoryMsg")
     }
 
-  private def getSubjectText(contactReason: String, enquiryCategoryMsg: String, postCode: String, init: Initialize):String = {
+  private def getSubjectText(contactReason: String, enquiryCategoryMsg: String, subEnquiryCategoryMsg: String, postCode: String, init: Initialize):String = {
     val ucPostCode = postCode.replaceAll("\\s+","").toUpperCase
     (contactReason, enquiryCategoryMsg) match {
       case ("more_details", "Other") => s"${init.subjectOtherAddInfo} $ucPostCode"
       case ("update_existing", "Other") => s"${init.subjectOtherChase} $ucPostCode"
       case ("more_details", _ ) => s"${init.subjectAddInfo} $ucPostCode"
       case ("update_existing", _) => s"${init.subjectChase} $ucPostCode"
+      case ("new_enquiry", "Council Tax") => s"CF $subEnquiryCategoryMsg $ucPostCode"
       case _ => s"${init.subjectText}"
     }
   }
