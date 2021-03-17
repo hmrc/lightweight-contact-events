@@ -104,6 +104,7 @@ class VOADataTransferSpec extends SpecBase with MockitoSugar {
 
   "return the correct subject and email address when the contact reason is equal to 'new_enquiry'" in {
     val contact = brContact.copy(contactReason = "new_enquiry", enquiryCategoryMsg =  "Council Tax")
+    val subject = "CF My property is in poor repair or uninhabitable AA11AA"
     when(init.subjectText).thenReturn(subject)
     when(init.councilTaxEmail).thenReturn(brEmail)
 
