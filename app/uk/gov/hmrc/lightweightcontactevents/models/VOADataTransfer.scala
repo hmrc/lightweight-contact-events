@@ -67,6 +67,7 @@ object VOADataTransfer {
       case ("more_details", _ ) => s"${init.subjectAddInfo} $ucPostCode"
       case ("update_existing", _) => s"${init.subjectChase} $ucPostCode"
       case ("new_enquiry", "Council Tax") => s"CF $subEnquiryCategoryMsg $ucPostCode"
+      case ("new_enquiry", "Business Rates") => s"CF $subEnquiryCategoryMsg $ucPostCode"
       case _ => s"${init.subjectText}"
     }
   }
