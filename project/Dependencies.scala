@@ -10,9 +10,9 @@ object Dependencies {
   private val scalaTestPlusPlayVersion = "3.1.3"
   private val pegdownVersion = "1.6.0"
   private val mockitoAllVersion = "1.10.19"
-  private val bootstrapVersion = "1.16.0"
-  private val simpleReactivemongoVersion = "7.30.0-play-26"
-  private val hmrcMongoLock = "6.21.0-play-26"
+  private val bootstrapVersion = "4.0.0"
+  private val simpleReactivemongoVersion = "8.0.0-play-26"
+  private val hmrcMongoLock = "7.0.0-play-26"
   private val akkaVersion = "2.5.23"
 
   lazy val appDependencies: Seq[ModuleID] = compile ++ Test() ++ IntegrationTest() ++ tmpMacWorkaround()
@@ -31,7 +31,7 @@ object Dependencies {
   lazy val appDependencyOverrides: Seq[ModuleID] = Seq(
     "com.typesafe.akka" %% "akka-stream"    % akkaVersion     force(),
     "com.typesafe.akka" %% "akka-slf4j"     % akkaVersion     force(),
-    "com.typesafe.akka" %% "akka-actor"     % akkaVersion     force(),
+    "com.typesafe.akka" %% "akka-actor"     % akkaVersion     force()
   )
 
   trait TestDependencies {
