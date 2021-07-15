@@ -35,10 +35,11 @@ class AuditingService @Inject()(auditConnector:AuditServiceConnector){
   }
 
   private def eventFor(auditType: String, json: JsValue)(implicit hc: HeaderCarrier) = {
+
     ExtendedDataEvent(
       auditSource = "send-contact-email-api",
       auditType = auditType,
-      tags = (hc.headers :+ "transactionName" -> "submit-contact-to-VOA"
+      tags = (Seq.empty[(String, String)] :+ "transactionName" -> "submit-contact-to-VOA"
         :+ "clientIP" -> hc.trueClientIp.getOrElse("")
         :+ "clientPort" -> hc.trueClientPort.getOrElse("")).toMap-("X-Request-Chain",
         "x-forwarded-for",

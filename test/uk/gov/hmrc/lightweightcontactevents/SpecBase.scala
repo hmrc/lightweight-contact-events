@@ -48,7 +48,7 @@ trait SpecBase extends PlaySpec with GuiceOneAppPerSuite with MockitoSugar {
     val httpMock = mock[HttpClient]
     when(httpMock.POST(anyString, any[JsValue], any[Seq[(String, String)]])(any[Writes[Any]], any[HttpReads[Any]],
       any[HeaderCarrier], any())) thenReturn Future.successful(HttpResponse(returnedStatus, None))
-    when(httpMock.GET(anyString)(any[HttpReads[Any]], any[HeaderCarrier], any())) thenReturn Future.successful(HttpResponse(returnedStatus, None))
+    when(httpMock.GET(anyString, any[Seq[(String,String)]], any[Seq[(String,String)]])(any[HttpReads[Any]], any[HeaderCarrier], any())) thenReturn Future.successful(HttpResponse(returnedStatus, None))
     httpMock
   }
 
