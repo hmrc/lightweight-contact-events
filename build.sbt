@@ -1,23 +1,23 @@
 import sbt.Keys._
 import sbt._
-import Dependencies.{appDependencies, appDependencyOverrides}
+import Dependencies.appDependencies
+import play.sbt.PlayImport.PlayKeys
 import scoverage.ScoverageKeys
-import uk.gov.hmrc.DefaultBuildSettings.{defaultSettings, scalaSettings, integrationTestSettings}
+import uk.gov.hmrc.DefaultBuildSettings.{defaultSettings, integrationTestSettings, scalaSettings}
 import uk.gov.hmrc.sbtdistributables.SbtDistributablesPlugin.publishingSettings
-
 import play.sbt.routes.RoutesKeys
 RoutesKeys.routesImport := Seq.empty
 
 val appName = "lightweight-contact-events"
 
 lazy val root = Project(appName, file("."))
-  .enablePlugins(Seq(play.sbt.PlayScala, SbtAutoBuildPlugin, SbtGitVersioning, SbtDistributablesPlugin, SbtArtifactory): _*)
+  .enablePlugins(Seq(play.sbt.PlayScala, SbtAutoBuildPlugin, SbtGitVersioning, SbtDistributablesPlugin): _*)
   .disablePlugins(JUnitXmlReportPlugin)
   .settings(
     ScoverageKeys.coverageExcludedFiles := "<empty>;Reverse.*;.*filters.*;.*handlers.*;.*components.*;" +
       ".*BuildInfo.*;.*javascript.*;.*FrontendAuditConnector.*;.*Routes.*;.*GuiceInjector;.*DataCacheConnector;" +
       ".*ControllerConfiguration;.*LanguageSwitchController;.*Repository;",
-    ScoverageKeys.coverageMinimum := 90,
+    ScoverageKeys.coverageMinimumStmtTotal := 90,
     ScoverageKeys.coverageFailOnMinimum := true,
     ScoverageKeys.coverageHighlighting := true,
     parallelExecution in sbt.Test := false
@@ -28,7 +28,6 @@ lazy val root = Project(appName, file("."))
   .settings(defaultSettings(): _*)
   .settings(
     libraryDependencies ++= appDependencies,
-    dependencyOverrides ++= appDependencyOverrides,
     retrieveManaged := true,
     evictionWarningOptions in update := EvictionWarningOptions.default.withWarnScalaVersionEviction(false),
     scalaVersion := "2.12.12"

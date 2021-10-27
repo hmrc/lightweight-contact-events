@@ -20,13 +20,12 @@ import javax.inject.Inject
 
 import play.api.libs.json.JsValue
 import uk.gov.hmrc.http.HeaderCarrier
-import uk.gov.hmrc.lightweightcontactevents.utils.AuditServiceConnector
+import uk.gov.hmrc.play.audit.http.connector.AuditConnector
 import uk.gov.hmrc.play.audit.model.ExtendedDataEvent
 
 import scala.concurrent.ExecutionContext
 
-
-class AuditingService @Inject()(auditConnector:AuditServiceConnector){
+class AuditingService @Inject()(auditConnector:AuditConnector){
 
 
   def sendEvent(auditType: String, json: JsValue)(implicit ec: ExecutionContext, hc: HeaderCarrier): Unit = {

@@ -30,7 +30,7 @@ import reactivemongo.api.commands.WriteResult
 import uk.gov.hmrc.http.{HeaderCarrier, HttpReads, HttpResponse}
 import uk.gov.hmrc.lightweightcontactevents.models.QueuedDataTransfer
 import uk.gov.hmrc.lightweightcontactevents.repository.QueuedDataTransferRepository
-import uk.gov.hmrc.play.bootstrap.http.HttpClient
+import uk.gov.hmrc.http.HttpClient
 
 import scala.concurrent.{ExecutionContext, Future}
 
@@ -46,7 +46,7 @@ trait SpecBase extends PlaySpec with GuiceOneAppPerSuite with MockitoSugar {
 
   def getHttpMock(returnedStatus: Int): HttpClient = {
     val httpMock = mock[HttpClient]
-    when(httpMock.POST(anyString, any[JsValue], any[Seq[(String, String)]])(any[Writes[Any]], any[HttpReads[Any]],
+    when(httpMock.POST(anyString, any[JsValue], any[Seq[(String, String)]])(any[Writes[JsValue]], any[HttpReads[Any]],
       any[HeaderCarrier], any())) thenReturn Future.successful(HttpResponse(returnedStatus, None))
     when(httpMock.GET(anyString, any[Seq[(String,String)]], any[Seq[(String,String)]])(any[HttpReads[Any]], any[HeaderCarrier], any())) thenReturn Future.successful(HttpResponse(returnedStatus, None))
     httpMock

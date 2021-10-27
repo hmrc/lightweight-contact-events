@@ -55,7 +55,7 @@ object VOADataTransfer {
       case "Housing Allowance or fair rents" => init.housingAllowanceEmail
       case "Other" => init.otherEmail
       case _ =>
-        Logger.error(s"Email address not found for enquiryCategory : $enquiryCategoryMsg")
+        Logger(getClass).error(s"Email address not found for enquiryCategory : $enquiryCategoryMsg")
         throw new RuntimeException(s"Email address not found for enquiryCategory : $enquiryCategoryMsg")
     }
 
