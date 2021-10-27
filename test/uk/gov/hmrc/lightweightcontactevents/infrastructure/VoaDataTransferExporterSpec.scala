@@ -18,7 +18,8 @@ package uk.gov.hmrc.lightweightcontactevents.infrastructure
 
 import org.mockito.Matchers.{any, eq => eqTo}
 import org.mockito.Mockito.{times, verify, when}
-import org.scalatest.{FlatSpec, Matchers}
+import org.scalatest.flatspec.AnyFlatSpec
+import org.scalatest.matchers.should.Matchers
 import org.scalatestplus.mockito.MockitoSugar
 import play.api.test.{DefaultAwaitTimeout, FutureAwaits}
 import reactivemongo.api.commands.{GetLastError, WriteResult}
@@ -34,7 +35,7 @@ import scala.concurrent.{ExecutionContext, Future}
 import scala.language.reflectiveCalls
 import scala.util.Success
 
-class VoaDataTransferExporterSpec extends FlatSpec with Matchers with MockitoSugar with FutureAwaits
+class VoaDataTransferExporterSpec extends AnyFlatSpec with Matchers with MockitoSugar with FutureAwaits
   with DefaultAwaitTimeout {
   val now = Instant.now()
 

@@ -25,7 +25,7 @@ import play.api.libs.json._
 import uk.gov.hmrc.lightweightcontactevents.models.{Contact, QueuedDataTransfer, VOADataTransfer}
 import uk.gov.hmrc.lightweightcontactevents.repository.QueuedDataTransferRepository
 import uk.gov.hmrc.lightweightcontactevents.utils.Initialize
-import uk.gov.hmrc.play.bootstrap.controller.BackendController
+import uk.gov.hmrc.play.bootstrap.backend.controller.BackendController
 
 import scala.concurrent.ExecutionContext.Implicits.global
 

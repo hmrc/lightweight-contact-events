@@ -27,7 +27,7 @@ import uk.gov.hmrc.lightweightcontactevents.SpecBase
 import uk.gov.hmrc.lightweightcontactevents.models.ConfirmedContactDetails.toLegacyContact
 import uk.gov.hmrc.lightweightcontactevents.models.{ConfirmedContactDetails, PropertyAddress, VOADataTransfer}
 import uk.gov.hmrc.play.bootstrap.config.ServicesConfig
-import uk.gov.hmrc.play.bootstrap.http.HttpClient
+import uk.gov.hmrc.http.HttpClient
 
 import scala.concurrent.Future
 import scala.util.{Failure, Success}
@@ -81,7 +81,7 @@ class VoaDataTransferConnectorSpec extends SpecBase {
       "call the Microservice with the given JSON" in {
         implicit val headerCarrierNapper = ArgumentCaptor.forClass(classOf[HeaderCarrier])
         implicit val httpReadsNapper = ArgumentCaptor.forClass(classOf[HttpReads[Any]])
-        implicit val jsonWritesNapper = ArgumentCaptor.forClass(classOf[Writes[Any]])
+        implicit val jsonWritesNapper = ArgumentCaptor.forClass(classOf[Writes[JsValue]])
         val urlCaptor = ArgumentCaptor.forClass(classOf[String])
         val bodyCaptor = ArgumentCaptor.forClass(classOf[JsValue])
         val headersCaptor = ArgumentCaptor.forClass(classOf[Seq[(String, String)]])
@@ -115,7 +115,7 @@ class VoaDataTransferConnectorSpec extends SpecBase {
 
       "return a failure if the data transfer call throws an exception" in {
         val httpMock = mock[HttpClient]
-        when(httpMock.POST(anyString, any[JsValue], any[Seq[(String, String)]])(any[Writes[Any]], any[HttpReads[Any]],
+        when(httpMock.POST(anyString, any[JsValue], any[Seq[(String, String)]])(any[Writes[JsValue]], any[HttpReads[Any]],
           any[HeaderCarrier], any())) thenReturn Future.successful(new RuntimeException)
         val connector = new VoaDataTransferConnector(httpMock, configuration, environment,auditService, servicesConfig)
         val result = await(connector.sendJson(minimalJson)(HeaderCarrier()))
