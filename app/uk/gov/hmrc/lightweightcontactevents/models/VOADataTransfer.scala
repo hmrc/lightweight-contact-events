@@ -52,6 +52,7 @@ object VOADataTransfer {
     enquiryCategoryMsg match {
       case "Council Tax" => init.councilTaxEmail
       case "Business rates" => init.businessRatesEmail
+      case "Housing Benefit, Local Housing Allowances, or fair rents" => init.housingAllowanceEmail
       case "Housing Allowance or fair rents" => init.housingAllowanceEmail
       case "Other" => init.otherEmail
       case _ =>
