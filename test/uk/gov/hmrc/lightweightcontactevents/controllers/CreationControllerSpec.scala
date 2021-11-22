@@ -106,7 +106,7 @@ class CreationControllerSpec extends SpecBase with MockitoSugar {
     },
     "isCouncilTaxEnquiry": false,
     "contactReason": "more_details",
-    "enquiryCategoryMsg": "Housing Allowance or fair rents",
+    "enquiryCategoryMsg": "Housing Benefit, Local Housing Allowances, or fair rents",
     "subEnquiryCategoryMsg": "seq",
     "message": "message"
   }""""
