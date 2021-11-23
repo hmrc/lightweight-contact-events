@@ -52,7 +52,8 @@ object VOADataTransfer {
     enquiryCategoryMsg match {
       case "Council Tax" => init.councilTaxEmail
       case "Business rates" => init.businessRatesEmail
-      case "Housing Benefit, Local Housing Allowances, or fair rents" => init.housingAllowanceEmail
+      case "Housing Benefit, Local Housing Allowances" => init.housingAllowanceEmail
+      case "Fair rents" => init.housingAllowanceEmail
       case "Other" => init.otherEmail
       case _ =>
         Logger(getClass).error(s"Email address not found for enquiryCategory : $enquiryCategoryMsg")
