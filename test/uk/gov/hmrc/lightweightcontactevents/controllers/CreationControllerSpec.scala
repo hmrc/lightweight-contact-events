@@ -106,7 +106,28 @@ class CreationControllerSpec extends SpecBase with MockitoSugar {
     },
     "isCouncilTaxEnquiry": false,
     "contactReason": "more_details",
-    "enquiryCategoryMsg": "Housing Benefit, Local Housing Allowances, or fair rents",
+    "enquiryCategoryMsg": "Housing Benefit, Local Housing Allowances",
+    "subEnquiryCategoryMsg": "seq",
+    "message": "message"
+  }""""
+
+  val frContactJson =
+    """{
+    "contact": {
+      "fullName": "full name",
+      "email": "email",
+      "contactNumber": "tel"
+    },
+    "propertyAddress": {
+      "addressLine1": "line1",
+      "addressLine2": "line2",
+      "town": "town",
+      "county": "county",
+      "postcode": "postcode"
+    },
+    "isCouncilTaxEnquiry": false,
+    "contactReason": "more_details",
+    "enquiryCategoryMsg": "Fair rents",
     "subEnquiryCategoryMsg": "seq",
     "message": "message"
   }""""
@@ -198,6 +219,13 @@ class CreationControllerSpec extends SpecBase with MockitoSugar {
     val repository = getQueuedDataTransferRepository()
 
     val result = new CreationController(repository, initialize, action, stub).create()(fakeRequestWithJson(haContactJson))
+    status(result) mustBe OK
+  }
+
+  "return 200 for a POST carrying an enquiry for fair rent" in {
+    val repository = getQueuedDataTransferRepository()
+
+    val result = new CreationController(repository, initialize, action, stub).create()(fakeRequestWithJson(frContactJson))
     status(result) mustBe OK
   }
 
