@@ -162,4 +162,14 @@ class VOADataTransferSpec extends SpecBase with MockitoSugar {
     voaDataTransfer.subject mustBe s"$subject $postCode"
     voaDataTransfer.recipientEmailAddress mustBe brEmail
   }
+
+  "return the correct subject and email for contact reason 'new_enquiry' and enquiry category 'Housing Benefit and Local Housing Allowances'" in {
+    val initialize = injector.instanceOf[Initialize]
+    val voaDataTransfer = VOADataTransfer(housingBenefitContact, initialize)
+
+    voaDataTransfer.recipientEmailAddress mustBe housingBenefitEmail
+    voaDataTransfer.subject mustBe s"CF - other - $postCode"
+    voaDataTransfer mustBe housingBenefitDataTransfer
+  }
+
 }
