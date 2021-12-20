@@ -20,7 +20,8 @@ lazy val root = Project(appName, file("."))
     ScoverageKeys.coverageMinimumStmtTotal := 90,
     ScoverageKeys.coverageFailOnMinimum := true,
     ScoverageKeys.coverageHighlighting := true,
-    parallelExecution in sbt.Test := false
+    parallelExecution in sbt.Test := false,
+    PlayKeys.playDefaultPort := 7312
   )
   .settings(majorVersion := 1)
   .settings(scalaSettings: _*)

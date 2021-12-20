@@ -37,6 +37,16 @@ object LightweightFixture {
   val brDataTransfer = VOADataTransfer(toLegacyContact(confirmedContactDetails), propertyAddress, false, subject, brEmail, enquiryCategoryMsg, subEnquiryCategoryMsg, message)
   val wrongContact = Contact(confirmedContactDetails, propertyAddress, false, contactReason, "", subEnquiryCategoryMsg, message)
 
+  val housingBenefitEmail = "NSOhelpdesk@voa.gov.uk"
+  val housingBenefitSubject = s"CF - other - $postCode"
+  val housingBenefitCategory = "Housing Benefit and Local Housing Allowances"
+  val housingBenefitSubCategory = "I want to find out the valuation details behind my Housing Benefit decision"
+  val housingBenefitMessage = "More about my enquiry..."
+  val housingBenefitContact: Contact = Contact(confirmedContactDetails, propertyAddress, isCouncilTaxEnquiry = false, "new_enquiry",
+    housingBenefitCategory, housingBenefitSubCategory, housingBenefitMessage)
+  val housingBenefitDataTransfer: VOADataTransfer = VOADataTransfer(toLegacyContact(confirmedContactDetails), propertyAddress, isCouncilTaxEnquiry = false,
+    housingBenefitSubject, housingBenefitEmail, housingBenefitCategory, housingBenefitSubCategory, housingBenefitMessage)
+
   def aQueuedDataTransfer(): QueuedDataTransfer = {
     QueuedDataTransfer(aVoaDataTransfer())
   }

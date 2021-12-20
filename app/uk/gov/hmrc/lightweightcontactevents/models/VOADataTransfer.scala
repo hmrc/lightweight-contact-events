@@ -52,7 +52,7 @@ object VOADataTransfer {
     enquiryCategoryMsg match {
       case "Council Tax" => init.councilTaxEmail
       case "Business rates" => init.businessRatesEmail
-      case "Housing Benefit, Local Housing Allowances" => init.housingAllowanceEmail
+      case "Housing Benefit and Local Housing Allowances" => init.housingAllowanceEmail
       case "Fair rents" => init.housingAllowanceEmail
       case "Other" => init.otherEmail
       case _ =>
@@ -69,6 +69,7 @@ object VOADataTransfer {
       case ("update_existing", _) => s"${init.subjectChase} $ucPostCode"
       case ("new_enquiry", "Council Tax") => s"CF $subEnquiryCategoryMsg $ucPostCode"
       case ("new_enquiry", "Business Rates") => s"CF $subEnquiryCategoryMsg $ucPostCode"
+      case ("new_enquiry", "Housing Benefit and Local Housing Allowances") => s"CF - other - $ucPostCode"
       case _ => s"${init.subjectText}"
     }
   }

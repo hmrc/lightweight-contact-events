@@ -12,7 +12,7 @@ object Dependencies {
   private val bootstrapVersion = "5.16.0"
   private val simpleReactivemongoVersion = "8.0.0-play-28"
   private val hmrcMongoLock = "7.0.0-play-28"
-  private val akkaVersion = "2.6.17"
+  private val akkaVersion = PlayVersion.akkaVersion
   private val flexmarkVersion = "0.35.10"
   private val mockitoVersion = "3.2.9.0"
   private val jsoupVersion = "1.14.3"

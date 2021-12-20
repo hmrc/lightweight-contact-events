@@ -106,7 +106,7 @@ class CreationControllerSpec extends SpecBase with MockitoSugar {
     },
     "isCouncilTaxEnquiry": false,
     "contactReason": "more_details",
-    "enquiryCategoryMsg": "Housing Benefit, Local Housing Allowances",
+    "enquiryCategoryMsg": "Housing Benefit and Local Housing Allowances",
     "subEnquiryCategoryMsg": "seq",
     "message": "message"
   }""""
