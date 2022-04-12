@@ -20,7 +20,7 @@ lazy val root = Project(appName, file("."))
     ScoverageKeys.coverageMinimumStmtTotal := 90,
     ScoverageKeys.coverageFailOnMinimum := true,
     ScoverageKeys.coverageHighlighting := true,
-    parallelExecution in sbt.Test := false,
+    Test / parallelExecution := false,
     PlayKeys.playDefaultPort := 7312
   )
   .settings(majorVersion := 1)
@@ -30,8 +30,7 @@ lazy val root = Project(appName, file("."))
   .settings(
     libraryDependencies ++= appDependencies,
     retrieveManaged := true,
-    evictionWarningOptions in update := EvictionWarningOptions.default.withWarnScalaVersionEviction(false),
-    scalaVersion := "2.12.12"
+    scalaVersion := "2.12.15"
   )
   .configs(IntegrationTest)
   .settings(inConfig(IntegrationTest)(Defaults.itSettings): _*)

@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 HM Revenue & Customs
+ * Copyright 2022 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,7 +23,7 @@ import javax.inject.{Inject, Singleton, Provider}
 import play.api.inject._
 import play.api.{Configuration, Environment, Logger}
 import play.modules.reactivemongo.ReactiveMongoComponent
-import uk.gov.hmrc.lightweightcontactevents.infrastructure.{DefaultRegularSchedule, VoaDataTransferExporter, VoaDataTransferLockKeeper, VoaDataTransferScheduler}
+import uk.gov.hmrc.lightweightcontactevents.infrastructure._
 
 import scala.concurrent.ExecutionContext
 
@@ -44,7 +44,9 @@ class SchedulerModule extends Module {
 
 class VoaDataTransferSchedulerProvider @Inject()(actorSystem: ActorSystem, scheduler: DefaultRegularSchedule,
                                                  voaDataTransferExporter: VoaDataTransferExporter, reactiveMongoComponent: ReactiveMongoComponent,
-                                                 lockKeeper: VoaDataTransferLockKeeper)(implicit ec: ExecutionContext) extends Provider[VoaDataTransferScheduler] {
+                                                 lockKeeper: VoaDataTransferLockKeeper)(implicit ec: ExecutionContext)
+  extends Provider[VoaDataTransferScheduler] {
+
   override def get(): VoaDataTransferScheduler = {
    val transferScheduler =  new VoaDataTransferScheduler(
       actorSystem.scheduler, actorSystem.eventStream,
