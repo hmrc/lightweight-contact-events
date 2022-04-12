@@ -1,6 +1,5 @@
 import sbt.Keys._
 import sbt._
-import Dependencies.appDependencies
 import play.sbt.PlayImport.PlayKeys
 import scoverage.ScoverageKeys
 import uk.gov.hmrc.DefaultBuildSettings.{defaultSettings, integrationTestSettings, scalaSettings}
@@ -28,9 +27,9 @@ lazy val root = Project(appName, file("."))
   .settings(publishingSettings: _*)
   .settings(defaultSettings(): _*)
   .settings(
-    libraryDependencies ++= appDependencies,
+    libraryDependencies ++= Dependencies.appDependencies,
     retrieveManaged := true,
-    scalaVersion := "2.12.15"
+    scalaVersion := "2.13.8"
   )
   .configs(IntegrationTest)
   .settings(inConfig(IntegrationTest)(Defaults.itSettings): _*)
