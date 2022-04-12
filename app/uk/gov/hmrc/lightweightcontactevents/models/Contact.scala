@@ -16,7 +16,7 @@
 
 package uk.gov.hmrc.lightweightcontactevents.models
 
-import play.api.libs.json.Json
+import play.api.libs.json.{Json, OFormat}
 
 case class Contact(contact: ConfirmedContactDetails,
                    propertyAddress: PropertyAddress,
@@ -27,5 +27,5 @@ case class Contact(contact: ConfirmedContactDetails,
                    message: String)
 
 object Contact {
-  implicit val format = Json.format[Contact]
+  implicit val format: OFormat[Contact] = Json.format[Contact]
 }

@@ -16,18 +16,17 @@
 
 package uk.gov.hmrc.lightweightcontactevents
 
-import java.time.Clock
-
 import akka.actor.ActorSystem
-import javax.inject.{Inject, Singleton, Provider}
 import play.api.inject._
-import play.api.{Configuration, Environment, Logger}
-import play.modules.reactivemongo.ReactiveMongoComponent
+import play.api.{Configuration, Environment, Logging}
 import uk.gov.hmrc.lightweightcontactevents.infrastructure._
+import uk.gov.hmrc.mongo.lock.MongoLockRepository
 
+import java.time.Clock
+import javax.inject.{Inject, Provider, Singleton}
 import scala.concurrent.ExecutionContext
 
-class SchedulerModule extends Module {
+class SchedulerModule extends Module with Logging {
 
   override def bindings(environment: Environment, configuration: Configuration): Seq[Binding[_]] = {
     if (configuration.getOptional[String]("voaExport.enable").exists(_.toBoolean)) {
@@ -36,22 +35,29 @@ class SchedulerModule extends Module {
         bind[Clock].toInstance(Clock.systemUTC()).in[Singleton]
       )
     } else {
-      Logger(getClass).warn("Export disabled, transfers won't be exported to VOA")
+      logger.warn("Export disabled, transfers won't be exported to VOA")
       Seq.empty[Binding[_]]
     }
   }
 }
 
-class VoaDataTransferSchedulerProvider @Inject()(actorSystem: ActorSystem, scheduler: DefaultRegularSchedule,
-                                                 voaDataTransferExporter: VoaDataTransferExporter, reactiveMongoComponent: ReactiveMongoComponent,
-                                                 lockKeeper: VoaDataTransferLockKeeper)(implicit ec: ExecutionContext)
+class VoaDataTransferSchedulerProvider @Inject()(actorSystem: ActorSystem,
+                                                 schedule: DefaultRegularSchedule,
+                                                 voaDataTransferExporter: VoaDataTransferExporter,
+                                                 mongoLockRepository: MongoLockRepository
+                                                )(implicit ec: ExecutionContext)
   extends Provider[VoaDataTransferScheduler] {
 
   override def get(): VoaDataTransferScheduler = {
-   val transferScheduler =  new VoaDataTransferScheduler(
-      actorSystem.scheduler, actorSystem.eventStream,
-      scheduler, voaDataTransferExporter, reactiveMongoComponent, lockKeeper)
+    val transferScheduler = new VoaDataTransferScheduler(
+      actorSystem.scheduler,
+      actorSystem.eventStream,
+      schedule,
+      voaDataTransferExporter,
+      mongoLockRepository
+    )
     transferScheduler.start()
     transferScheduler
   }
+
 }

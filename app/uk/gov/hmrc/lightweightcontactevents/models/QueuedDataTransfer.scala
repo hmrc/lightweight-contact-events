@@ -16,18 +16,19 @@
 
 package uk.gov.hmrc.lightweightcontactevents.models
 
+import org.bson.types.ObjectId
+import play.api.libs.json.{Format, Json}
+import uk.gov.hmrc.mongo.play.json.formats.MongoFormats.mongoEntity
+
 import java.time.Instant
 
-import play.api.libs.json.Json
-import reactivemongo.bson.BSONObjectID
-
-case class QueuedDataTransfer(voaDataTransfer: VOADataTransfer, fistError: Option[Instant] = None, id: BSONObjectID = BSONObjectID.generate)
+case class QueuedDataTransfer(voaDataTransfer: VOADataTransfer, fistError: Option[Instant] = None, id: String = ObjectId.get.toHexString)
 
 
 object QueuedDataTransfer {
-  import uk.gov.hmrc.mongo.json.ReactiveMongoFormats.{objectIdFormats, mongoEntity}
 
-  implicit val format = mongoEntity {
+  implicit val format: Format[QueuedDataTransfer] = mongoEntity {
     Json.format[QueuedDataTransfer]
   }
+
 }

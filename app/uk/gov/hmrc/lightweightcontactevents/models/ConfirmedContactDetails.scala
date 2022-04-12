@@ -16,7 +16,7 @@
 
 package uk.gov.hmrc.lightweightcontactevents.models
 
-import play.api.libs.json.Json
+import play.api.libs.json.{Json, OFormat}
 
 case class ConfirmedContactDetails(fullName: String,
                                    email: String,
@@ -30,12 +30,12 @@ final case class ConfirmedContactDetailsLegacy(firstName: String,
                                                contactNumber: String)
 
 object ConfirmedContactDetails {
-  implicit val format = Json.format[ConfirmedContactDetails]
+  implicit val format: OFormat[ConfirmedContactDetails] = Json.format[ConfirmedContactDetails]
 
   def toLegacyContact(ct: ConfirmedContactDetails) =
     ConfirmedContactDetailsLegacy(ct.fullName, lastName = "", ct.email, ct.contactNumber)
 }
 
 object ConfirmedContactDetailsLegacy {
-  implicit val format = Json.format[ConfirmedContactDetailsLegacy]
+  implicit val format: OFormat[ConfirmedContactDetailsLegacy] = Json.format[ConfirmedContactDetailsLegacy]
 }

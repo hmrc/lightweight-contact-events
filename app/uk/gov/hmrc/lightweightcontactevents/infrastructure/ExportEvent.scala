@@ -19,7 +19,7 @@ package uk.gov.hmrc.lightweightcontactevents.infrastructure
 sealed trait ExportEvent
 
 
-case object ExportSucess extends ExportEvent
+case object ExportSuccess extends ExportEvent
 
 
 case object ExportFailed extends ExportEvent

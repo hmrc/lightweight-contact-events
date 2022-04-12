@@ -75,7 +75,7 @@ class ExportTransferSpec extends DiAcceptanceTest {
 
       val queueSize = await(repository().count)
 
-      exportEvent must equal(ExportSucess)
+      exportEvent must equal(ExportSuccess)
 
       queueSize mustBe(0)
 
@@ -102,7 +102,7 @@ class ExportTransferSpec extends DiAcceptanceTest {
 
       val queueSize = await(repository().count)
 
-      exportEvent must equal(ExportSucess)
+      exportEvent must equal(ExportSuccess)
 
       queueSize mustBe(1)
     }

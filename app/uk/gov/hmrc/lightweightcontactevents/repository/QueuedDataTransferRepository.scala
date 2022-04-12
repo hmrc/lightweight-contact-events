@@ -16,53 +16,57 @@
 
 package uk.gov.hmrc.lightweightcontactevents.repository
 
-import java.time.Instant
-
-import javax.inject.{Inject, Singleton}
-import play.modules.reactivemongo.ReactiveMongoComponent
-import reactivemongo.bson.BSONObjectID
+import org.mongodb.scala.ReadPreference
 import uk.gov.hmrc.lightweightcontactevents.models.QueuedDataTransfer
-import uk.gov.hmrc.mongo.ReactiveRepository
-import uk.gov.hmrc.mongo.json.ReactiveMongoFormats
-import play.api.libs.json.{JsObject, Json}
-import reactivemongo.api.Cursor.FailOnError
-import reactivemongo.api.{QueryOpts, ReadPreference}
-import reactivemongo.play.json._
+import uk.gov.hmrc.mongo.MongoComponent
+import uk.gov.hmrc.mongo.play.json.PlayMongoRepository
 
+import java.time.Instant
+import javax.inject.{Inject, Singleton}
 import scala.concurrent.{ExecutionContext, Future}
 
 
 @Singleton
-class QueuedDataTransferRepository @Inject() (mongo: ReactiveMongoComponent) extends ReactiveRepository[QueuedDataTransfer,BSONObjectID] (
-  collectionName =  "dataTransferQueue",
-  mongo = mongo.mongoConnector.db,
-  domainFormat = QueuedDataTransfer.format,
-  idFormat = ReactiveMongoFormats.objectIdFormats) {
+class QueuedDataTransferRepository @Inject()(
+                                              mongo: MongoComponent
+                                            )(implicit ec: ExecutionContext)
+  extends PlayMongoRepository[QueuedDataTransfer](
+    collectionName = "dataTransferQueue",
+    mongoComponent = mongo,
+    domainFormat = QueuedDataTransfer.format,
+    indexes = Seq.empty) {
 
   val defaultBatchSize = 10
 
-  def updateTime(id: BSONObjectID, time: Instant)(implicit ec: ExecutionContext): Future[Unit] = {
-    val selector = _id(id)
+  def updateTime(id: String, time: Instant)(implicit ec: ExecutionContext): Future[Unit] = {
+    //    collection.findOneAndUpdate(equal("_id", Codecs.toBson(id))
+    //
+    //    val selector = _id(id)
+    //
+    //    val update = Json.obj(
+    //      "$set" -> Json.obj(
+    //        "fistError" -> time
+    //      )
+    //    )
+    //
+    //    collection.findOneAndUpdate(filter = selector, update = update, options = FindOneAndUpdateOptions()).toFutureOption.map(_ => ())
 
-    val update = Json.obj(
-      "$set" -> Json.obj(
-        "fistError" -> time
-      )
-    )
-
-    findAndUpdate(selector, update).map(_ => ())
+    Future.unit
   }
 
   def findBatch(batchSize: Int = defaultBatchSize,
-                readPreference: ReadPreference = ReadPreference.primaryPreferred
-               )(implicit ec: ExecutionContext):Future[List[QueuedDataTransfer]] = {
+                readPreference: ReadPreference = ReadPreference.primaryPreferred()
+               )(implicit ec: ExecutionContext): Future[List[QueuedDataTransfer]] = {
 
-    collection.find(Json.obj(), Option.empty[JsObject]).options(QueryOpts().batchSize(batchSize))
-        .cursor[QueuedDataTransfer](readPreference)
-        .collect[List](batchSize, FailOnError[List[QueuedDataTransfer]]())
+    //    collection.find(Json.obj(), Option.empty[JsObject]).options(QueryOpts().batchSize(batchSize))
+    //        .cursor[QueuedDataTransfer](readPreference)
+    //        .collect[List](batchSize, FailOnError[List[QueuedDataTransfer]]())
 
+    Future.successful(List.empty)
   }
 
+  def insert(transfer: QueuedDataTransfer): Future[Unit] = ???
+
+  def removeById(id: String): Future[Unit] = ???
 
 }
-
