@@ -67,11 +67,8 @@ class QueuedDataTransferRepositorySpec extends DiAcceptanceTest with OptionValue
       res must have size 10
 
       items must contain allElementsOf (res)
-
     }
 
-
   }
-
 
 }
