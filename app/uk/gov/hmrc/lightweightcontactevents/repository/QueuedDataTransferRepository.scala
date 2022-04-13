@@ -16,7 +16,11 @@
 
 package uk.gov.hmrc.lightweightcontactevents.repository
 
-import org.mongodb.scala.ReadPreference
+import org.mongodb.scala.bson.conversions.Bson
+import org.mongodb.scala.model.Updates.{push, set}
+import org.mongodb.scala.model.{Filters, FindOneAndReplaceOptions, FindOneAndUpdateOptions, ReturnDocument, Updates}
+import org.mongodb.scala.{ReadPreference, SingleObservable}
+import play.api.Logging
 import uk.gov.hmrc.lightweightcontactevents.models.QueuedDataTransfer
 import uk.gov.hmrc.mongo.MongoComponent
 import uk.gov.hmrc.mongo.play.json.PlayMongoRepository
@@ -34,25 +38,31 @@ class QueuedDataTransferRepository @Inject()(
     collectionName = "dataTransferQueue",
     mongoComponent = mongo,
     domainFormat = QueuedDataTransfer.format,
-    indexes = Seq.empty) {
+    indexes = Seq.empty
+  ) with Logging {
 
+  val _id = "_id"
   val defaultBatchSize = 10
 
-  def updateTime(id: String, time: Instant): Future[Unit] = {
-    //    collection.findOneAndUpdate(equal("_id", Codecs.toBson(id))
-    //
-    //    val selector = _id(id)
-    //
-    //    val update = Json.obj(
-    //      "$set" -> Json.obj(
-    //        "fistError" -> time
-    //      )
-    //    )
-    //
-    //    collection.findOneAndUpdate(filter = selector, update = update, options = FindOneAndUpdateOptions()).toFutureOption.map(_ => ())
-
-    Future.unit
+  implicit class singleObservableOps[T](singleObservable: SingleObservable[T]) {
+    def toFutureUnit: Future[Unit] = singleObservable
+      .toFutureOption()
+      .map(_ => ())
+      .recover {
+        case ex: Throwable =>
+          logger.error("Mongo error", ex)
+      }
   }
+
+  def updateTime(id: String, time: Instant): Future[Unit] =
+    collection
+      .findOneAndUpdate(byId(id), set("fistError", time),
+        FindOneAndUpdateOptions().upsert(false).returnDocument(ReturnDocument.AFTER))
+      .toFutureOption()
+      .flatMap {
+        case Some(_) => Future.unit
+        case _ => Future.failed(new IllegalStateException(s"dataTransfer not found for id = $id"))
+      }
 
   def findBatch(batchSize: Int = defaultBatchSize,
                 readPreference: ReadPreference = ReadPreference.primaryPreferred()
@@ -65,8 +75,23 @@ class QueuedDataTransferRepository @Inject()(
     Future.successful(List.empty)
   }
 
-  def insert(transfer: QueuedDataTransfer): Future[Unit] = ???
+  def insert(transfer: QueuedDataTransfer): Future[Unit] =
+    collection.findOneAndReplace(byId(transfer.id), transfer, FindOneAndReplaceOptions().upsert(true)).toFutureUnit
 
-  def removeById(id: String): Future[Unit] = ???
+  def bulkInsert(entities: Seq[QueuedDataTransfer]): Future[Unit] =
+    collection.insertMany(entities).toFutureUnit
+
+  def findById(id: String, readPreference: ReadPreference = ReadPreference.primaryPreferred()): Future[Option[QueuedDataTransfer]] =
+    collection.withReadPreference(readPreference)
+      .find(byId(id)).first().toFutureOption()
+
+  def removeById(id: String): Future[Unit] =
+    collection.deleteOne(byId(id)).toFutureUnit
+
+  def count: Future[Option[Long]] =
+    collection.countDocuments().toFutureOption()
+
+  private def byId(id: String): Bson =
+    Filters.equal(_id, id)
 
 }

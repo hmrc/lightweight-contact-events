@@ -31,7 +31,6 @@ import uk.gov.hmrc.lightweightcontactevents.utils.LightweightFixture._
 import java.time.{Clock, Instant, ZoneId}
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
-import scala.language.reflectiveCalls
 import scala.util.Success
 
 class VoaDataTransferExporterSpec extends AnyFlatSpec with Matchers with MockitoSugar with FutureAwaits

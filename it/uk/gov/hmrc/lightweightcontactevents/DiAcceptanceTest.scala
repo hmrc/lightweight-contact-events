@@ -23,34 +23,32 @@ import org.scalatestplus.play.guice.GuiceOneAppPerSuite
 import play.api.Application
 import play.api.inject.guice.GuiceApplicationBuilder
 import play.api.test.{DefaultAwaitTimeout, FutureAwaits}
-import play.modules.reactivemongo.{ReactiveMongoComponent, ReactiveMongoHmrcModule}
-import reactivemongo.api.MongoConnection
-import scala.concurrent.ExecutionContext.Implicits.global
+import uk.gov.hmrc.mongo.MongoComponent
+import uk.gov.hmrc.mongo.play.PlayMongoModule
 
 trait DiAcceptanceTest extends AnyWordSpecLike with BeforeAndAfterAll with Matchers with FutureAwaits
   with DefaultAwaitTimeout with GuiceOneAppPerSuite {
 
   def testDbPrefix(): String
 
-  implicit lazy val conn: MongoConnection = app.injector.instanceOf[ReactiveMongoComponent].mongoConnector.helper.connection
-
   def fakeApplicationBuilder(): GuiceApplicationBuilder = new GuiceApplicationBuilder()
     .configure(customConfigs)
-    .bindings(new ReactiveMongoHmrcModule)
+    .bindings(new PlayMongoModule)
 
-  def testDbName = s"$testDbPrefix${java.util.UUID.randomUUID.toString.replaceAll("-", "")}"
+  def testDbName = s"${testDbPrefix()}${java.util.UUID.randomUUID.toString.replaceAll("-", "")}"
   final val testDbUri = s"mongodb://localhost:27017/$testDbName?rm.tcpNoDelay=true&rm.nbChannelsPerNode=3&writeConcern=unacknowledged"
 
   def customConfigs: Map[String, Any] = Map(
     "mongodb.uri" -> testDbUri
   )
 
-  def mongo = app.injector.instanceOf[ReactiveMongoComponent]
+  def mongoComponent = app.injector.instanceOf[MongoComponent]
 
   override final def fakeApplication(): Application = fakeApplicationBuilder().build()
 
   override protected def afterAll(): Unit = {
-    await(mongo.mongoConnector.db().drop())
+    await(mongoComponent.database.drop().toFutureOption())
+    mongoComponent.client.close()
   }
 
 }
