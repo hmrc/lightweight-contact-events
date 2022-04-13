@@ -38,7 +38,7 @@ class QueuedDataTransferRepository @Inject()(
 
   val defaultBatchSize = 10
 
-  def updateTime(id: String, time: Instant)(implicit ec: ExecutionContext): Future[Unit] = {
+  def updateTime(id: String, time: Instant): Future[Unit] = {
     //    collection.findOneAndUpdate(equal("_id", Codecs.toBson(id))
     //
     //    val selector = _id(id)
@@ -56,7 +56,7 @@ class QueuedDataTransferRepository @Inject()(
 
   def findBatch(batchSize: Int = defaultBatchSize,
                 readPreference: ReadPreference = ReadPreference.primaryPreferred()
-               )(implicit ec: ExecutionContext): Future[List[QueuedDataTransfer]] = {
+               ): Future[List[QueuedDataTransfer]] = {
 
     //    collection.find(Json.obj(), Option.empty[JsObject]).options(QueryOpts().batchSize(batchSize))
     //        .cursor[QueuedDataTransfer](readPreference)

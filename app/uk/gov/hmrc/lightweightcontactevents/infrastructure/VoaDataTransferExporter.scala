@@ -42,13 +42,12 @@ class VoaDataTransferExporter @Inject() (dataTransferConnector: VoaDataTransferC
       processSequentially(x)})
   }
 
-  private def processSequentially(transfers: List[QueuedDataTransfer])(implicit ec: ExecutionContext): Future[Unit] = {
-    if(transfers.isEmpty) {
-      Future.successful[Unit](())
-    }else {
+  private def processSequentially(transfers: List[QueuedDataTransfer])(implicit ec: ExecutionContext): Future[Unit] =
+    if (transfers.isEmpty) {
+      Future.unit
+    } else {
       processTransfer(transfers.head).flatMap(_ => processSequentially(transfers.tail))
     }
-  }
 
   def processTransfer(transfer: QueuedDataTransfer)(implicit ec: ExecutionContext): Future[Unit] = {
     transfer.fistError match {
@@ -76,18 +75,17 @@ class VoaDataTransferExporter @Inject() (dataTransferConnector: VoaDataTransferC
   def sendToVoa(transfer: VOADataTransfer)(implicit ec: ExecutionContext): Future[Unit] = {
     val hc: HeaderCarrier = new HeaderCarrier()
     dataTransferConnector.transfer(transfer)(hc).flatMap {
-      case Success(statusCode) if statusCode < 300 => Future.successful(())
+      case Success(statusCode) if statusCode < 300 => Future.unit
       case Success(statusCode) => Future.failed(new RuntimeException(s"Unable to send data to VOA, StatusCode: ${statusCode}"))
       case Failure(exception) => Future.failed(new RuntimeException(s"Unable to send data to VOA", exception))
     }
   }
 
-  private def recordError(transfer: QueuedDataTransfer)(implicit ec: ExecutionContext): Future[Unit] = {
-    if(transfer.fistError.isEmpty) {
+  private def recordError(transfer: QueuedDataTransfer): Future[Unit] =
+    if (transfer.fistError.isEmpty) {
       dataTransferRepository.updateTime(transfer.id, Instant.now(clock))
-    }else {
-      Future.successful(())
+    } else {
+      Future.unit
     }
-  }
 
 }

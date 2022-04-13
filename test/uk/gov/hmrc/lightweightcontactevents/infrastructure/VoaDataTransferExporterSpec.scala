@@ -16,22 +16,21 @@
 
 package uk.gov.hmrc.lightweightcontactevents.infrastructure
 
-import org.mockito.Matchers.{any, eq => eqTo}
+import org.mockito.Matchers.{any, anyString, eq => eqTo}
 import org.mockito.Mockito.{times, verify, when}
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
 import org.scalatestplus.mockito.MockitoSugar
 import play.api.test.{DefaultAwaitTimeout, FutureAwaits}
-import reactivemongo.api.commands.{GetLastError, WriteResult}
-import reactivemongo.bson.BSONObjectID
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.lightweightcontactevents.connectors.VoaDataTransferConnector
 import uk.gov.hmrc.lightweightcontactevents.models.VOADataTransfer
 import uk.gov.hmrc.lightweightcontactevents.repository.QueuedDataTransferRepository
 import uk.gov.hmrc.lightweightcontactevents.utils.LightweightFixture._
+
 import java.time.{Clock, Instant, ZoneId}
 import scala.concurrent.ExecutionContext.Implicits.global
-import scala.concurrent.{ExecutionContext, Future}
+import scala.concurrent.Future
 import scala.language.reflectiveCalls
 import scala.util.Success
 
@@ -42,7 +41,7 @@ class VoaDataTransferExporterSpec extends AnyFlatSpec with Matchers with Mockito
   val nowMinus12Days = now.minusSeconds(60 * 60 * 24 * 12)
 
   val clock = new Clock {
-    var now = Instant.now()
+    private val now = Instant.now()
     override def getZone: ZoneId = ZoneId.systemDefault()
 
     override def withZone(zone: ZoneId): Clock = ???
@@ -63,12 +62,12 @@ class VoaDataTransferExporterSpec extends AnyFlatSpec with Matchers with Mockito
 
     when(dataTransferConnector.transfer(any(classOf[VOADataTransfer]))(any(classOf[HeaderCarrier]))).thenReturn(Future.successful(Success(200)))
     when(dataTransferRepository.findBatch()).thenReturn(Future.successful(data))
-    when(dataTransferRepository.removeById(any(classOf[BSONObjectID]), any(classOf[GetLastError]))(any(classOf[ExecutionContext]))).thenReturn(Future.successful(mock[WriteResult]))
+    when(dataTransferRepository.removeById(anyString)).thenReturn(Future.unit)
 
     await(voaDataTransferExporter.exportBatch())
 
     verify(dataTransferConnector, times(1)).transfer(eqTo(transfer.voaDataTransfer))(any(classOf[HeaderCarrier]))
-    verify(dataTransferRepository, times(1)).removeById(eqTo(transfer.id), any(classOf[GetLastError]))(any(classOf[ExecutionContext]))
+    verify(dataTransferRepository, times(1)).removeById(eqTo(transfer.id))
 
   }
 
@@ -84,15 +83,15 @@ class VoaDataTransferExporterSpec extends AnyFlatSpec with Matchers with Mockito
 
     when(dataTransferConnector.transfer(any(classOf[VOADataTransfer]))(any(classOf[HeaderCarrier]))).thenReturn(Future.successful(Success(404)))
     when(dataTransferRepository.findBatch()).thenReturn(Future.successful(data))
-    when(dataTransferRepository.removeById(any(classOf[BSONObjectID]), any(classOf[GetLastError]))(any(classOf[ExecutionContext]))).thenReturn(Future.successful(mock[WriteResult]))
-    when(dataTransferRepository.updateTime(any(classOf[BSONObjectID]), any(classOf[Instant]))(any(classOf[ExecutionContext]))).thenReturn(Future.successful(()))
+    when(dataTransferRepository.removeById(anyString)).thenReturn(Future.unit)
+    when(dataTransferRepository.updateTime(anyString, any(classOf[Instant]))).thenReturn(Future.unit)
 
     await(voaDataTransferExporter.exportBatch())
 
     verify(dataTransferConnector, times(1)).transfer(eqTo(transfer.voaDataTransfer))(any(classOf[HeaderCarrier]))
-    verify(dataTransferRepository, times(0)).removeById(eqTo(transfer.id), any(classOf[GetLastError]))(any(classOf[ExecutionContext]))
+    verify(dataTransferRepository, times(0)).removeById(eqTo(transfer.id))
 
-    verify(dataTransferRepository, times(1)).updateTime(eqTo(transfer.id), eqTo(clock.now))(any(classOf[ExecutionContext]))
+    verify(dataTransferRepository, times(1)).updateTime(eqTo(transfer.id), eqTo(clock.instant()))
 
   }
 
@@ -108,15 +107,15 @@ class VoaDataTransferExporterSpec extends AnyFlatSpec with Matchers with Mockito
 
     when(dataTransferConnector.transfer(any(classOf[VOADataTransfer]))(any(classOf[HeaderCarrier]))).thenReturn(Future.successful(Success(404)))
     when(dataTransferRepository.findBatch()).thenReturn(Future.successful(data))
-    when(dataTransferRepository.removeById(any(classOf[BSONObjectID]), any(classOf[GetLastError]))(any(classOf[ExecutionContext]))).thenReturn(Future.successful(mock[WriteResult]))
-    when(dataTransferRepository.updateTime(any(classOf[BSONObjectID]), any(classOf[Instant]))(any(classOf[ExecutionContext]))).thenReturn(Future.successful(()))
+    when(dataTransferRepository.removeById(anyString)).thenReturn(Future.unit)
+    when(dataTransferRepository.updateTime(anyString, any(classOf[Instant]))).thenReturn(Future.unit)
 
     await(voaDataTransferExporter.exportBatch())
 
     verify(dataTransferConnector, times(0)).transfer(eqTo(transfer.voaDataTransfer))(any(classOf[HeaderCarrier]))
-    verify(dataTransferRepository, times(1)).removeById(eqTo(transfer.id), any(classOf[GetLastError]))(any(classOf[ExecutionContext]))
+    verify(dataTransferRepository, times(1)).removeById(eqTo(transfer.id))
 
-    verify(dataTransferRepository, times(0)).updateTime(eqTo(transfer.id), eqTo(clock.now))(any(classOf[ExecutionContext]))
+    verify(dataTransferRepository, times(0)).updateTime(eqTo(transfer.id), eqTo(clock.instant()))
 
   }
 }

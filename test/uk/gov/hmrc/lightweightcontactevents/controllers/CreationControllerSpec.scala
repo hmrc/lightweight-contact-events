@@ -19,6 +19,7 @@ package uk.gov.hmrc.lightweightcontactevents.controllers
 
 import org.mockito.Matchers.any
 import org.mockito.Mockito.when
+import org.scalatest.EitherValues
 import org.scalatestplus.mockito.MockitoSugar
 import play.api.{Configuration, Environment}
 import play.api.libs.json.Json
@@ -31,9 +32,9 @@ import uk.gov.hmrc.lightweightcontactevents.models.{ConfirmedContactDetails, Pro
 import uk.gov.hmrc.lightweightcontactevents.repository.QueuedDataTransferRepository
 import uk.gov.hmrc.lightweightcontactevents.utils.Initialize
 
-import scala.concurrent.{ExecutionContext, Future}
+import scala.concurrent.Future
 
-class CreationControllerSpec extends SpecBase with MockitoSugar {
+class CreationControllerSpec extends SpecBase with MockitoSugar with EitherValues {
 
   val configuration = injector.instanceOf[Configuration]
   val environment = injector.instanceOf[Environment]
@@ -194,11 +195,11 @@ class CreationControllerSpec extends SpecBase with MockitoSugar {
     val result = controller.createContact(Some(Json.parse(contactJson)))
 
     result.isRight mustBe true
-    result.right.get.contact mustBe ConfirmedContactDetails("full name", "email", "tel")
-    result.right.get.propertyAddress mustBe PropertyAddress("line1", Some("line2"), "town", Some("county"), "postcode")
-    result.right.get.enquiryCategoryMsg mustBe "Council Tax"
-    result.right.get.subEnquiryCategoryMsg mustBe "seq"
-    result.right.get.message mustBe "message"
+    result.value.contact mustBe ConfirmedContactDetails("full name", "email", "tel")
+    result.value.propertyAddress mustBe PropertyAddress("line1", Some("line2"), "town", Some("county"), "postcode")
+    result.value.enquiryCategoryMsg mustBe "Council Tax"
+    result.value.subEnquiryCategoryMsg mustBe "seq"
+    result.value.message mustBe "message"
   }
 
   "return 200 for a POST carrying an enquiry for council tax" in {
@@ -254,7 +255,7 @@ class CreationControllerSpec extends SpecBase with MockitoSugar {
 
   "return 500 (internal server errro) when repository is unable to enqueue request " in {
     val repositoryMock = mock[QueuedDataTransferRepository]
-    when(repositoryMock.insert(any[QueuedDataTransfer])(any[ExecutionContext])).thenReturn(Future.failed(new Exception("unable to store")))
+    when(repositoryMock.insert(any[QueuedDataTransfer])).thenReturn(Future.failed(new Exception("Unable to store")))
 
     val result = new CreationController(repositoryMock, initialize, action, stub).create()(fakeRequestWithJson(contactJson))
     status(result) mustBe INTERNAL_SERVER_ERROR
