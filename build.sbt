@@ -29,7 +29,8 @@ lazy val root = Project(appName, file("."))
   .settings(
     libraryDependencies ++= Dependencies.appDependencies,
     retrieveManaged := true,
-    scalaVersion := "2.13.8"
+    scalaVersion := "2.13.8",
+    maintainer := "voa.service.optimisation@digital.hmrc.gov.uk"
   )
   .configs(IntegrationTest)
   .settings(inConfig(IntegrationTest)(Defaults.itSettings): _*)

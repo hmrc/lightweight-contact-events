@@ -17,15 +17,31 @@
 package uk.gov.hmrc.lightweightcontactevents.models
 
 import org.bson.types.ObjectId
-import play.api.libs.json.{Format, Json}
+import play.api.libs.json._
 import uk.gov.hmrc.mongo.play.json.formats.MongoFormats.mongoEntity
 
-import java.time.Instant
+import java.time.{Instant, ZoneOffset, ZonedDateTime}
+import scala.util.Try
 
 case class QueuedDataTransfer(voaDataTransfer: VOADataTransfer, fistError: Option[Instant] = None, id: String = ObjectId.get.toHexString)
 
 
 object QueuedDataTransfer {
+
+  implicit val instantWrites: Writes[Instant] = {
+    case instant: Instant => JsString(instant.atZone(ZoneOffset.UTC).toString)
+    case _ => JsNull
+  }
+
+  implicit val instantReads: Reads[Instant] = Reads[Instant] {
+    case JsString(str) =>
+      Try(JsSuccess(ZonedDateTime.parse(str).toInstant))
+        .getOrElse(JsError("error.invalid.dateformat"))
+    case JsNull => JsSuccess(null)
+    case _ => JsError("error.expected.string")
+  }
+
+  implicit val instantFormat: Format[Instant] = Format(instantReads, instantWrites)
 
   implicit val format: Format[QueuedDataTransfer] = mongoEntity {
     Json.format[QueuedDataTransfer]

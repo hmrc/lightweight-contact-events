@@ -17,9 +17,8 @@
 package uk.gov.hmrc.lightweightcontactevents.infrastructure
 
 import java.time.{Clock, Duration, Instant}
-
 import javax.inject.{Inject, Singleton}
-import play.api.Logger
+import play.api.Logging
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.lightweightcontactevents.connectors.VoaDataTransferConnector
 import uk.gov.hmrc.lightweightcontactevents.models.{QueuedDataTransfer, VOADataTransfer}
@@ -32,17 +31,18 @@ import scala.util.{Failure, Success}
 class VoaDataTransferExporter @Inject() (dataTransferConnector: VoaDataTransferConnector,
                                          dataTransferRepository: QueuedDataTransferRepository,
                                          clock: Clock = Clock.systemDefaultZone()
-                                        ) {
+                                        ) extends Logging {
 
-  val sevenDaysSeconds = 7L * 24L * 60L * 60L
+  private val sevenDaysSeconds = 7L * 24L * 60L * 60L
 
   def exportBatch()(implicit ec: ExecutionContext): Future[Unit] = {
-    dataTransferRepository.findBatch().flatMap(x => {
-      Logger(getClass).info(s"Found ${x.size} transfer(s) to export")
-      processSequentially(x)})
+    dataTransferRepository.findBatch().flatMap(seq => {
+      logger.info(s"Found ${seq.size} transfer(s) to export")
+      processSequentially(seq)
+    })
   }
 
-  private def processSequentially(transfers: List[QueuedDataTransfer])(implicit ec: ExecutionContext): Future[Unit] =
+  private def processSequentially(transfers: Seq[QueuedDataTransfer])(implicit ec: ExecutionContext): Future[Unit] =
     if (transfers.isEmpty) {
       Future.unit
     } else {
@@ -52,23 +52,21 @@ class VoaDataTransferExporter @Inject() (dataTransferConnector: VoaDataTransferC
   def processTransfer(transfer: QueuedDataTransfer)(implicit ec: ExecutionContext): Future[Unit] = {
     transfer.fistError match {
         //if error is permanent, remove element
-      case Some(x) if (Duration.between(x, Instant.now(clock)).getSeconds() > sevenDaysSeconds) => removeTransferWithError(transfer)
-      case _ => {
+      case Some(x) if Duration.between(x, Instant.now(clock)).getSeconds > sevenDaysSeconds => removeTransferWithError(transfer)
+      case _ =>
         val promise = Promise[Unit]()
         sendToVoa(transfer.voaDataTransfer).onComplete {
-          case Success(_) => {
+          case Success(_) =>
             dataTransferRepository.removeById(transfer.id).onComplete(x => promise.complete(x.map(_ =>())))
-          }case Failure(_) => {
+          case Failure(_) =>
             recordError(transfer).onComplete(x => promise.complete(x.map(_ => ())))
-          }
         }
         promise.future
-      }
     }
   }
 
   def removeTransferWithError(transfer: QueuedDataTransfer)(implicit ec: ExecutionContext): Future[Unit] = {
-    Logger(getClass).warn(s"removing element with permanent error : ${transfer}")//TODO - send details only to SPLUNK
+    logger.warn(s"removing element with permanent error : $transfer") //TODO - send details only to SPLUNK
     dataTransferRepository.removeById(transfer.id).map(_ => ())
   }
 
@@ -76,7 +74,7 @@ class VoaDataTransferExporter @Inject() (dataTransferConnector: VoaDataTransferC
     val hc: HeaderCarrier = new HeaderCarrier()
     dataTransferConnector.transfer(transfer)(hc).flatMap {
       case Success(statusCode) if statusCode < 300 => Future.unit
-      case Success(statusCode) => Future.failed(new RuntimeException(s"Unable to send data to VOA, StatusCode: ${statusCode}"))
+      case Success(statusCode) => Future.failed(new RuntimeException(s"Unable to send data to VOA, StatusCode: $statusCode"))
       case Failure(exception) => Future.failed(new RuntimeException(s"Unable to send data to VOA", exception))
     }
   }

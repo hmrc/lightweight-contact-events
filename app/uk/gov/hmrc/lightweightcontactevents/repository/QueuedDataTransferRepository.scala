@@ -17,13 +17,13 @@
 package uk.gov.hmrc.lightweightcontactevents.repository
 
 import org.mongodb.scala.bson.conversions.Bson
-import org.mongodb.scala.model.Updates.{push, set}
-import org.mongodb.scala.model.{Filters, FindOneAndReplaceOptions, FindOneAndUpdateOptions, ReturnDocument, Updates}
+import org.mongodb.scala.model.Updates.set
+import org.mongodb.scala.model.{Filters, FindOneAndReplaceOptions, FindOneAndUpdateOptions, ReturnDocument}
 import org.mongodb.scala.{ReadPreference, SingleObservable}
 import play.api.Logging
 import uk.gov.hmrc.lightweightcontactevents.models.QueuedDataTransfer
 import uk.gov.hmrc.mongo.MongoComponent
-import uk.gov.hmrc.mongo.play.json.PlayMongoRepository
+import uk.gov.hmrc.mongo.play.json.{Codecs, PlayMongoRepository}
 
 import java.time.Instant
 import javax.inject.{Inject, Singleton}
@@ -38,7 +38,10 @@ class QueuedDataTransferRepository @Inject()(
     collectionName = "dataTransferQueue",
     mongoComponent = mongo,
     domainFormat = QueuedDataTransfer.format,
-    indexes = Seq.empty
+    indexes = Seq.empty,
+    extraCodecs = Seq(
+      Codecs.playFormatCodec(QueuedDataTransfer.instantFormat)
+    )
   ) with Logging {
 
   val _id = "_id"
@@ -66,30 +69,32 @@ class QueuedDataTransferRepository @Inject()(
 
   def findBatch(batchSize: Int = defaultBatchSize,
                 readPreference: ReadPreference = ReadPreference.primaryPreferred()
-               ): Future[List[QueuedDataTransfer]] = {
-
-    //    collection.find(Json.obj(), Option.empty[JsObject]).options(QueryOpts().batchSize(batchSize))
-    //        .cursor[QueuedDataTransfer](readPreference)
-    //        .collect[List](batchSize, FailOnError[List[QueuedDataTransfer]]())
-
-    Future.successful(List.empty)
-  }
+               ): Future[Seq[QueuedDataTransfer]] =
+    collection.withReadPreference(readPreference)
+      .find()
+      .limit(batchSize)
+      .toFuture()
 
   def insert(transfer: QueuedDataTransfer): Future[Unit] =
-    collection.findOneAndReplace(byId(transfer.id), transfer, FindOneAndReplaceOptions().upsert(true)).toFutureUnit
+    collection.findOneAndReplace(byId(transfer.id), transfer, FindOneAndReplaceOptions().upsert(true))
+      .toFutureUnit
 
   def bulkInsert(entities: Seq[QueuedDataTransfer]): Future[Unit] =
-    collection.insertMany(entities).toFutureUnit
+    collection.insertMany(entities)
+      .toFutureUnit
 
   def findById(id: String, readPreference: ReadPreference = ReadPreference.primaryPreferred()): Future[Option[QueuedDataTransfer]] =
     collection.withReadPreference(readPreference)
-      .find(byId(id)).first().toFutureOption()
+      .find(byId(id)).first()
+      .toFutureOption()
 
   def removeById(id: String): Future[Unit] =
-    collection.deleteOne(byId(id)).toFutureUnit
+    collection.deleteOne(byId(id))
+      .toFutureUnit
 
   def count: Future[Option[Long]] =
-    collection.countDocuments().toFutureOption()
+    collection.countDocuments()
+      .toFutureOption()
 
   private def byId(id: String): Bson =
     Filters.equal(_id, id)

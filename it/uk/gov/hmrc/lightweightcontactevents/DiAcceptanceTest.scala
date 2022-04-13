@@ -29,14 +29,15 @@ import uk.gov.hmrc.mongo.play.PlayMongoModule
 trait DiAcceptanceTest extends AnyWordSpecLike with BeforeAndAfterAll with Matchers with FutureAwaits
   with DefaultAwaitTimeout with GuiceOneAppPerSuite {
 
-  def testDbPrefix(): String
+  def testDbPrefix: String = getClass.getSimpleName
 
   def fakeApplicationBuilder(): GuiceApplicationBuilder = new GuiceApplicationBuilder()
     .configure(customConfigs)
     .bindings(new PlayMongoModule)
 
-  def testDbName = s"${testDbPrefix()}${java.util.UUID.randomUUID.toString.replaceAll("-", "")}"
-  final val testDbUri = s"mongodb://localhost:27017/$testDbName?rm.tcpNoDelay=true&rm.nbChannelsPerNode=3&writeConcern=unacknowledged"
+  def testDbName = s"$testDbPrefix${java.util.UUID.randomUUID.toString.replaceAll("-", "")}"
+
+  lazy val testDbUri = s"mongodb://localhost:27017/$testDbName"
 
   def customConfigs: Map[String, Any] = Map(
     "mongodb.uri" -> testDbUri
@@ -47,7 +48,7 @@ trait DiAcceptanceTest extends AnyWordSpecLike with BeforeAndAfterAll with Match
   override final def fakeApplication(): Application = fakeApplicationBuilder().build()
 
   override protected def afterAll(): Unit = {
-    await(mongoComponent.database.drop().toFutureOption())
+//    await(mongoComponent.database.drop().toFutureOption())
     mongoComponent.client.close()
   }
 
