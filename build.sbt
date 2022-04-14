@@ -1,6 +1,5 @@
 import sbt.Keys._
 import sbt._
-import Dependencies.appDependencies
 import play.sbt.PlayImport.PlayKeys
 import scoverage.ScoverageKeys
 import uk.gov.hmrc.DefaultBuildSettings.{defaultSettings, integrationTestSettings, scalaSettings}
@@ -20,7 +19,7 @@ lazy val root = Project(appName, file("."))
     ScoverageKeys.coverageMinimumStmtTotal := 90,
     ScoverageKeys.coverageFailOnMinimum := true,
     ScoverageKeys.coverageHighlighting := true,
-    parallelExecution in sbt.Test := false,
+    Test / parallelExecution := false,
     PlayKeys.playDefaultPort := 7312
   )
   .settings(majorVersion := 1)
@@ -28,10 +27,10 @@ lazy val root = Project(appName, file("."))
   .settings(publishingSettings: _*)
   .settings(defaultSettings(): _*)
   .settings(
-    libraryDependencies ++= appDependencies,
+    libraryDependencies ++= Dependencies.appDependencies,
     retrieveManaged := true,
-    evictionWarningOptions in update := EvictionWarningOptions.default.withWarnScalaVersionEviction(false),
-    scalaVersion := "2.12.12"
+    scalaVersion := "2.13.8",
+    maintainer := "voa.service.optimisation@digital.hmrc.gov.uk"
   )
   .configs(IntegrationTest)
   .settings(inConfig(IntegrationTest)(Defaults.itSettings): _*)
@@ -40,4 +39,3 @@ lazy val root = Project(appName, file("."))
     Resolver.bintrayRepo("hmrc", "releases"),
     Resolver.jcenterRepo
   ))
-

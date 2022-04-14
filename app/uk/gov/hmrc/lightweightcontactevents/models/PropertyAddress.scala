@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 HM Revenue & Customs
+ * Copyright 2022 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,5 +21,5 @@ import play.api.libs.json._
 case class PropertyAddress(addressLine1: String, addressLine2: Option[String], town: String, county: Option[String], postcode: String)
 
 object PropertyAddress {
-  implicit val format = Json.format[PropertyAddress]
+  implicit val format: OFormat[PropertyAddress] = Json.format[PropertyAddress]
 }

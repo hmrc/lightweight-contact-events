@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 HM Revenue & Customs
+ * Copyright 2022 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,13 +26,12 @@ import play.api.inject.Injector
 import play.api.libs.json.{JsValue, Writes}
 import play.api.mvc.AnyContentAsEmpty
 import play.api.test.FakeRequest
-import reactivemongo.api.commands.WriteResult
 import uk.gov.hmrc.http.{HeaderCarrier, HttpReads, HttpResponse}
 import uk.gov.hmrc.lightweightcontactevents.models.QueuedDataTransfer
 import uk.gov.hmrc.lightweightcontactevents.repository.QueuedDataTransferRepository
 import uk.gov.hmrc.http.HttpClient
 
-import scala.concurrent.{ExecutionContext, Future}
+import scala.concurrent.Future
 
 trait SpecBase extends PlaySpec with GuiceOneAppPerSuite with MockitoSugar {
 
@@ -47,14 +46,15 @@ trait SpecBase extends PlaySpec with GuiceOneAppPerSuite with MockitoSugar {
   def getHttpMock(returnedStatus: Int): HttpClient = {
     val httpMock = mock[HttpClient]
     when(httpMock.POST(anyString, any[JsValue], any[Seq[(String, String)]])(any[Writes[JsValue]], any[HttpReads[Any]],
-      any[HeaderCarrier], any())) thenReturn Future.successful(HttpResponse(returnedStatus, None))
-    when(httpMock.GET(anyString, any[Seq[(String,String)]], any[Seq[(String,String)]])(any[HttpReads[Any]], any[HeaderCarrier], any())) thenReturn Future.successful(HttpResponse(returnedStatus, None))
+      any[HeaderCarrier], any())) thenReturn Future.successful(HttpResponse(returnedStatus, ""))
+    when(httpMock.GET(anyString, any[Seq[(String,String)]], any[Seq[(String,String)]])(any[HttpReads[Any]], any[HeaderCarrier], any())) thenReturn
+      Future.successful(HttpResponse(returnedStatus, ""))
     httpMock
   }
 
   def getQueuedDataTransferRepository(): QueuedDataTransferRepository = {
     val repositoryMock = mock[QueuedDataTransferRepository]
-    when(repositoryMock.insert(any[QueuedDataTransfer])(any[ExecutionContext])).thenReturn(Future.successful(mock[WriteResult]))
+    when(repositoryMock.insert(any[QueuedDataTransfer])).thenReturn(Future.unit)
     repositoryMock
   }
 

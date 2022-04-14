@@ -14,12 +14,12 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.lightweightcontactevents.utils
+package uk.gov.hmrc.lightweightcontactevents.util
 
 import uk.gov.hmrc.lightweightcontactevents.models.ConfirmedContactDetails.toLegacyContact
-import uk.gov.hmrc.lightweightcontactevents.models.{ConfirmedContactDetails, Contact, PropertyAddress, QueuedDataTransfer, VOADataTransfer}
+import uk.gov.hmrc.lightweightcontactevents.models._
 
-object LightweightFixture {
+object LightweightITFixture {
 
   val message = "MSG"
   val subject = "Valuation Office Agency Contact Form"

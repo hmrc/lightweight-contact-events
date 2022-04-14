@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 HM Revenue & Customs
+ * Copyright 2022 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,18 +16,44 @@
 
 package uk.gov.hmrc.lightweightcontactevents.models
 
-import java.time.Instant
+import org.bson.types.ObjectId
+import org.mongodb.scala.bson.ObjectId
+import play.api.libs.json._
 
-import play.api.libs.json.Json
-import reactivemongo.bson.BSONObjectID
+import java.time.{Instant, ZoneOffset, ZonedDateTime}
+import scala.annotation.tailrec
+import scala.util.Try
 
-case class QueuedDataTransfer(voaDataTransfer: VOADataTransfer, fistError: Option[Instant] = None, id: BSONObjectID = BSONObjectID.generate)
+case class QueuedDataTransfer(voaDataTransfer: VOADataTransfer, firstError: Option[Instant] = None, _id: ObjectId = ObjectId.get())
 
 
 object QueuedDataTransfer {
-  import uk.gov.hmrc.mongo.json.ReactiveMongoFormats.{objectIdFormats, mongoEntity}
 
-  implicit val format = mongoEntity {
-    Json.format[QueuedDataTransfer]
+  implicit object ObjectIdFormat extends OFormat[ObjectId] {
+    def writes(o: ObjectId): JsObject = Json.obj("$oid" -> o.toHexString)
+
+    @tailrec
+    def reads(value: JsValue): JsResult[ObjectId] = value match {
+      case JsObject(obj) => reads(obj("$oid"))
+      case JsString(str) => JsSuccess(new ObjectId(str))
+      case _ => JsError("error.expected.object")
+    }
   }
+
+  implicit val instantWrites: Writes[Instant] = {
+    case instant: Instant => JsString(instant.atZone(ZoneOffset.UTC).toString)
+    case _ => JsNull
+  }
+
+  implicit val instantReads: Reads[Instant] = Reads[Instant] {
+    case JsString(str) =>
+      Try(JsSuccess(ZonedDateTime.parse(str).toInstant))
+        .getOrElse(JsError("error.invalid.dateformat"))
+    case _ => JsError("error.expected.string")
+  }
+
+  implicit val instantFormat: Format[Instant] = Format(instantReads, instantWrites)
+
+  implicit val format: Format[QueuedDataTransfer] = Json.format[QueuedDataTransfer]
+
 }

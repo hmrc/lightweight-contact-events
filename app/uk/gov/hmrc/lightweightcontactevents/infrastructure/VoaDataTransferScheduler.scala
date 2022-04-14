@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 HM Revenue & Customs
+ * Copyright 2022 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,44 +18,35 @@ package uk.gov.hmrc.lightweightcontactevents.infrastructure
 
 import akka.actor.Scheduler
 import akka.event.EventStream
-import javax.inject.{Inject, Singleton}
-import org.joda.time.Duration
-import play.modules.reactivemongo.ReactiveMongoComponent
-import uk.gov.hmrc.lock.{LockKeeper, LockRepository}
+import play.api.Logger
+import uk.gov.hmrc.lightweightcontactevents.infrastructure.LockedJobScheduler.timeout
+import uk.gov.hmrc.mongo.lock.{LockService, MongoLockRepository}
 
+import javax.inject.{Inject, Singleton}
 import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
-class VoaDataTransferScheduler @Inject() (scheduler: Scheduler, eventStream: EventStream,
-                                          val schedule: DefaultRegularSchedule, voaDataTransferExporter: VoaDataTransferExporter,
-                                          reactiveMongoComponent: ReactiveMongoComponent, lock: VoaDataTransferLockKeeper
-                                         )(implicit val ec: ExecutionContext)
+class VoaDataTransferScheduler @Inject()(scheduler: Scheduler,
+                                         eventStream: EventStream,
+                                         val schedule: DefaultRegularSchedule,
+                                         voaDataTransferExporter: VoaDataTransferExporter,
+                                         mongoLockRepository: MongoLockRepository
+                                        )(implicit val ec: ExecutionContext)
 
-  extends LockedJobScheduler[ExportEvent](lock, scheduler, eventStream) {
+  extends LockedJobScheduler[ExportEvent](scheduler, eventStream) {
 
+  override protected val lockService: LockService = LockService(mongoLockRepository, "VoaDataTransferLock", timeout.duration)
+  override protected val logger: Logger = Logger(getClass)
 
   override val name: String = this.getClass.getName
 
-  override def runJob()(implicit ec: ExecutionContext): Future[ExportEvent] = {
-    voaDataTransferExporter.exportBatch().map(_ => ExportSucess).recover {
-      case ex: Exception => ExportFailed
-    }
+  override def runJob()(implicit ec: ExecutionContext): Future[ExportEvent] =
+    voaDataTransferExporter.exportBatch()
+      .map(_ => ExportSuccess)
+      .recover {
+        case ex: Exception =>
+          logger.error("Export failed", ex)
+          ExportFailed
+      }
 
-    //Future.successful(ExportSucess)
-  }
-}
-
-@Singleton
-class VoaDataTransferLockKeeper @Inject()(reactiveMongoComponent: ReactiveMongoComponent) extends LockKeeper {
-
-  val lockRepository =  {
-    implicit val db = reactiveMongoComponent.mongoConnector.db
-    new LockRepository()
-  }
-
-  override def lockId: String = this.getClass.getName
-
-  override val forceLockReleaseAfter: Duration = Duration.standardHours(1)
-
-  override def repo: LockRepository = lockRepository
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 HM Revenue & Customs
+ * Copyright 2022 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,7 +17,7 @@
 package uk.gov.hmrc.lightweightcontactevents.models
 
 import play.api.Logger
-import play.api.libs.json.Json
+import play.api.libs.json.{Json, OFormat}
 import uk.gov.hmrc.lightweightcontactevents.models.ConfirmedContactDetails.toLegacyContact
 import uk.gov.hmrc.lightweightcontactevents.utils.Initialize
 
@@ -33,7 +33,8 @@ case class VOADataTransfer(contact: ConfirmedContactDetailsLegacy,
 /**/
 
 object VOADataTransfer {
-  implicit val format = Json.format[VOADataTransfer]
+
+  implicit val format: OFormat[VOADataTransfer] = Json.format[VOADataTransfer]
 
   def apply(ctc: Contact, init: Initialize): VOADataTransfer = {
     VOADataTransfer(toLegacyContact(ctc.contact),

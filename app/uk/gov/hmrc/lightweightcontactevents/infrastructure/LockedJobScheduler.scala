@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 HM Revenue & Customs
+ * Copyright 2022 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,39 +20,50 @@ import akka.actor.Scheduler
 import akka.event.EventStream
 import akka.util.Timeout
 import play.api.Logger
-import uk.gov.hmrc.lock.LockKeeper
+import uk.gov.hmrc.mongo.lock.LockService
+
 import scala.concurrent.duration._
+import scala.concurrent.{ExecutionContext, Future}
 import scala.language.postfixOps
 
-import scala.concurrent.{ExecutionContext, Future}
+object LockedJobScheduler {
+  implicit val timeout: Timeout = Timeout(1 hour)
+}
 
-abstract class LockedJobScheduler[Event <: AnyRef](lock: LockKeeper, scheduler: Scheduler, eventStream: EventStream) {
-  implicit val t: Timeout = 1 hour
+abstract class LockedJobScheduler[Event <: AnyRef](scheduler: Scheduler, eventStream: EventStream) {
 
   val name: String
   val schedule: Schedule
+
+  protected def lockService: LockService
+
+  protected def logger: Logger
+
   def runJob()(implicit ec: ExecutionContext): Future[Event]
 
-  def start()(implicit ec: ExecutionContext) {
+  def start()(implicit ec: ExecutionContext): Unit = {
     scheduleNextImport()
   }
 
   private def run()(implicit ec: ExecutionContext) = {
-    Logger(getClass).info(s"Starting job: $name")
-    runJob().map { event =>
-      eventStream.publish(event)
+    logger.info(s"Starting job: $name")
+    runJob().map {
+      eventStream.publish
     } recoverWith {
       case e: Exception =>
-        Logger(getClass).error(s"Error running job: $name", e)
+        logger.error(s"Error running job: $name", e)
         Future.failed(e)
     }
   }
 
-  private def scheduleNextImport()(implicit ec: ExecutionContext) {
-    val t = schedule.timeUntilNextRun
-    Logger(getClass).info(s"Scheduling $name to run in: $t")
-    scheduler.scheduleOnce(t) {
-      lock.tryLock { run } onComplete { _ => scheduleNextImport() }
+  private def scheduleNextImport()(implicit ec: ExecutionContext): Unit = {
+    val delay = schedule.timeUntilNextRun()
+    logger.info(s"Scheduling $name to run in: $delay")
+    scheduler.scheduleOnce(delay) {
+      lockService.withLock {
+        run()
+      } onComplete { _ => scheduleNextImport() }
     }
   }
+
 }
