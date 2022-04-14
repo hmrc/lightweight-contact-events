@@ -50,14 +50,14 @@ class VoaDataTransferExporter @Inject() (dataTransferConnector: VoaDataTransferC
     }
 
   def processTransfer(transfer: QueuedDataTransfer)(implicit ec: ExecutionContext): Future[Unit] = {
-    transfer.fistError match {
+    transfer.firstError match {
         //if error is permanent, remove element
       case Some(x) if Duration.between(x, Instant.now(clock)).getSeconds > sevenDaysSeconds => removeTransferWithError(transfer)
       case _ =>
         val promise = Promise[Unit]()
         sendToVoa(transfer.voaDataTransfer).onComplete {
           case Success(_) =>
-            dataTransferRepository.removeById(transfer.id).onComplete(x => promise.complete(x.map(_ =>())))
+            dataTransferRepository.removeById(transfer._id).onComplete(x => promise.complete(x.map(_ =>())))
           case Failure(_) =>
             recordError(transfer).onComplete(x => promise.complete(x.map(_ => ())))
         }
@@ -67,7 +67,7 @@ class VoaDataTransferExporter @Inject() (dataTransferConnector: VoaDataTransferC
 
   def removeTransferWithError(transfer: QueuedDataTransfer)(implicit ec: ExecutionContext): Future[Unit] = {
     logger.warn(s"removing element with permanent error : $transfer") //TODO - send details only to SPLUNK
-    dataTransferRepository.removeById(transfer.id).map(_ => ())
+    dataTransferRepository.removeById(transfer._id).map(_ => ())
   }
 
   def sendToVoa(transfer: VOADataTransfer)(implicit ec: ExecutionContext): Future[Unit] = {
@@ -80,8 +80,8 @@ class VoaDataTransferExporter @Inject() (dataTransferConnector: VoaDataTransferC
   }
 
   private def recordError(transfer: QueuedDataTransfer): Future[Unit] =
-    if (transfer.fistError.isEmpty) {
-      dataTransferRepository.updateTime(transfer.id, Instant.now(clock))
+    if (transfer.firstError.isEmpty) {
+      dataTransferRepository.updateTime(transfer._id, Instant.now(clock))
     } else {
       Future.unit
     }

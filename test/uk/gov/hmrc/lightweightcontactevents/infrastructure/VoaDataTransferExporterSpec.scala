@@ -16,8 +16,9 @@
 
 package uk.gov.hmrc.lightweightcontactevents.infrastructure
 
-import org.mockito.Matchers.{any, anyString, eq => eqTo}
+import org.mockito.Matchers.{any, eq => eqTo}
 import org.mockito.Mockito.{times, verify, when}
+import org.mongodb.scala.bson.ObjectId
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
 import org.scalatestplus.mockito.MockitoSugar
@@ -61,12 +62,12 @@ class VoaDataTransferExporterSpec extends AnyFlatSpec with Matchers with Mockito
 
     when(dataTransferConnector.transfer(any(classOf[VOADataTransfer]))(any(classOf[HeaderCarrier]))).thenReturn(Future.successful(Success(200)))
     when(dataTransferRepository.findBatch()).thenReturn(Future.successful(data))
-    when(dataTransferRepository.removeById(anyString)).thenReturn(Future.unit)
+    when(dataTransferRepository.removeById(any(classOf[ObjectId]))).thenReturn(Future.unit)
 
     await(voaDataTransferExporter.exportBatch())
 
     verify(dataTransferConnector, times(1)).transfer(eqTo(transfer.voaDataTransfer))(any(classOf[HeaderCarrier]))
-    verify(dataTransferRepository, times(1)).removeById(eqTo(transfer.id))
+    verify(dataTransferRepository, times(1)).removeById(eqTo(transfer._id))
 
   }
 
@@ -82,15 +83,15 @@ class VoaDataTransferExporterSpec extends AnyFlatSpec with Matchers with Mockito
 
     when(dataTransferConnector.transfer(any(classOf[VOADataTransfer]))(any(classOf[HeaderCarrier]))).thenReturn(Future.successful(Success(404)))
     when(dataTransferRepository.findBatch()).thenReturn(Future.successful(data))
-    when(dataTransferRepository.removeById(anyString)).thenReturn(Future.unit)
-    when(dataTransferRepository.updateTime(anyString, any(classOf[Instant]))).thenReturn(Future.unit)
+    when(dataTransferRepository.removeById(any(classOf[ObjectId]))).thenReturn(Future.unit)
+    when(dataTransferRepository.updateTime(any(classOf[ObjectId]), any(classOf[Instant]))).thenReturn(Future.unit)
 
     await(voaDataTransferExporter.exportBatch())
 
     verify(dataTransferConnector, times(1)).transfer(eqTo(transfer.voaDataTransfer))(any(classOf[HeaderCarrier]))
-    verify(dataTransferRepository, times(0)).removeById(eqTo(transfer.id))
+    verify(dataTransferRepository, times(0)).removeById(eqTo(transfer._id))
 
-    verify(dataTransferRepository, times(1)).updateTime(eqTo(transfer.id), eqTo(clock.instant()))
+    verify(dataTransferRepository, times(1)).updateTime(eqTo(transfer._id), eqTo(clock.instant()))
 
   }
 
@@ -101,20 +102,20 @@ class VoaDataTransferExporterSpec extends AnyFlatSpec with Matchers with Mockito
 
     val voaDataTransferExporter = new VoaDataTransferExporter(dataTransferConnector, dataTransferRepository, clock)
 
-    val transfer = aQueuedDataTransfer().copy(fistError = Option(nowMinus12Days))
+    val transfer = aQueuedDataTransfer().copy(firstError = Option(nowMinus12Days))
     val data = List(transfer)
 
     when(dataTransferConnector.transfer(any(classOf[VOADataTransfer]))(any(classOf[HeaderCarrier]))).thenReturn(Future.successful(Success(404)))
     when(dataTransferRepository.findBatch()).thenReturn(Future.successful(data))
-    when(dataTransferRepository.removeById(anyString)).thenReturn(Future.unit)
-    when(dataTransferRepository.updateTime(anyString, any(classOf[Instant]))).thenReturn(Future.unit)
+    when(dataTransferRepository.removeById(any(classOf[ObjectId]))).thenReturn(Future.unit)
+    when(dataTransferRepository.updateTime(any(classOf[ObjectId]), any(classOf[Instant]))).thenReturn(Future.unit)
 
     await(voaDataTransferExporter.exportBatch())
 
     verify(dataTransferConnector, times(0)).transfer(eqTo(transfer.voaDataTransfer))(any(classOf[HeaderCarrier]))
-    verify(dataTransferRepository, times(1)).removeById(eqTo(transfer.id))
+    verify(dataTransferRepository, times(1)).removeById(eqTo(transfer._id))
 
-    verify(dataTransferRepository, times(0)).updateTime(eqTo(transfer.id), eqTo(clock.instant()))
+    verify(dataTransferRepository, times(0)).updateTime(eqTo(transfer._id), eqTo(clock.instant()))
 
   }
 }

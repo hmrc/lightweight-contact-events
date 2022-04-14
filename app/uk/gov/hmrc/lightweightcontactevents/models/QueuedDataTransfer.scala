@@ -17,16 +17,28 @@
 package uk.gov.hmrc.lightweightcontactevents.models
 
 import org.bson.types.ObjectId
+import org.mongodb.scala.bson.ObjectId
 import play.api.libs.json._
-import uk.gov.hmrc.mongo.play.json.formats.MongoFormats.mongoEntity
 
 import java.time.{Instant, ZoneOffset, ZonedDateTime}
+import scala.annotation.tailrec
 import scala.util.Try
 
-case class QueuedDataTransfer(voaDataTransfer: VOADataTransfer, fistError: Option[Instant] = None, id: String = ObjectId.get.toHexString)
+case class QueuedDataTransfer(voaDataTransfer: VOADataTransfer, firstError: Option[Instant] = None, _id: ObjectId = ObjectId.get())
 
 
 object QueuedDataTransfer {
+
+  implicit object ObjectIdFormat extends OFormat[ObjectId] {
+    def writes(o: ObjectId): JsObject = Json.obj("$oid" -> o.toHexString)
+
+    @tailrec
+    def reads(value: JsValue): JsResult[ObjectId] = value match {
+      case JsObject(obj) => reads(obj("$oid"))
+      case JsString(str) => JsSuccess(new ObjectId(str))
+      case _ => JsError("error.expected.object")
+    }
+  }
 
   implicit val instantWrites: Writes[Instant] = {
     case instant: Instant => JsString(instant.atZone(ZoneOffset.UTC).toString)
@@ -37,14 +49,11 @@ object QueuedDataTransfer {
     case JsString(str) =>
       Try(JsSuccess(ZonedDateTime.parse(str).toInstant))
         .getOrElse(JsError("error.invalid.dateformat"))
-    case JsNull => JsSuccess(null)
     case _ => JsError("error.expected.string")
   }
 
   implicit val instantFormat: Format[Instant] = Format(instantReads, instantWrites)
 
-  implicit val format: Format[QueuedDataTransfer] = mongoEntity {
-    Json.format[QueuedDataTransfer]
-  }
+  implicit val format: Format[QueuedDataTransfer] = Json.format[QueuedDataTransfer]
 
 }

@@ -35,9 +35,7 @@ class QueuedDataTransferRepositorySpec extends DiAcceptanceTest with OptionValue
       val item = aQueuedDataTransfer()
       await(mongoRepository.insert(item))
 
-      val itemFromDb = await(mongoRepository.findById(item.id))
-
-      Console.println(itemFromDb)
+      val itemFromDb = await(mongoRepository.findById(item._id))
 
       itemFromDb.value mustBe item
     }
@@ -48,11 +46,11 @@ class QueuedDataTransferRepositorySpec extends DiAcceptanceTest with OptionValue
 
       val errorTime = Instant.now()
 
-      await(mongoRepository.updateTime(item.id, errorTime))
+      await(mongoRepository.updateTime(item._id, errorTime))
 
-      val itemFromDatabase = await(mongoRepository.findById(item.id))
+      val itemFromDatabase = await(mongoRepository.findById(item._id))
 
-      itemFromDatabase.value.fistError.value mustBe errorTime
+      itemFromDatabase.value.firstError.value mustBe errorTime
     }
 
     "Get batch of elements" in {
@@ -60,7 +58,7 @@ class QueuedDataTransferRepositorySpec extends DiAcceptanceTest with OptionValue
 
       await(mongoRepository.collection.deleteMany(Document()).toFutureOption())
 
-      await(mongoRepository.bulkInsert(items))
+      await(mongoRepository.collection.insertMany(items).toFutureOption())
 
       val res = await(mongoRepository.findBatch())
 

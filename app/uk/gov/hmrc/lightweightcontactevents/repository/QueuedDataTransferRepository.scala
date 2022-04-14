@@ -16,6 +16,8 @@
 
 package uk.gov.hmrc.lightweightcontactevents.repository
 
+import org.bson.codecs.ObjectIdCodec
+import org.mongodb.scala.bson.ObjectId
 import org.mongodb.scala.bson.conversions.Bson
 import org.mongodb.scala.model.Updates.set
 import org.mongodb.scala.model.{Filters, FindOneAndReplaceOptions, FindOneAndUpdateOptions, ReturnDocument}
@@ -40,6 +42,7 @@ class QueuedDataTransferRepository @Inject()(
     domainFormat = QueuedDataTransfer.format,
     indexes = Seq.empty,
     extraCodecs = Seq(
+      new ObjectIdCodec,
       Codecs.playFormatCodec(QueuedDataTransfer.instantFormat)
     )
   ) with Logging {
@@ -57,9 +60,9 @@ class QueuedDataTransferRepository @Inject()(
       }
   }
 
-  def updateTime(id: String, time: Instant): Future[Unit] =
+  def updateTime(id: ObjectId, time: Instant): Future[Unit] =
     collection
-      .findOneAndUpdate(byId(id), set("fistError", time),
+      .findOneAndUpdate(byId(id), set("firstError", time),
         FindOneAndUpdateOptions().upsert(false).returnDocument(ReturnDocument.AFTER))
       .toFutureOption()
       .flatMap {
@@ -76,19 +79,15 @@ class QueuedDataTransferRepository @Inject()(
       .toFuture()
 
   def insert(transfer: QueuedDataTransfer): Future[Unit] =
-    collection.findOneAndReplace(byId(transfer.id), transfer, FindOneAndReplaceOptions().upsert(true))
+    collection.findOneAndReplace(byId(transfer._id), transfer, FindOneAndReplaceOptions().upsert(true))
       .toFutureUnit
 
-  def bulkInsert(entities: Seq[QueuedDataTransfer]): Future[Unit] =
-    collection.insertMany(entities)
-      .toFutureUnit
-
-  def findById(id: String, readPreference: ReadPreference = ReadPreference.primaryPreferred()): Future[Option[QueuedDataTransfer]] =
+  def findById(id: ObjectId, readPreference: ReadPreference = ReadPreference.primaryPreferred()): Future[Option[QueuedDataTransfer]] =
     collection.withReadPreference(readPreference)
       .find(byId(id)).first()
       .toFutureOption()
 
-  def removeById(id: String): Future[Unit] =
+  def removeById(id: ObjectId): Future[Unit] =
     collection.deleteOne(byId(id))
       .toFutureUnit
 
@@ -96,7 +95,8 @@ class QueuedDataTransferRepository @Inject()(
     collection.countDocuments()
       .toFutureOption()
 
-  private def byId(id: String): Bson =
+  private def byId(id: ObjectId): Bson = {
     Filters.equal(_id, id)
+  }
 
 }
