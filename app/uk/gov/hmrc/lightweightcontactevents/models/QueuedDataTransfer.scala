@@ -21,7 +21,6 @@ import org.mongodb.scala.bson.ObjectId
 import play.api.libs.json._
 
 import java.time.{Instant, ZoneOffset, ZonedDateTime}
-import scala.annotation.tailrec
 import scala.util.Try
 
 case class QueuedDataTransfer(voaDataTransfer: VOADataTransfer, firstError: Option[Instant] = None, _id: ObjectId = ObjectId.get())
@@ -29,16 +28,7 @@ case class QueuedDataTransfer(voaDataTransfer: VOADataTransfer, firstError: Opti
 
 object QueuedDataTransfer {
 
-  implicit object ObjectIdFormat extends OFormat[ObjectId] {
-    def writes(o: ObjectId): JsObject = Json.obj("$oid" -> o.toHexString)
-
-    @tailrec
-    def reads(value: JsValue): JsResult[ObjectId] = value match {
-      case JsObject(obj) => reads(obj("$oid"))
-      case JsString(str) => JsSuccess(new ObjectId(str))
-      case _ => JsError("error.expected.object")
-    }
-  }
+  import uk.gov.hmrc.mongo.play.json.formats.MongoFormats.Implicits._
 
   implicit val instantWrites: Writes[Instant] = {
     case instant: Instant => JsString(instant.atZone(ZoneOffset.UTC).toString)
