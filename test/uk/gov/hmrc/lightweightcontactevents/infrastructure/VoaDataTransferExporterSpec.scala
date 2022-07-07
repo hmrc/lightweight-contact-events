@@ -16,7 +16,7 @@
 
 package uk.gov.hmrc.lightweightcontactevents.infrastructure
 
-import org.mockito.Matchers.{any, eq => eqTo}
+import org.mockito.ArgumentMatchers.{any, eq => eqTo}
 import org.mockito.Mockito.{times, verify, when}
 import org.mongodb.scala.bson.ObjectId
 import org.scalatest.flatspec.AnyFlatSpec

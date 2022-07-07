@@ -1,7 +1,5 @@
 # lightweight-contact-events
 
-[![Build Status](https://travis-ci.org/hmrc/lightweight-contact-events.svg)](https://travis-ci.org/hmrc/lightweight-contact-events) [ ![Download](https://api.bintray.com/packages/hmrc/releases/lightweight-contact-events/images/download.svg) ](https://bintray.com/hmrc/releases/lightweight-contact-events/_latestVersion)
-
 This is a placeholder README.md for a new repository
 
 ### License
