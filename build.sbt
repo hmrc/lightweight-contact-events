@@ -2,10 +2,9 @@ import sbt.Keys._
 import sbt._
 import play.sbt.PlayImport.PlayKeys
 import scoverage.ScoverageKeys
+import uk.gov.hmrc.DefaultBuildSettings
 import uk.gov.hmrc.DefaultBuildSettings.{defaultSettings, integrationTestSettings, scalaSettings}
 import uk.gov.hmrc.sbtdistributables.SbtDistributablesPlugin.publishingSettings
-import play.sbt.routes.RoutesKeys
-RoutesKeys.routesImport := Seq.empty
 
 val appName = "lightweight-contact-events"
 
@@ -30,6 +29,7 @@ lazy val root = Project(appName, file("."))
     libraryDependencies ++= Dependencies.appDependencies,
     retrieveManaged := true,
     scalaVersion := "2.13.8",
+    DefaultBuildSettings.targetJvm := "jvm-11",
     maintainer := "voa.service.optimisation@digital.hmrc.gov.uk"
   )
   .configs(IntegrationTest)

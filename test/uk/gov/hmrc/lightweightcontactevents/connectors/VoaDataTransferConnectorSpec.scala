@@ -17,7 +17,7 @@
 package uk.gov.hmrc.lightweightcontactevents.connectors
 
 import org.mockito.ArgumentCaptor
-import org.mockito.Matchers.{any, anyString}
+import org.mockito.ArgumentMatchers.{any, anyString}
 import org.mockito.Mockito.{verify, when}
 import play.api.libs.json.{JsValue, Json, Writes}
 import play.api.test.Helpers._
@@ -57,13 +57,13 @@ class VoaDataTransferConnectorSpec extends SpecBase {
     "provided with Voa Data Transfer Model" must {
 
       "Send the contact details returning a 200 when it succeeds" in {
-        val httpMock = getHttpMock(200)
+        val httpMock = getHttpMock(OK)
         val connector = new VoaDataTransferConnector(httpMock, configuration, environment,auditService, servicesConfig)
 
         val result = await(connector.transfer(ctDataTransfer)(HeaderCarrier()))
 
         result match {
-          case Success(status) => status mustBe 200
+          case Success(status) => status mustBe OK
           case Failure(_) => assert(false)
         }
       }
@@ -82,10 +82,10 @@ class VoaDataTransferConnectorSpec extends SpecBase {
         implicit val headerCarrierNapper = ArgumentCaptor.forClass(classOf[HeaderCarrier])
         implicit val httpReadsNapper = ArgumentCaptor.forClass(classOf[HttpReads[Any]])
         implicit val jsonWritesNapper = ArgumentCaptor.forClass(classOf[Writes[JsValue]])
-        val urlCaptor = ArgumentCaptor.forClass(classOf[String])
-        val bodyCaptor = ArgumentCaptor.forClass(classOf[JsValue])
-        val headersCaptor = ArgumentCaptor.forClass(classOf[Seq[(String, String)]])
-        val httpMock = getHttpMock(200)
+        val urlCaptor: ArgumentCaptor[String] = ArgumentCaptor.forClass(classOf[String])
+        val bodyCaptor: ArgumentCaptor[JsValue] = ArgumentCaptor.forClass(classOf[JsValue])
+        val headersCaptor: ArgumentCaptor[Seq[(String, String)]] = ArgumentCaptor.forClass(classOf[Seq[(String, String)]])
+        val httpMock = getHttpMock(OK)
 
         val connector = new VoaDataTransferConnector(httpMock, configuration, environment,auditService, servicesConfig)
         connector.sendJson(minimalJson)(HeaderCarrier())
@@ -98,11 +98,11 @@ class VoaDataTransferConnectorSpec extends SpecBase {
       }
 
       "return a 200 if the data transfer call is successful" in {
-        val connector = new VoaDataTransferConnector(getHttpMock(200), configuration, environment,auditService, servicesConfig)
+        val connector = new VoaDataTransferConnector(getHttpMock(OK), configuration, environment,auditService, servicesConfig)
         val result = await(connector.sendJson(minimalJson)(HeaderCarrier()))
         result match {
           case Success(status) =>
-            status mustBe 200
+            status mustBe OK
           case _ => assert(false)
         }
       }

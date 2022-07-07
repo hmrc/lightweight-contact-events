@@ -3,17 +3,16 @@ import sbt._
 
 object Dependencies {
 
-  private val bootstrapVersion = "5.24.0"
-  private val hmrcMongoVersion = "0.63.0"
+  private val bootstrapVersion = "6.2.0"
+  private val hmrcMongoVersion = "0.66.0"
 
   // Test dependencies
   private val scalaTestPlusPlayVersion = "5.1.0"
   private val scalaTestVersion = "3.2.12"
   private val scalacheckVersion = "3.2.12.0"
   private val mockitoVersion = "3.2.12.0"
-  private val mockitoAllVersion = "1.10.19"
-  private val scalaGuiceVersion = "5.0.2"
-  private val flexmarkVersion = "0.62.2"
+  private val scalaGuiceVersion = "5.1.0"
+  private val flexMarkVersion = "0.64.0"
 
   private val compile = Seq(
     "uk.gov.hmrc" %% "bootstrap-backend-play-28" % bootstrapVersion,
@@ -27,8 +26,7 @@ object Dependencies {
     "com.typesafe.play" %% "play-test" % PlayVersion.current % commonTestScope,
     "org.scalatest" %% "scalatest" % scalaTestVersion % commonTestScope,
     "org.scalatestplus" %% "mockito-4-5" % mockitoVersion % commonTestScope,
-    "org.mockito" % "mockito-all" % mockitoAllVersion % commonTestScope,
-    "com.vladsch.flexmark" % "flexmark-all" % flexmarkVersion % commonTestScope // for scalatest 3.2.x
+    "com.vladsch.flexmark" % "flexmark-all" % flexMarkVersion % commonTestScope // for scalatest 3.2.x
   )
 
   private val integrationTest = Seq(
