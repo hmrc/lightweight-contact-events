@@ -3,8 +3,8 @@ import sbt._
 
 object Dependencies {
 
-  private val bootstrapVersion = "6.2.0"
-  private val hmrcMongoVersion = "0.66.0"
+  private val bootstrapVersion = "6.4.0"
+  private val hmrcMongoVersion = "0.68.0"
 
   // Test dependencies
   private val scalaTestPlusPlayVersion = "5.1.0"
