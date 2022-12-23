@@ -32,10 +32,11 @@ import uk.gov.hmrc.lightweightcontactevents.models.{ConfirmedContactDetails, Pro
 import uk.gov.hmrc.lightweightcontactevents.repository.QueuedDataTransferRepository
 import uk.gov.hmrc.lightweightcontactevents.utils.Initialize
 
-import scala.concurrent.Future
+import scala.concurrent.{ExecutionContext, Future}
 
 class CreationControllerSpec extends SpecBase with MockitoSugar with EitherValues {
 
+  implicit val ec: ExecutionContext = injector.instanceOf[ExecutionContext]
   val configuration = injector.instanceOf[Configuration]
   val environment = injector.instanceOf[Environment]
   val auditService = injector.instanceOf[AuditingService]

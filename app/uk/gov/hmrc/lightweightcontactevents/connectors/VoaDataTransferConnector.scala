@@ -18,23 +18,21 @@ package uk.gov.hmrc.lightweightcontactevents.connectors
 
 import javax.inject.Inject
 import play.api.libs.json.{JsValue, Json}
-import play.api.{Configuration, Environment, Logger}
+import play.api.{Configuration, Logger}
 import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse}
 import uk.gov.hmrc.lightweightcontactevents.models.VOADataTransfer
 import uk.gov.hmrc.http.HttpClient
 import uk.gov.hmrc.play.bootstrap.config.ServicesConfig
 import uk.gov.hmrc.http.HttpReads.Implicits._
 
-import scala.concurrent.ExecutionContext.Implicits.global
-import scala.concurrent.Future
+import scala.concurrent.{ExecutionContext, Future}
 import scala.util.{Failure, Success, Try}
 
 class VoaDataTransferConnector @Inject()(val http: HttpClient,
                                          val configuration: Configuration,
-                                         environment: Environment,
-                                          auditService:AuditingService,
+                                         auditService: AuditingService,
                                          servicesConfig: ServicesConfig
-                                        ) {
+                                        )(implicit ec: ExecutionContext) {
 
   implicit val hc: HeaderCarrier = HeaderCarrier()
 
