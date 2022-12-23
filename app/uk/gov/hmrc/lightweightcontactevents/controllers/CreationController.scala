@@ -20,21 +20,20 @@ import javax.inject.{Inject, Singleton}
 import play.api.Logger
 import play.api.mvc.{Action, AnyContent, ControllerComponents, DefaultActionBuilder}
 
-import scala.concurrent.Future
+import scala.concurrent.{ExecutionContext, Future}
 import play.api.libs.json._
 import uk.gov.hmrc.lightweightcontactevents.models.{Contact, QueuedDataTransfer, VOADataTransfer}
 import uk.gov.hmrc.lightweightcontactevents.repository.QueuedDataTransferRepository
 import uk.gov.hmrc.lightweightcontactevents.utils.Initialize
 import uk.gov.hmrc.play.bootstrap.backend.controller.BackendController
 
-import scala.concurrent.ExecutionContext.Implicits.global
-
 @Singleton
 class CreationController @Inject()(
                                     val queueRepository: QueuedDataTransferRepository,
                                     val init: Initialize,
                                     val action: DefaultActionBuilder,
-                                    override val controllerComponents: ControllerComponents) extends BackendController(controllerComponents) {
+                                    override val controllerComponents: ControllerComponents)(implicit ec: ExecutionContext)
+  extends BackendController(controllerComponents) {
 
   def create(): Action[AnyContent] = action.async { implicit request =>
     createContact(request.body.asJson) match {

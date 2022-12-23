@@ -23,7 +23,7 @@ import net.codingwell.scalaguice.ScalaModule
 import org.scalatest.OptionValues
 import play.api.http.Status.{NOT_FOUND, OK}
 import play.api.inject.guice.GuiceApplicationBuilder
-import play.api.{Configuration, Environment}
+import play.api.Configuration
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.lightweightcontactevents.DiAcceptanceTest
 import uk.gov.hmrc.lightweightcontactevents.connectors.{AuditingService, VoaDataTransferConnector}
@@ -138,10 +138,9 @@ class ScheduleEvery1Second extends DefaultRegularSchedule {
 @Singleton
 class ExportTestDataTransferConnector @Inject() (http: HttpClient,
                                                   configuration: Configuration,
-                                                  environment: Environment,
                                                   auditService:AuditingService,
-                                                 servicesConfig: ServicesConfig)
-  extends VoaDataTransferConnector(http, configuration, environment, auditService, servicesConfig) {
+                                                 servicesConfig: ServicesConfig)(implicit ec: ExecutionContext)
+  extends VoaDataTransferConnector(http, configuration, auditService, servicesConfig) {
 
   var transfer: List[VOADataTransfer] = List[VOADataTransfer]()
   var responseCode: Int = OK
