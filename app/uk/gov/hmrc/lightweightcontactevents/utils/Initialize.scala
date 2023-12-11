@@ -17,7 +17,6 @@
 package uk.gov.hmrc.lightweightcontactevents.utils
 
 import javax.inject.{Inject, Singleton}
-import com.google.inject.AbstractModule
 import play.api.Configuration
 
 @Singleton
@@ -31,10 +30,4 @@ class Initialize @Inject()(conf: Configuration) {
   val businessRatesEmail = conf.underlying.getString("email.business-rates")
   val housingAllowanceEmail = conf.underlying.getString("email.housing-allowance")
   val otherEmail = conf.underlying.getString("email.other")
-}
-
-class StartupModule extends AbstractModule {
-  override def configure(): Unit = {
-    bind(classOf[Initialize]).asEagerSingleton()
-  }
 }
