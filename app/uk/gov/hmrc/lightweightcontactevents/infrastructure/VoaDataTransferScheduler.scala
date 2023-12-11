@@ -16,8 +16,8 @@
 
 package uk.gov.hmrc.lightweightcontactevents.infrastructure
 
-import akka.actor.Scheduler
-import akka.event.EventStream
+import org.apache.pekko.actor.Scheduler
+import org.apache.pekko.event.EventStream
 import play.api.Logger
 import uk.gov.hmrc.lightweightcontactevents.infrastructure.LockedJobScheduler.timeout
 import uk.gov.hmrc.mongo.lock.{LockService, MongoLockRepository}

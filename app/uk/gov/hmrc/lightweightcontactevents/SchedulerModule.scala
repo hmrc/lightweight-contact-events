@@ -16,7 +16,7 @@
 
 package uk.gov.hmrc.lightweightcontactevents
 
-import akka.actor.ActorSystem
+import org.apache.pekko.actor.ActorSystem
 import play.api.inject._
 import play.api.{Configuration, Environment, Logging}
 import uk.gov.hmrc.lightweightcontactevents.infrastructure._

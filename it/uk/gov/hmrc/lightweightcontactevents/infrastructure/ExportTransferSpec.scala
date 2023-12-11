@@ -16,8 +16,8 @@
 
 package uk.gov.hmrc.lightweightcontactevents.infrastructure
 
-import akka.actor.ActorSystem
-import akka.testkit.TestProbe
+import org.apache.pekko.actor.ActorSystem
+import org.apache.pekko.testkit.TestProbe
 import com.google.inject.AbstractModule
 import net.codingwell.scalaguice.ScalaModule
 import org.scalatest.OptionValues
