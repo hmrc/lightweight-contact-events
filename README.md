@@ -1,5 +1,6 @@
-# lightweight-contact-events
+# Lightweight Contact Events Service
 
+Stores a history of events
 
 ### License
 
