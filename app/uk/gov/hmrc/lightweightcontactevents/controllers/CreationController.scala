@@ -28,44 +28,40 @@ import uk.gov.hmrc.lightweightcontactevents.utils.Initialize
 import uk.gov.hmrc.play.bootstrap.backend.controller.BackendController
 
 @Singleton
-class CreationController @Inject()(
-                                    val queueRepository: QueuedDataTransferRepository,
-                                    val init: Initialize,
-                                    val action: DefaultActionBuilder,
-                                    override val controllerComponents: ControllerComponents)(implicit ec: ExecutionContext)
-  extends BackendController(controllerComponents) {
+class CreationController @Inject() (
+  val queueRepository: QueuedDataTransferRepository,
+  val init: Initialize,
+  val action: DefaultActionBuilder,
+  override val controllerComponents: ControllerComponents
+)(implicit ec: ExecutionContext
+) extends BackendController(controllerComponents) {
 
   def create(): Action[AnyContent] = action.async { implicit request =>
     createContact(request.body.asJson) match {
-      case Right(contact) => {
+      case Right(contact) =>
         val jsonData = VOADataTransfer(contact, init)
-        val result = queueRepository.insert(QueuedDataTransfer(jsonData))
+        val result   = queueRepository.insert(QueuedDataTransfer(jsonData))
 
         result.map(_ => Ok)
           .recover {
-            case ex: Exception => {
+            case ex: Exception =>
               Logger(getClass).warn("Unable to store email to mongo Queue", ex)
               InternalServerError(s"Unable to store email to mongo Queue: ${ex.getMessage}")
-            }
           }
-      }
-      case Left(error) => {
+      case Left(error)    =>
         Logger(getClass).warn(error)
         Future.successful(BadRequest(error))
-      }
     }
   }
 
-  private[controllers] def createContact(json: Option[JsValue]): Either[String, Contact] = {
+  private[controllers] def createContact(json: Option[JsValue]): Either[String, Contact] =
     json match {
-      case Some(value) => {
+      case Some(value) =>
         val model = Json.fromJson[Contact](value)
         model match {
           case JsSuccess(contact, _) => Right(contact)
-          case JsError(_) => Left("Unable to parse " + value)
+          case JsError(_)            => Left("Unable to parse " + value)
         }
-      }
-      case None => Left("No Json available")
+      case None        => Left("No Json available")
     }
-  }
 }

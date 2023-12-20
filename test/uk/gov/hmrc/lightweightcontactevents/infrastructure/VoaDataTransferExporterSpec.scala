@@ -34,21 +34,19 @@ import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 import scala.util.Success
 
-class VoaDataTransferExporterSpec extends AnyFlatSpec with Matchers with MockitoSugar with FutureAwaits
-  with DefaultAwaitTimeout {
-  val now = Instant.now()
+class VoaDataTransferExporterSpec extends AnyFlatSpec with Matchers with MockitoSugar with FutureAwaits with DefaultAwaitTimeout {
+  val now: Instant = Instant.now()
 
-  val nowMinus12Days = now.minusSeconds(60 * 60 * 24 * 12)
+  val nowMinus12Days: Instant = now.minusSeconds(60 * 60 * 24 * 12)
 
-  val clock = new Clock {
-    private val now = Instant.now()
+  val clock: Clock = new Clock {
+    private val now              = Instant.now()
     override def getZone: ZoneId = ZoneId.systemDefault()
 
     override def withZone(zone: ZoneId): Clock = ???
 
     override def instant(): Instant = now
   }
-
 
   "DataExporter" should "export data" in {
     val dataTransferConnector = mock[VoaDataTransferConnector]
@@ -58,7 +56,7 @@ class VoaDataTransferExporterSpec extends AnyFlatSpec with Matchers with Mockito
     val voaDataTransferExporter = new VoaDataTransferExporter(dataTransferConnector, dataTransferRepository, clock)
 
     val transfer = aQueuedDataTransfer()
-    val data = List(transfer)
+    val data     = List(transfer)
 
     when(dataTransferConnector.transfer(any(classOf[VOADataTransfer]))(any(classOf[HeaderCarrier]))).thenReturn(Future.successful(Success(200)))
     when(dataTransferRepository.findBatch()).thenReturn(Future.successful(data))
@@ -79,7 +77,7 @@ class VoaDataTransferExporterSpec extends AnyFlatSpec with Matchers with Mockito
     val voaDataTransferExporter = new VoaDataTransferExporter(dataTransferConnector, dataTransferRepository, clock)
 
     val transfer = aQueuedDataTransfer()
-    val data = List(transfer)
+    val data     = List(transfer)
 
     when(dataTransferConnector.transfer(any(classOf[VOADataTransfer]))(any(classOf[HeaderCarrier]))).thenReturn(Future.successful(Success(404)))
     when(dataTransferRepository.findBatch()).thenReturn(Future.successful(data))
@@ -103,7 +101,7 @@ class VoaDataTransferExporterSpec extends AnyFlatSpec with Matchers with Mockito
     val voaDataTransferExporter = new VoaDataTransferExporter(dataTransferConnector, dataTransferRepository, clock)
 
     val transfer = aQueuedDataTransfer().copy(firstError = Option(nowMinus12Days))
-    val data = List(transfer)
+    val data     = List(transfer)
 
     when(dataTransferConnector.transfer(any(classOf[VOADataTransfer]))(any(classOf[HeaderCarrier]))).thenReturn(Future.successful(Success(404)))
     when(dataTransferRepository.findBatch()).thenReturn(Future.successful(data))

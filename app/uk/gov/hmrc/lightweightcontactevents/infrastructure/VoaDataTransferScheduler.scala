@@ -26,17 +26,17 @@ import javax.inject.{Inject, Singleton}
 import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
-class VoaDataTransferScheduler @Inject()(scheduler: Scheduler,
-                                         eventStream: EventStream,
-                                         val schedule: DefaultRegularSchedule,
-                                         voaDataTransferExporter: VoaDataTransferExporter,
-                                         mongoLockRepository: MongoLockRepository
-                                        )(implicit val ec: ExecutionContext)
-
-  extends LockedJobScheduler[ExportEvent](scheduler, eventStream) {
+class VoaDataTransferScheduler @Inject() (
+  scheduler: Scheduler,
+  eventStream: EventStream,
+  val schedule: DefaultRegularSchedule,
+  voaDataTransferExporter: VoaDataTransferExporter,
+  mongoLockRepository: MongoLockRepository
+)(implicit val ec: ExecutionContext
+) extends LockedJobScheduler[ExportEvent](scheduler, eventStream) {
 
   override protected val lockService: LockService = LockService(mongoLockRepository, "VoaDataTransferLock", timeout.duration)
-  override protected val logger: Logger = Logger(getClass)
+  override protected val logger: Logger           = Logger(getClass)
 
   override val name: String = this.getClass.getName
 

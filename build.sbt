@@ -8,6 +8,7 @@ ThisBuild / libraryDependencySchemes += "org.scala-lang.modules" %% "scala-xml" 
 
 ThisBuild / majorVersion := 1
 ThisBuild / scalaVersion := "2.13.12"
+ThisBuild / scalafixScalaBinaryVersion := "2.13"
 
 lazy val microservice = Project(appName, file("."))
   .enablePlugins(PlayScala, SbtAutoBuildPlugin, SbtGitVersioning, SbtDistributablesPlugin)
@@ -18,7 +19,7 @@ lazy val microservice = Project(appName, file("."))
       ".*ControllerConfiguration;.*LanguageSwitchController;.*Repository;",
     ScoverageKeys.coverageMinimumStmtTotal := 97,
     ScoverageKeys.coverageFailOnMinimum := true,
-    ScoverageKeys.coverageHighlighting := true,
+    ScoverageKeys.coverageHighlighting := true
   )
   .settings(scalaSettings)
   .settings(defaultSettings())
@@ -29,6 +30,25 @@ lazy val microservice = Project(appName, file("."))
     maintainer := "voa.service.optimisation@digital.hmrc.gov.uk",
     Test / parallelExecution := false
   )
+  .settings(
+    scalafmtFailOnErrors := true,
+    Test / test := ((Test / test) dependsOn formatAll).value,
+    formatAll := Def
+      .sequential(
+        scalafmtAll,
+        Compile / scalafmtSbt,
+        scalafixAll.toTask(""),
+        (Compile / scalastyle).toTask("")
+      )
+      .value
+  )
+  .settings( // sbt-scalafix
+    semanticdbEnabled := true, // enable SemanticDB
+    semanticdbVersion := scalafixSemanticdb.revision, // only required for Scala 2.x
+    scalacOptions += "-Ywarn-unused" // Scala 2.x only, required by `RemoveUnused`
+  )
+
+lazy val formatAll: TaskKey[Unit] = taskKey[Unit]("Run scalafmt for all files")
 
 lazy val it = (project in file("it"))
   .enablePlugins(PlayScala)

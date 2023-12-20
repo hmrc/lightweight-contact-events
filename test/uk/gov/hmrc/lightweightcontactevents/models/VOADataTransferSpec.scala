@@ -24,7 +24,7 @@ import uk.gov.hmrc.lightweightcontactevents.utils.{Initialize, LightweightFixtur
 
 class VOADataTransferSpec extends SpecBase with MockitoSugar {
 
-  val init = mock[Initialize]
+  val init: Initialize = mock[Initialize]
 
   /* VOADataTransfer Contact Tests */
 
@@ -103,7 +103,7 @@ class VOADataTransferSpec extends SpecBase with MockitoSugar {
   }
 
   "return the correct subject and email address when the contact reason is equal to 'new_enquiry'" in {
-    val contact = brContact.copy(contactReason = "new_enquiry", enquiryCategoryMsg =  "Council Tax")
+    val contact = brContact.copy(contactReason = "new_enquiry", enquiryCategoryMsg = "Council Tax")
     val subject = "CF My property is in poor repair or uninhabitable AA11AA"
     when(init.subjectText).thenReturn(subject)
     when(init.councilTaxEmail).thenReturn(brEmail)
@@ -114,7 +114,7 @@ class VOADataTransferSpec extends SpecBase with MockitoSugar {
   }
 
   "return the correct subject and email address when the contact reason is equal to 'new_enquiry' and the enquiry category is equal to 'Other'" in {
-    val contact = brContact.copy(contactReason = "new_enquiry", enquiryCategoryMsg =  "Other")
+    val contact = brContact.copy(contactReason = "new_enquiry", enquiryCategoryMsg = "Other")
     when(init.subjectText).thenReturn(subject)
     when(init.otherEmail).thenReturn(brEmail)
 
@@ -124,7 +124,7 @@ class VOADataTransferSpec extends SpecBase with MockitoSugar {
   }
 
   "return the correct subject and email address when the contact reason is equal to 'more_details'" in {
-    val contact = brContact.copy(contactReason = "more_details", enquiryCategoryMsg =  "Council Tax")
+    val contact = brContact.copy(contactReason = "more_details", enquiryCategoryMsg = "Council Tax")
     when(init.subjectAddInfo).thenReturn(subject)
     when(init.councilTaxEmail).thenReturn(brEmail)
 
@@ -134,7 +134,7 @@ class VOADataTransferSpec extends SpecBase with MockitoSugar {
   }
 
   "return the correct subject and email address when the contact reason is equal to 'more_details' and the enquiry category is equal to 'Other'" in {
-    val contact = brContact.copy(contactReason = "more_details", enquiryCategoryMsg =  "Other")
+    val contact = brContact.copy(contactReason = "more_details", enquiryCategoryMsg = "Other")
     when(init.subjectOtherAddInfo).thenReturn(subject)
     when(init.otherEmail).thenReturn(brEmail)
 
@@ -144,7 +144,7 @@ class VOADataTransferSpec extends SpecBase with MockitoSugar {
   }
 
   "return the correct subject and email address when the contact reason is equal to 'update_existing'" in {
-    val contact = brContact.copy(contactReason = "update_existing", enquiryCategoryMsg =  "Council Tax")
+    val contact = brContact.copy(contactReason = "update_existing", enquiryCategoryMsg = "Council Tax")
     when(init.subjectChase).thenReturn(subject)
     when(init.councilTaxEmail).thenReturn(brEmail)
 
@@ -154,7 +154,7 @@ class VOADataTransferSpec extends SpecBase with MockitoSugar {
   }
 
   "return the correct subject and email address when the contact reason is equal to 'update_existing' and the enquiry category is equal to 'Other'" in {
-    val contact = brContact.copy(contactReason = "update_existing", enquiryCategoryMsg =  "Other")
+    val contact = brContact.copy(contactReason = "update_existing", enquiryCategoryMsg = "Other")
     when(init.subjectOtherChase).thenReturn(subject)
     when(init.otherEmail).thenReturn(brEmail)
 
@@ -164,7 +164,7 @@ class VOADataTransferSpec extends SpecBase with MockitoSugar {
   }
 
   "return the correct subject and email for contact reason 'new_enquiry' and enquiry category 'Housing Benefit and Local Housing Allowances'" in {
-    val initialize = injector.instanceOf[Initialize]
+    val initialize      = injector.instanceOf[Initialize]
     val voaDataTransfer = VOADataTransfer(housingBenefitContact, initialize)
 
     voaDataTransfer.recipientEmailAddress mustBe housingBenefitEmail

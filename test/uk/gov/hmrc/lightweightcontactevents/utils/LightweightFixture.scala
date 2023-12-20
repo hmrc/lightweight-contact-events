@@ -21,56 +21,88 @@ import uk.gov.hmrc.lightweightcontactevents.models.{ConfirmedContactDetails, Con
 
 object LightweightFixture {
 
-  val message = "MSG"
-  val subject = "Valuation Office Agency Contact Form"
-  val ctEmail = "ct.email@voa.gsi.gov.uk"
-  val brEmail = "br.email@voa.gsi.gov.uk"
-  val enquiryCategoryMsg = "Council Tax"
-  val contactReason = "more_details"
-  val subEnquiryCategoryMsg = "My property is in poor repair or uninhabitable"
-  val confirmedContactDetails = ConfirmedContactDetails("full name", "email", "07777777")
-  val propertyAddress = PropertyAddress("line1", Some("line2"), "town", Some("county"), "AA1 1AA")
-  val postCode = propertyAddress.postcode.replaceAll("\\s+","").toUpperCase
-  val ctContact = Contact(confirmedContactDetails, propertyAddress, true, contactReason, enquiryCategoryMsg, subEnquiryCategoryMsg, message)
-  val brContact = Contact(confirmedContactDetails, propertyAddress, false, contactReason, enquiryCategoryMsg, subEnquiryCategoryMsg, message)
-  val ctDataTransfer = VOADataTransfer(toLegacyContact(confirmedContactDetails), propertyAddress, true, subject, ctEmail, enquiryCategoryMsg, subEnquiryCategoryMsg, message)
-  val brDataTransfer = VOADataTransfer(toLegacyContact(confirmedContactDetails), propertyAddress, false, subject, brEmail, enquiryCategoryMsg, subEnquiryCategoryMsg, message)
-  val wrongContact = Contact(confirmedContactDetails, propertyAddress, false, contactReason, "", subEnquiryCategoryMsg, message)
+  val message                                          = "MSG"
+  val subject                                          = "Valuation Office Agency Contact Form"
+  val ctEmail                                          = "ct.email@voa.gsi.gov.uk"
+  val brEmail                                          = "br.email@voa.gsi.gov.uk"
+  val enquiryCategoryMsg                               = "Council Tax"
+  val contactReason                                    = "more_details"
+  val subEnquiryCategoryMsg                            = "My property is in poor repair or uninhabitable"
+  val confirmedContactDetails: ConfirmedContactDetails = ConfirmedContactDetails("full name", "email", "07777777")
+  val propertyAddress: PropertyAddress                 = PropertyAddress("line1", Some("line2"), "town", Some("county"), "AA1 1AA")
+  val postCode: String                                 = propertyAddress.postcode.replaceAll("\\s+", "").toUpperCase
+  val ctContact: Contact                               = Contact(confirmedContactDetails, propertyAddress, true, contactReason, enquiryCategoryMsg, subEnquiryCategoryMsg, message)
+  val brContact: Contact                               = Contact(confirmedContactDetails, propertyAddress, false, contactReason, enquiryCategoryMsg, subEnquiryCategoryMsg, message)
 
-  val housingBenefitEmail = "NSOhelpdesk@voa.gov.uk"
-  val housingBenefitSubject = s"CF - other - $postCode"
-  val housingBenefitCategory = "Housing Benefit and Local Housing Allowances"
-  val housingBenefitSubCategory = "I want to find out the valuation details behind my Housing Benefit decision"
-  val housingBenefitMessage = "More about my enquiry..."
-  val housingBenefitContact: Contact = Contact(confirmedContactDetails, propertyAddress, isCouncilTaxEnquiry = false, "new_enquiry",
-    housingBenefitCategory, housingBenefitSubCategory, housingBenefitMessage)
-  val housingBenefitDataTransfer: VOADataTransfer = VOADataTransfer(toLegacyContact(confirmedContactDetails), propertyAddress, isCouncilTaxEnquiry = false,
-    housingBenefitSubject, housingBenefitEmail, housingBenefitCategory, housingBenefitSubCategory, housingBenefitMessage)
+  val ctDataTransfer: VOADataTransfer =
+    VOADataTransfer(toLegacyContact(confirmedContactDetails), propertyAddress, true, subject, ctEmail, enquiryCategoryMsg, subEnquiryCategoryMsg, message)
 
-  def aQueuedDataTransfer(): QueuedDataTransfer = {
+  val brDataTransfer: VOADataTransfer =
+    VOADataTransfer(toLegacyContact(confirmedContactDetails), propertyAddress, false, subject, brEmail, enquiryCategoryMsg, subEnquiryCategoryMsg, message)
+  val wrongContact: Contact           = Contact(confirmedContactDetails, propertyAddress, false, contactReason, "", subEnquiryCategoryMsg, message)
+
+  val housingBenefitEmail           = "NSOhelpdesk@voa.gov.uk"
+  val housingBenefitSubject: String = s"CF - other - $postCode"
+  val housingBenefitCategory        = "Housing Benefit and Local Housing Allowances"
+  val housingBenefitSubCategory     = "I want to find out the valuation details behind my Housing Benefit decision"
+  val housingBenefitMessage         = "More about my enquiry..."
+
+  val housingBenefitContact: Contact = Contact(
+    confirmedContactDetails,
+    propertyAddress,
+    isCouncilTaxEnquiry = false,
+    "new_enquiry",
+    housingBenefitCategory,
+    housingBenefitSubCategory,
+    housingBenefitMessage
+  )
+
+  val housingBenefitDataTransfer: VOADataTransfer = VOADataTransfer(
+    toLegacyContact(confirmedContactDetails),
+    propertyAddress,
+    isCouncilTaxEnquiry = false,
+    housingBenefitSubject,
+    housingBenefitEmail,
+    housingBenefitCategory,
+    housingBenefitSubCategory,
+    housingBenefitMessage
+  )
+
+  def aQueuedDataTransfer(): QueuedDataTransfer =
     QueuedDataTransfer(aVoaDataTransfer())
-  }
 
-  def aVoaDataTransfer(): VOADataTransfer = {
-    VOADataTransfer(toLegacyContact(aConfirmedContactDetails()), aPropertyAddress(), true,
-      "Subject", "email@email.com", "council-tax", "subCategory", "Free text message")
-  }
+  def aVoaDataTransfer(): VOADataTransfer =
+    VOADataTransfer(
+      toLegacyContact(aConfirmedContactDetails()),
+      aPropertyAddress(),
+      true,
+      "Subject",
+      "email@email.com",
+      "council-tax",
+      "subCategory",
+      "Free text message"
+    )
 
-  def brVoaDataTransfer(): VOADataTransfer = {
-    VOADataTransfer(toLegacyContact(aConfirmedContactDetails()), aPropertyAddress(), false,
-      "Subject", "email@email.com", "business-rates", "subCategory", "Free text message")
-  }
+  def brVoaDataTransfer(): VOADataTransfer =
+    VOADataTransfer(
+      toLegacyContact(aConfirmedContactDetails()),
+      aPropertyAddress(),
+      false,
+      "Subject",
+      "email@email.com",
+      "business-rates",
+      "subCategory",
+      "Free text message"
+    )
 
-  def aPropertyAddress(): PropertyAddress = {
+  def aPropertyAddress(): PropertyAddress =
     PropertyAddress("Some stree", None, "Some town", Some("Some county"), "BN12 4AX")
-  }
 
-  def aConfirmedContactDetails()  = {
+  def aConfirmedContactDetails(): ConfirmedContactDetails =
     ConfirmedContactDetails(
       "John Doe",
       "email@noreply.voa.gov.uk",
       "0123456789"
     )
-  }
 
 }
