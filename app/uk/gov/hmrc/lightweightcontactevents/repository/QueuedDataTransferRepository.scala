@@ -31,12 +31,11 @@ import java.time.Instant
 import javax.inject.{Inject, Singleton}
 import scala.concurrent.{ExecutionContext, Future}
 
-
 @Singleton
-class QueuedDataTransferRepository @Inject()(
-                                              mongo: MongoComponent
-                                            )(implicit ec: ExecutionContext)
-  extends PlayMongoRepository[QueuedDataTransfer](
+class QueuedDataTransferRepository @Inject() (
+  mongo: MongoComponent
+)(implicit ec: ExecutionContext
+) extends PlayMongoRepository[QueuedDataTransfer](
     collectionName = "dataTransferQueue",
     mongoComponent = mongo,
     domainFormat = QueuedDataTransfer.format,
@@ -45,12 +44,14 @@ class QueuedDataTransferRepository @Inject()(
       new ObjectIdCodec,
       Codecs.playFormatCodec(QueuedDataTransfer.instantFormat)
     )
-  ) with Logging {
+  )
+  with Logging {
 
-  val _id = "_id"
+  val _id              = "_id"
   val defaultBatchSize = 10
 
   implicit class singleObservableOps[T](singleObservable: SingleObservable[T]) {
+
     def toFutureUnit: Future[Unit] = singleObservable
       .toFutureOption()
       .map(_ => ())
@@ -62,17 +63,14 @@ class QueuedDataTransferRepository @Inject()(
 
   def updateTime(id: ObjectId, time: Instant): Future[Unit] =
     collection
-      .findOneAndUpdate(byId(id), set("firstError", time),
-        FindOneAndUpdateOptions().upsert(false).returnDocument(ReturnDocument.AFTER))
+      .findOneAndUpdate(byId(id), set("firstError", time), FindOneAndUpdateOptions().upsert(false).returnDocument(ReturnDocument.AFTER))
       .toFutureOption()
       .flatMap {
         case Some(_) => Future.unit
-        case _ => Future.failed(new IllegalStateException(s"dataTransfer not found for id = $id"))
+        case _       => Future.failed(new IllegalStateException(s"dataTransfer not found for id = $id"))
       }
 
-  def findBatch(batchSize: Int = defaultBatchSize,
-                readPreference: ReadPreference = ReadPreference.primaryPreferred()
-               ): Future[Seq[QueuedDataTransfer]] =
+  def findBatch(batchSize: Int = defaultBatchSize, readPreference: ReadPreference = ReadPreference.primaryPreferred()): Future[Seq[QueuedDataTransfer]] =
     collection.withReadPreference(readPreference)
       .find()
       .limit(batchSize)
@@ -95,8 +93,7 @@ class QueuedDataTransferRepository @Inject()(
     collection.countDocuments()
       .toFutureOption()
 
-  private def byId(id: ObjectId): Bson = {
+  private def byId(id: ObjectId): Bson =
     Filters.equal(_id, id)
-  }
 
 }

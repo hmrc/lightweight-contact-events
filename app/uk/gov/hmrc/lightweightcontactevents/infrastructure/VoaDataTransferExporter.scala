@@ -28,19 +28,19 @@ import scala.concurrent.{ExecutionContext, Future, Promise}
 import scala.util.{Failure, Success}
 
 @Singleton
-class VoaDataTransferExporter @Inject() (dataTransferConnector: VoaDataTransferConnector,
-                                         dataTransferRepository: QueuedDataTransferRepository,
-                                         clock: Clock = Clock.systemDefaultZone()
-                                        ) extends Logging {
+class VoaDataTransferExporter @Inject() (
+  dataTransferConnector: VoaDataTransferConnector,
+  dataTransferRepository: QueuedDataTransferRepository,
+  clock: Clock = Clock.systemDefaultZone()
+) extends Logging {
 
   private val sevenDaysSeconds = 7L * 24L * 60L * 60L
 
-  def exportBatch()(implicit ec: ExecutionContext): Future[Unit] = {
-    dataTransferRepository.findBatch().flatMap(seq => {
+  def exportBatch()(implicit ec: ExecutionContext): Future[Unit] =
+    dataTransferRepository.findBatch().flatMap { seq =>
       logger.info(s"Found ${seq.size} transfer(s) to export")
       processSequentially(seq)
-    })
-  }
+    }
 
   private def processSequentially(transfers: Seq[QueuedDataTransfer])(implicit ec: ExecutionContext): Future[Unit] =
     if (transfers.isEmpty) {
@@ -49,24 +49,23 @@ class VoaDataTransferExporter @Inject() (dataTransferConnector: VoaDataTransferC
       processTransfer(transfers.head).flatMap(_ => processSequentially(transfers.tail))
     }
 
-  def processTransfer(transfer: QueuedDataTransfer)(implicit ec: ExecutionContext): Future[Unit] = {
+  def processTransfer(transfer: QueuedDataTransfer)(implicit ec: ExecutionContext): Future[Unit] =
     transfer.firstError match {
-        //if error is permanent, remove element
+      // if error is permanent, remove element
       case Some(x) if Duration.between(x, Instant.now(clock)).getSeconds > sevenDaysSeconds => removeTransferWithError(transfer)
-      case _ =>
+      case _                                                                                =>
         val promise = Promise[Unit]()
         sendToVoa(transfer.voaDataTransfer).onComplete {
           case Success(_) =>
-            dataTransferRepository.removeById(transfer._id).onComplete(x => promise.complete(x.map(_ =>())))
+            dataTransferRepository.removeById(transfer._id).onComplete(x => promise.complete(x.map(_ => ())))
           case Failure(_) =>
             recordError(transfer).onComplete(x => promise.complete(x.map(_ => ())))
         }
         promise.future
     }
-  }
 
   def removeTransferWithError(transfer: QueuedDataTransfer)(implicit ec: ExecutionContext): Future[Unit] = {
-    logger.warn(s"removing element with permanent error : $transfer") //TODO - send details only to SPLUNK
+    logger.warn(s"removing element with permanent error : $transfer") // TODO - send details only to SPLUNK
     dataTransferRepository.removeById(transfer._id).map(_ => ())
   }
 
@@ -74,8 +73,8 @@ class VoaDataTransferExporter @Inject() (dataTransferConnector: VoaDataTransferC
     val hc: HeaderCarrier = new HeaderCarrier()
     dataTransferConnector.transfer(transfer)(hc).flatMap {
       case Success(statusCode) if statusCode < 300 => Future.unit
-      case Success(statusCode) => Future.failed(new RuntimeException(s"Unable to send data to VOA, StatusCode: $statusCode"))
-      case Failure(exception) => Future.failed(new RuntimeException(s"Unable to send data to VOA", exception))
+      case Success(statusCode)                     => Future.failed(new RuntimeException(s"Unable to send data to VOA, StatusCode: $statusCode"))
+      case Failure(exception)                      => Future.failed(new RuntimeException("Unable to send data to VOA", exception))
     }
   }
 

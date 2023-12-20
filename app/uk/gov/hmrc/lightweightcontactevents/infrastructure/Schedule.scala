@@ -32,5 +32,5 @@ trait RegularSchedule extends Schedule {
 
 @Singleton
 class DefaultRegularSchedule extends RegularSchedule {
-  override def timeUntilNextRun(): FiniteDuration = (300 seconds)
+  override def timeUntilNextRun(): FiniteDuration = 300 seconds
 }

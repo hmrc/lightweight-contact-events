@@ -41,9 +41,8 @@ abstract class LockedJobScheduler[Event <: AnyRef](scheduler: Scheduler, eventSt
 
   def runJob()(implicit ec: ExecutionContext): Future[Event]
 
-  def start()(implicit ec: ExecutionContext): Unit = {
+  def start()(implicit ec: ExecutionContext): Unit =
     scheduleNextImport()
-  }
 
   private def run()(implicit ec: ExecutionContext) = {
     logger.info(s"Starting job: $name")

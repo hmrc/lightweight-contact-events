@@ -28,7 +28,7 @@ import scala.concurrent.ExecutionContext
 
 class SchedulerModule extends Module with Logging {
 
-  override def bindings(environment: Environment, configuration: Configuration): Seq[Binding[_]] = {
+  override def bindings(environment: Environment, configuration: Configuration): Seq[Binding[_]] =
     if (configuration.getOptional[String]("voaExport.enable").exists(_.toBoolean)) {
       Seq(
         bind[VoaDataTransferScheduler].toProvider[VoaDataTransferSchedulerProvider].eagerly(),
@@ -38,15 +38,15 @@ class SchedulerModule extends Module with Logging {
       logger.warn("Export disabled, transfers won't be exported to VOA")
       Seq.empty[Binding[_]]
     }
-  }
 }
 
-class VoaDataTransferSchedulerProvider @Inject()(actorSystem: ActorSystem,
-                                                 schedule: DefaultRegularSchedule,
-                                                 voaDataTransferExporter: VoaDataTransferExporter,
-                                                 mongoLockRepository: MongoLockRepository
-                                                )(implicit ec: ExecutionContext)
-  extends Provider[VoaDataTransferScheduler] {
+class VoaDataTransferSchedulerProvider @Inject() (
+  actorSystem: ActorSystem,
+  schedule: DefaultRegularSchedule,
+  voaDataTransferExporter: VoaDataTransferExporter,
+  mongoLockRepository: MongoLockRepository
+)(implicit ec: ExecutionContext
+) extends Provider[VoaDataTransferScheduler] {
 
   override def get(): VoaDataTransferScheduler = {
     val transferScheduler = new VoaDataTransferScheduler(

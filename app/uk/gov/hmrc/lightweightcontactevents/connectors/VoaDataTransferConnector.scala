@@ -16,6 +16,8 @@
 
 package uk.gov.hmrc.lightweightcontactevents.connectors
 
+import play.api.http.Status.OK
+
 import javax.inject.Inject
 import play.api.libs.json.{JsValue, Json}
 import play.api.{Configuration, Logger}
@@ -28,18 +30,19 @@ import uk.gov.hmrc.http.HttpReads.Implicits._
 import scala.concurrent.{ExecutionContext, Future}
 import scala.util.{Failure, Success, Try}
 
-class VoaDataTransferConnector @Inject()(val http: HttpClient,
-                                         val configuration: Configuration,
-                                         auditService: AuditingService,
-                                         servicesConfig: ServicesConfig
-                                        )(implicit ec: ExecutionContext) {
+class VoaDataTransferConnector @Inject() (
+  val http: HttpClient,
+  val configuration: Configuration,
+  auditService: AuditingService,
+  servicesConfig: ServicesConfig
+)(implicit ec: ExecutionContext
+) {
 
   implicit val hc: HeaderCarrier = HeaderCarrier()
 
-  val jsonContentTypeHeader = ("Content-Type", "application/json")
+  val jsonContentTypeHeader: (String, String) = ("Content-Type", "application/json")
 
   val serviceUrl: String = servicesConfig.baseUrl("voa-data-transfer")
-  val RETURN_200: Int = 200
 
   def transfer(dataTransfer: VOADataTransfer)(implicit hc: HeaderCarrier): Future[Try[Int]] = sendJson(Json.toJson(dataTransfer))
 
@@ -48,16 +51,15 @@ class VoaDataTransferConnector @Inject()(val http: HttpClient,
       .map { response =>
         auditService.sendEvent("sendcontactemailtoVOA", json)
         response.status match {
-          case RETURN_200 =>
-            Success(RETURN_200)
-          case status =>
+          case OK => Success(OK)
+          case status     =>
             Logger(getClass).warn("Data transfer service fails with status " + status)
             Failure(new RuntimeException("Data transfer service fails with status " + status))
         }
       } recover {
-        case ex =>
-          Logger(getClass).warn("Data transfer service fails with exception " + ex.getMessage)
-          Failure(new RuntimeException("Data transfer service fails with exception " + ex.getMessage))
-      }
+      case ex =>
+        Logger(getClass).warn("Data transfer service fails with exception " + ex.getMessage)
+        Failure(new RuntimeException("Data transfer service fails with exception " + ex.getMessage))
+    }
 
 }

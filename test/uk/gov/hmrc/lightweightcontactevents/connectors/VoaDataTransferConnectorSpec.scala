@@ -34,24 +34,25 @@ import scala.util.{Failure, Success}
 
 class VoaDataTransferConnectorSpec extends SpecBase {
 
-  implicit val ec: ExecutionContext = injector.instanceOf[ExecutionContext]
-  val configuration = injector.instanceOf[Configuration]
-  val auditService = injector.instanceOf[AuditingService]
-  val environment = injector.instanceOf[Environment]
-  val servicesConfig = injector.instanceOf[ServicesConfig]
+  implicit val ec: ExecutionContext  = injector.instanceOf[ExecutionContext]
+  val configuration: Configuration   = injector.instanceOf[Configuration]
+  val auditService: AuditingService  = injector.instanceOf[AuditingService]
+  val environment: Environment       = injector.instanceOf[Environment]
+  val servicesConfig: ServicesConfig = injector.instanceOf[ServicesConfig]
 
-  val message = "MSG"
-  val subject = "Valuation Office Agency Contact Form"
-  val ctEmail = "ct.email@voa.gsi.gov.uk"
-  val ndrEmail = "ndr.email@voa.gsi.gov.uk"
-  val enquiryCategoryMsg = "Council Tax"
-  val subEnquiryCategoryMsg = "My property is in poor repair or uninhabitable"
-  val contactReason = "more_details"
-  val confirmedContactDetails = ConfirmedContactDetails("full name", "email", "07777777")
-  val propertyAddress = PropertyAddress("line1", Some("line2"), "town", Some("county"), "AA1 1AA")
-  val ctDataTransfer = VOADataTransfer(toLegacyContact(confirmedContactDetails), propertyAddress, true, subject, ctEmail,
-    enquiryCategoryMsg, subEnquiryCategoryMsg, message)
-  val minimalJson = Json.toJson(ctDataTransfer)
+  val message                                          = "MSG"
+  val subject                                          = "Valuation Office Agency Contact Form"
+  val ctEmail                                          = "ct.email@voa.gsi.gov.uk"
+  val ndrEmail                                         = "ndr.email@voa.gsi.gov.uk"
+  val enquiryCategoryMsg                               = "Council Tax"
+  val subEnquiryCategoryMsg                            = "My property is in poor repair or uninhabitable"
+  val contactReason                                    = "more_details"
+  val confirmedContactDetails: ConfirmedContactDetails = ConfirmedContactDetails("full name", "email", "07777777")
+  val propertyAddress: PropertyAddress                 = PropertyAddress("line1", Some("line2"), "town", Some("county"), "AA1 1AA")
+
+  val ctDataTransfer: VOADataTransfer =
+    VOADataTransfer(toLegacyContact(confirmedContactDetails), propertyAddress, true, subject, ctEmail, enquiryCategoryMsg, subEnquiryCategoryMsg, message)
+  val minimalJson: JsValue            = Json.toJson(ctDataTransfer)
 
   def connector(httpMock: HttpClient) =
     new VoaDataTransferConnector(httpMock, configuration, auditService, servicesConfig)
@@ -62,17 +63,17 @@ class VoaDataTransferConnectorSpec extends SpecBase {
 
       "Send the contact details returning a 200 when it succeeds" in {
         val httpMock = getHttpMock(OK)
-        val result = await(connector(httpMock).transfer(ctDataTransfer)(HeaderCarrier()))
+        val result   = await(connector(httpMock).transfer(ctDataTransfer)(HeaderCarrier()))
 
         result match {
           case Success(status) => status mustBe OK
-          case Failure(_) => assert(false)
+          case Failure(_)      => assert(false)
         }
       }
 
       "return a failure representing the error when send method fails" in {
         val httpMock = getHttpMock(INTERNAL_SERVER_ERROR)
-        val result = await(connector(httpMock).transfer(ctDataTransfer)(HeaderCarrier()))
+        val result   = await(connector(httpMock).transfer(ctDataTransfer)(HeaderCarrier()))
 
         assert(result.isFailure)
       }
@@ -80,18 +81,22 @@ class VoaDataTransferConnectorSpec extends SpecBase {
 
     "provided with JSON directly" must {
       "call the Microservice with the given JSON" in {
-        implicit val headerCarrierNapper = ArgumentCaptor.forClass(classOf[HeaderCarrier])
-        implicit val httpReadsNapper = ArgumentCaptor.forClass(classOf[HttpReads[Any]])
-        implicit val jsonWritesNapper = ArgumentCaptor.forClass(classOf[Writes[JsValue]])
-        val urlCaptor: ArgumentCaptor[String] = ArgumentCaptor.forClass(classOf[String])
-        val bodyCaptor: ArgumentCaptor[JsValue] = ArgumentCaptor.forClass(classOf[JsValue])
+        implicit val headerCarrierNapper                         = ArgumentCaptor.forClass(classOf[HeaderCarrier])
+        implicit val httpReadsNapper                             = ArgumentCaptor.forClass(classOf[HttpReads[Any]])
+        implicit val jsonWritesNapper                            = ArgumentCaptor.forClass(classOf[Writes[JsValue]])
+        val urlCaptor: ArgumentCaptor[String]                    = ArgumentCaptor.forClass(classOf[String])
+        val bodyCaptor: ArgumentCaptor[JsValue]                  = ArgumentCaptor.forClass(classOf[JsValue])
         val headersCaptor: ArgumentCaptor[Seq[(String, String)]] = ArgumentCaptor.forClass(classOf[Seq[(String, String)]])
 
         val httpMock = getHttpMock(OK)
         connector(httpMock).sendJson(minimalJson)(HeaderCarrier())
 
-        verify(httpMock).POST(urlCaptor.capture, bodyCaptor.capture, headersCaptor.capture)(jsonWritesNapper.capture,
-          httpReadsNapper.capture, headerCarrierNapper.capture, any())
+        verify(httpMock).POST(urlCaptor.capture, bodyCaptor.capture, headersCaptor.capture)(
+          jsonWritesNapper.capture,
+          httpReadsNapper.capture,
+          headerCarrierNapper.capture,
+          any()
+        )
         urlCaptor.getValue must endWith("contact-process-api/contact/sendemail")
         bodyCaptor.getValue mustBe minimalJson
         headersCaptor.getValue mustBe Seq(connector(httpMock).jsonContentTypeHeader)
@@ -102,21 +107,22 @@ class VoaDataTransferConnectorSpec extends SpecBase {
         result match {
           case Success(status) =>
             status mustBe OK
-          case _ => assert(false)
+          case _               => assert(false)
         }
       }
 
       "throw an failure if the data transfer call fails" in {
         val httpMock = getHttpMock(INTERNAL_SERVER_ERROR)
-        val result = await(connector(httpMock).sendJson(minimalJson)(HeaderCarrier()))
+        val result   = await(connector(httpMock).sendJson(minimalJson)(HeaderCarrier()))
         assert(result.isFailure)
       }
 
       "return a failure if the data transfer call throws an exception" in {
         val httpMock = mock[HttpClient]
-        when(httpMock.POST(anyString, any[JsValue], any[Seq[(String, String)]])(any[Writes[JsValue]], any[HttpReads[Any]],
-          any[HeaderCarrier], any())) thenReturn Future.successful(new RuntimeException)
-        val result = await(connector(httpMock).sendJson(minimalJson)(HeaderCarrier()))
+        when(
+          httpMock.POST(anyString, any[JsValue], any[Seq[(String, String)]])(any[Writes[JsValue]], any[HttpReads[Any]], any[HeaderCarrier], any())
+        ) thenReturn Future.successful(new RuntimeException)
+        val result   = await(connector(httpMock).sendJson(minimalJson)(HeaderCarrier()))
         assert(result.isFailure)
       }
     }

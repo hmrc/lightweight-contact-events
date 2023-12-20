@@ -16,7 +16,6 @@
 
 package uk.gov.hmrc.lightweightcontactevents.controllers
 
-
 import org.mockito.ArgumentMatchers.any
 import org.mockito.Mockito.when
 import org.scalatest.EitherValues
@@ -33,19 +32,20 @@ import uk.gov.hmrc.lightweightcontactevents.repository.QueuedDataTransferReposit
 import uk.gov.hmrc.lightweightcontactevents.utils.Initialize
 
 import scala.concurrent.{ExecutionContext, Future}
+import play.api.mvc.{AnyContentAsJson, ControllerComponents}
 
 class CreationControllerSpec extends SpecBase with MockitoSugar with EitherValues {
 
   implicit val ec: ExecutionContext = injector.instanceOf[ExecutionContext]
-  val configuration = injector.instanceOf[Configuration]
-  val environment = injector.instanceOf[Environment]
-  val auditService = injector.instanceOf[AuditingService]
-  val initialize = injector.instanceOf[Initialize]
-  val action = injector.instanceOf(classOf[DefaultActionBuilder])
+  val configuration: Configuration  = injector.instanceOf[Configuration]
+  val environment: Environment      = injector.instanceOf[Environment]
+  val auditService: AuditingService = injector.instanceOf[AuditingService]
+  val initialize: Initialize        = injector.instanceOf[Initialize]
+  val action: DefaultActionBuilder  = injector.instanceOf(classOf[DefaultActionBuilder])
 
-  val stub = Helpers.stubControllerComponents()
+  val stub: ControllerComponents = Helpers.stubControllerComponents()
 
-  def fakeRequestWithJson(jsonStr: String) = {
+  def fakeRequestWithJson(jsonStr: String): FakeRequest[AnyContentAsJson] = {
     val json = Json.parse(jsonStr)
     FakeRequest("POST", "").withHeaders("Content-Type" -> "application/json").withJsonBody(json)
   }
@@ -193,7 +193,7 @@ class CreationControllerSpec extends SpecBase with MockitoSugar with EitherValue
   "Given some Json representing a Contact with an enquiry, the createContact method creates a Right(Contact) with council tax address details" in {
     val repository = getQueuedDataTransferRepository()
     val controller = new CreationController(repository, initialize, action, stub)
-    val result = controller.createContact(Some(Json.parse(contactJson)))
+    val result     = controller.createContact(Some(Json.parse(contactJson)))
 
     result.isRight mustBe true
     result.value.contact mustBe ConfirmedContactDetails("full name", "email", "tel")
@@ -240,7 +240,7 @@ class CreationControllerSpec extends SpecBase with MockitoSugar with EitherValue
 
   "return 400 (badrequest) when given no json" in {
     val fakeRequest = FakeRequest("POST", "").withHeaders("Content-Type" -> "application/json")
-    val repository = getQueuedDataTransferRepository()
+    val repository  = getQueuedDataTransferRepository()
 
     val result = new CreationController(repository, initialize, action, stub).create()(fakeRequest)
     status(result) mustBe BAD_REQUEST
@@ -248,7 +248,7 @@ class CreationControllerSpec extends SpecBase with MockitoSugar with EitherValue
 
   "return 400 (badrequest) when given garbled json" in {
     val fakeRequest = FakeRequest("POST", "").withHeaders("Content-Type" -> "application/json").withTextBody("{")
-    val repository = getQueuedDataTransferRepository()
+    val repository  = getQueuedDataTransferRepository()
 
     val result = new CreationController(repository, initialize, action, stub).create()(fakeRequest)
     status(result) mustBe BAD_REQUEST
@@ -267,7 +267,7 @@ class CreationControllerSpec extends SpecBase with MockitoSugar with EitherValue
     val repository = getQueuedDataTransferRepository()
 
     val controller = new CreationController(repository, initialize, action, stub)
-    val result = controller.createContact(Some(Json.parse(wrongJson)))
+    val result     = controller.createContact(Some(Json.parse(wrongJson)))
 
     result.isLeft mustBe true
   }

@@ -25,23 +25,18 @@ import uk.gov.hmrc.play.audit.model.ExtendedDataEvent
 
 import scala.concurrent.ExecutionContext
 
-class AuditingService @Inject()(auditConnector:AuditConnector){
-
+class AuditingService @Inject() (auditConnector: AuditConnector) {
 
   def sendEvent(auditType: String, json: JsValue)(implicit ec: ExecutionContext, hc: HeaderCarrier): Unit = {
     val event = eventFor(auditType, json)
     auditConnector.sendExtendedEvent(event)
   }
 
-  private def eventFor(auditType: String, json: JsValue)(implicit hc: HeaderCarrier) = {
-
+  private def eventFor(auditType: String, json: JsValue)(implicit hc: HeaderCarrier) =
     ExtendedDataEvent(
       auditSource = "send-contact-email-api",
       auditType = auditType,
-      tags = Map("transactionName" -> "submit-contact-to-VOA",
-        "clientIP" -> hc.trueClientIp.getOrElse(""),
-        "clientPort" -> hc.trueClientPort.getOrElse("")),
+      tags = Map("transactionName" -> "submit-contact-to-VOA", "clientIP" -> hc.trueClientIp.getOrElse(""), "clientPort" -> hc.trueClientPort.getOrElse("")),
       detail = json
     )
-  }
 }

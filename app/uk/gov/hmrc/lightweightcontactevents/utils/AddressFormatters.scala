@@ -20,18 +20,15 @@ import uk.gov.hmrc.lightweightcontactevents.models.PropertyAddress
 
 object AddressFormatters {
 
-  def formattedPropertyAddress(address: PropertyAddress, interstitial: String): String = {
+  def formattedPropertyAddress(address: PropertyAddress, interstitial: String): String =
     insertInterstitials(Seq(Some(address.addressLine1), address.addressLine2, Some(address.town), address.county, Some(address.postcode)), interstitial)
-  }
 
-  private[utils] def insertInterstitials(address: Seq[Option[String]], interstitial: String): String = {
-    if (address.isEmpty) "" else trim(address.head, "") + address.tail.foldLeft("") {(acc, elem) => acc + trim(elem, interstitial)}
-  }
+  private[utils] def insertInterstitials(address: Seq[Option[String]], interstitial: String): String =
+    if (address.isEmpty) "" else trim(address.head, "") + address.tail.foldLeft("")((acc, elem) => acc + trim(elem, interstitial))
 
-  def trim(ostr: Option[String], interstitial: String): String = {
+  def trim(ostr: Option[String], interstitial: String): String =
     ostr match {
       case Some(s) => interstitial + s.trim
-      case None => ""
+      case None    => ""
     }
-  }
 }
