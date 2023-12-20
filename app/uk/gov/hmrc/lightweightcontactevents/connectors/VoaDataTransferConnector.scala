@@ -51,8 +51,8 @@ class VoaDataTransferConnector @Inject() (
       .map { response =>
         auditService.sendEvent("sendcontactemailtoVOA", json)
         response.status match {
-          case OK => Success(OK)
-          case status     =>
+          case OK     => Success(OK)
+          case status =>
             Logger(getClass).warn("Data transfer service fails with status " + status)
             Failure(new RuntimeException("Data transfer service fails with status " + status))
         }
