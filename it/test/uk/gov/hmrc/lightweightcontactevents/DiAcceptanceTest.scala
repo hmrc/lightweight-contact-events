@@ -26,8 +26,7 @@ import play.api.test.{DefaultAwaitTimeout, FutureAwaits}
 import uk.gov.hmrc.mongo.MongoComponent
 import uk.gov.hmrc.mongo.play.PlayMongoModule
 
-trait DiAcceptanceTest extends AnyWordSpecLike with BeforeAndAfterAll with Matchers with FutureAwaits
-  with DefaultAwaitTimeout with GuiceOneAppPerSuite {
+trait DiAcceptanceTest extends AnyWordSpecLike with BeforeAndAfterAll with Matchers with FutureAwaits with DefaultAwaitTimeout with GuiceOneAppPerSuite {
 
   def testDbPrefix(): String
 
@@ -35,9 +34,9 @@ trait DiAcceptanceTest extends AnyWordSpecLike with BeforeAndAfterAll with Match
     .configure(customConfigs)
     .bindings(new PlayMongoModule)
 
-  def testDbName = s"${testDbPrefix()}${java.util.UUID.randomUUID.toString.replaceAll("-", "")}"
+  def testDbName: String = s"${testDbPrefix()}${java.util.UUID.randomUUID.toString.replaceAll("-", "")}"
 
-  lazy val testDbUri = s"mongodb://localhost:27017/$testDbName"
+  lazy val testDbUri: String = s"mongodb://localhost:27017/$testDbName"
 
   def customConfigs: Map[String, Any] = Map(
     "mongodb.uri" -> testDbUri
@@ -45,7 +44,7 @@ trait DiAcceptanceTest extends AnyWordSpecLike with BeforeAndAfterAll with Match
 
   def mongoComponent: MongoComponent = app.injector.instanceOf[MongoComponent]
 
-  override final def fakeApplication(): Application = fakeApplicationBuilder().build()
+  final override def fakeApplication(): Application = fakeApplicationBuilder().build()
 
   override protected def afterAll(): Unit = {
     await(mongoComponent.database.drop().toFutureOption())

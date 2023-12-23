@@ -49,11 +49,12 @@ class ExportTransferSpec extends DiAcceptanceTest with OptionValues {
     .configure(Map(
       "voaExport.enable" -> false
     )).overrides(new AbstractModule with ScalaModule {
-    override def configure(): Unit = {
-      bind[Clock].toInstance(Clock.systemUTC())
-      bind[VoaDataTransferConnector].to[ExportTestDataTransferConnector]
-    }
-  })
+
+      override def configure(): Unit = {
+        bind[Clock].toInstance(Clock.systemUTC())
+        bind[VoaDataTransferConnector].to[ExportTestDataTransferConnector]
+      }
+    })
 
   def exportConnector: ExportTestDataTransferConnector = app.injector.instanceOf[ExportTestDataTransferConnector]
 
@@ -63,13 +64,13 @@ class ExportTransferSpec extends DiAcceptanceTest with OptionValues {
       exportConnector.transfer = List.empty[VOADataTransfer]
 
       implicit val actorSystem: ActorSystem = app.actorSystem
-      implicit val ec: ExecutionContext = app.injector.instanceOf[ExecutionContext]
+      implicit val ec: ExecutionContext     = app.injector.instanceOf[ExecutionContext]
 
       val probe = TestProbe("test-probe")
-      actorSystem.eventStream.subscribe(probe.ref, classOf[ExportEvent]) //subscribe for event
+      actorSystem.eventStream.subscribe(probe.ref, classOf[ExportEvent]) // subscribe for event
 
       val transfer = aQueuedDataTransfer()
-      await(repository.insert(transfer))  //item is in database, can trigger scheduler
+      await(repository.insert(transfer)) // item is in database, can trigger scheduler
 
       val scheduler = createScheduler()
       scheduler.start()
@@ -89,13 +90,13 @@ class ExportTransferSpec extends DiAcceptanceTest with OptionValues {
       exportConnector.responseCode = NOT_FOUND
 
       implicit val actorSystem: ActorSystem = app.actorSystem
-      implicit val ec: ExecutionContext = app.injector.instanceOf[ExecutionContext]
+      implicit val ec: ExecutionContext     = app.injector.instanceOf[ExecutionContext]
 
       val probe = TestProbe("test-probe")
-      actorSystem.eventStream.subscribe(probe.ref, classOf[ExportEvent]) //subscribe for event
+      actorSystem.eventStream.subscribe(probe.ref, classOf[ExportEvent]) // subscribe for event
 
       val transfer = aQueuedDataTransfer()
-      await(repository.insert(transfer))  //item is in database, can trigger scheduler
+      await(repository.insert(transfer)) // item is in database, can trigger scheduler
 
       val scheduler = createScheduler()
       scheduler.start()
@@ -110,12 +111,10 @@ class ExportTransferSpec extends DiAcceptanceTest with OptionValues {
 
   }
 
-
   def repository: QueuedDataTransferRepository = app.injector.instanceOf[QueuedDataTransferRepository]
 
-
   def createScheduler(): VoaDataTransferScheduler = {
-    val actorSystem = app.injector.instanceOf[ActorSystem]
+    val actorSystem                              = app.injector.instanceOf[ActorSystem]
     val mongoLockRepository: MongoLockRepository = app.injector.instanceOf[MongoLockRepository]
 
     implicit val ec: ExecutionContext = app.injector.instanceOf[ExecutionContext]
@@ -136,14 +135,16 @@ class ScheduleEvery1Second extends DefaultRegularSchedule {
 }
 
 @Singleton
-class ExportTestDataTransferConnector @Inject() (http: HttpClient,
-                                                  configuration: Configuration,
-                                                  auditService:AuditingService,
-                                                 servicesConfig: ServicesConfig)(implicit ec: ExecutionContext)
-  extends VoaDataTransferConnector(http, configuration, auditService, servicesConfig) {
+class ExportTestDataTransferConnector @Inject() (
+  http: HttpClient,
+  configuration: Configuration,
+  auditService: AuditingService,
+  servicesConfig: ServicesConfig
+)(implicit ec: ExecutionContext
+) extends VoaDataTransferConnector(http, configuration, auditService, servicesConfig) {
 
   var transfer: List[VOADataTransfer] = List[VOADataTransfer]()
-  var responseCode: Int = OK
+  var responseCode: Int               = OK
 
   override def transfer(dataTransfer: VOADataTransfer)(implicit hc: HeaderCarrier): Future[Try[Int]] = {
     transfer = dataTransfer :: transfer

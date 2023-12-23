@@ -27,7 +27,7 @@ class QueuedDataTransferRepositorySpec extends DiAcceptanceTest with OptionValue
 
   override def testDbPrefix(): String = "cf-repository-spec"
 
-  def mongoRepository = app.injector.instanceOf[QueuedDataTransferRepository]
+  def mongoRepository: QueuedDataTransferRepository = app.injector.instanceOf[QueuedDataTransferRepository]
 
   "Repository" should {
     "save item to DB and read it back" in {
@@ -64,7 +64,7 @@ class QueuedDataTransferRepositorySpec extends DiAcceptanceTest with OptionValue
 
       res must have size 10
 
-      items must contain allElementsOf (res)
+      items must contain allElementsOf res
     }
 
   }
