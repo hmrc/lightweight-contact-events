@@ -7,7 +7,7 @@ object AppDependencies {
   private val hmrcMongoVersion = "1.6.0"
 
   // Test dependencies
-  private val scalaTestPlusPlayVersion = "7.0.0"
+  private val scalaTestPlusPlayVersion = "7.0.1"
   private val scalaTestVersion         = "3.2.17"
   private val scalacheckVersion        = "3.2.17.0"
   private val mockitoVersion           = "3.2.17.0"
