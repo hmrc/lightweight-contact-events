@@ -22,12 +22,13 @@ import org.mongodb.scala.bson.ObjectId
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
 import org.scalatestplus.mockito.MockitoSugar
+import play.api.http.Status.{NOT_FOUND, OK}
 import play.api.test.{DefaultAwaitTimeout, FutureAwaits}
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.lightweightcontactevents.connectors.VoaDataTransferConnector
 import uk.gov.hmrc.lightweightcontactevents.models.VOADataTransfer
 import uk.gov.hmrc.lightweightcontactevents.repository.QueuedDataTransferRepository
-import uk.gov.hmrc.lightweightcontactevents.utils.LightweightFixture._
+import uk.gov.hmrc.lightweightcontactevents.utils.LightweightFixture.*
 
 import java.time.{Clock, Instant, ZoneId}
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -58,15 +59,14 @@ class VoaDataTransferExporterSpec extends AnyFlatSpec with Matchers with Mockito
     val transfer = aQueuedDataTransfer()
     val data     = List(transfer)
 
-    when(dataTransferConnector.transfer(any(classOf[VOADataTransfer]))(any(classOf[HeaderCarrier]))).thenReturn(Future.successful(Success(200)))
-    when(dataTransferRepository.findBatch()).thenReturn(Future.successful(data))
-    when(dataTransferRepository.removeById(any(classOf[ObjectId]))).thenReturn(Future.unit)
+    when(dataTransferConnector.transfer(any[VOADataTransfer])(any[HeaderCarrier])) thenReturn Future.successful(Success(OK))
+    when(dataTransferRepository.findBatch()) thenReturn Future.successful(data)
+    when(dataTransferRepository.removeById(any[ObjectId])) thenReturn Future.unit
 
     await(voaDataTransferExporter.exportBatch())
 
-    verify(dataTransferConnector, times(1)).transfer(eqTo(transfer.voaDataTransfer))(any(classOf[HeaderCarrier]))
+    verify(dataTransferConnector, times(1)).transfer(eqTo(transfer.voaDataTransfer))(any[HeaderCarrier])
     verify(dataTransferRepository, times(1)).removeById(eqTo(transfer._id))
-
   }
 
   it should "record error" in {
@@ -79,18 +79,17 @@ class VoaDataTransferExporterSpec extends AnyFlatSpec with Matchers with Mockito
     val transfer = aQueuedDataTransfer()
     val data     = List(transfer)
 
-    when(dataTransferConnector.transfer(any(classOf[VOADataTransfer]))(any(classOf[HeaderCarrier]))).thenReturn(Future.successful(Success(404)))
-    when(dataTransferRepository.findBatch()).thenReturn(Future.successful(data))
-    when(dataTransferRepository.removeById(any(classOf[ObjectId]))).thenReturn(Future.unit)
-    when(dataTransferRepository.updateTime(any(classOf[ObjectId]), any(classOf[Instant]))).thenReturn(Future.unit)
+    when(dataTransferConnector.transfer(any[VOADataTransfer])(any[HeaderCarrier])) thenReturn Future.successful(Success(NOT_FOUND))
+    when(dataTransferRepository.findBatch()) thenReturn Future.successful(data)
+    when(dataTransferRepository.removeById(any[ObjectId])) thenReturn Future.unit
+    when(dataTransferRepository.updateTime(any[ObjectId], any[Instant])) thenReturn Future.unit
 
     await(voaDataTransferExporter.exportBatch())
 
-    verify(dataTransferConnector, times(1)).transfer(eqTo(transfer.voaDataTransfer))(any(classOf[HeaderCarrier]))
+    verify(dataTransferConnector, times(1)).transfer(eqTo(transfer.voaDataTransfer))(any[HeaderCarrier])
     verify(dataTransferRepository, times(0)).removeById(eqTo(transfer._id))
 
     verify(dataTransferRepository, times(1)).updateTime(eqTo(transfer._id), eqTo(clock.instant()))
-
   }
 
   it should "remove element with permanent error" in {
@@ -103,17 +102,17 @@ class VoaDataTransferExporterSpec extends AnyFlatSpec with Matchers with Mockito
     val transfer = aQueuedDataTransfer().copy(firstError = Option(nowMinus12Days))
     val data     = List(transfer)
 
-    when(dataTransferConnector.transfer(any(classOf[VOADataTransfer]))(any(classOf[HeaderCarrier]))).thenReturn(Future.successful(Success(404)))
-    when(dataTransferRepository.findBatch()).thenReturn(Future.successful(data))
-    when(dataTransferRepository.removeById(any(classOf[ObjectId]))).thenReturn(Future.unit)
-    when(dataTransferRepository.updateTime(any(classOf[ObjectId]), any(classOf[Instant]))).thenReturn(Future.unit)
+    when(dataTransferConnector.transfer(any[VOADataTransfer])(any[HeaderCarrier])) thenReturn Future.successful(Success(NOT_FOUND))
+    when(dataTransferRepository.findBatch()) thenReturn Future.successful(data)
+    when(dataTransferRepository.removeById(any[ObjectId])) thenReturn Future.unit
+    when(dataTransferRepository.updateTime(any[ObjectId], any[Instant])) thenReturn Future.unit
 
     await(voaDataTransferExporter.exportBatch())
 
-    verify(dataTransferConnector, times(0)).transfer(eqTo(transfer.voaDataTransfer))(any(classOf[HeaderCarrier]))
+    verify(dataTransferConnector, times(0)).transfer(eqTo(transfer.voaDataTransfer))(any[HeaderCarrier])
     verify(dataTransferRepository, times(1)).removeById(eqTo(transfer._id))
 
     verify(dataTransferRepository, times(0)).updateTime(eqTo(transfer._id), eqTo(clock.instant()))
-
   }
+
 }

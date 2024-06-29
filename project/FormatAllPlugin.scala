@@ -4,7 +4,7 @@ import org.scalastyle.sbt.ScalastylePlugin.autoImport.scalastyle
 import sbt.*
 import sbt.Keys.*
 import scalafix.sbt.ScalafixPlugin
-import scalafix.sbt.ScalafixPlugin.autoImport.{scalafixAll, scalafixSemanticdb}
+import scalafix.sbt.ScalafixPlugin.autoImport.scalafixAll
 import scoverage.ScoverageSbtPlugin
 
 /**
@@ -45,9 +45,7 @@ object FormatAllPlugin extends AutoPlugin {
   )
 
   private def scalafixSettings: Seq[Setting[?]] = Seq(
-    semanticdbEnabled := true, // enable SemanticDB
-    semanticdbVersion := scalafixSemanticdb.revision, // only required for Scala 2.x
-    scalacOptions += "-Ywarn-unused" // Scala 2.x only, required by `RemoveUnused`
+    semanticdbEnabled := true // enable SemanticDB
   )
 
 }

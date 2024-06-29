@@ -31,8 +31,9 @@ object LightweightFixture {
   val confirmedContactDetails: ConfirmedContactDetails = ConfirmedContactDetails("full name", "email", "07777777")
   val propertyAddress: PropertyAddress                 = PropertyAddress("line1", Some("line2"), "town", Some("county"), "AA1 1AA")
   val postCode: String                                 = propertyAddress.postcode.replaceAll("\\s+", "").toUpperCase
-  val ctContact: Contact                               = Contact(confirmedContactDetails, propertyAddress, true, contactReason, enquiryCategoryMsg, subEnquiryCategoryMsg, message)
-  val brContact: Contact                               = Contact(confirmedContactDetails, propertyAddress, false, contactReason, enquiryCategoryMsg, subEnquiryCategoryMsg, message)
+
+  val ctContact: Contact = Contact(confirmedContactDetails, propertyAddress, true, contactReason, enquiryCategoryMsg, subEnquiryCategoryMsg, message)
+  val brContact: Contact = Contact(confirmedContactDetails, propertyAddress, false, contactReason, enquiryCategoryMsg, subEnquiryCategoryMsg, message)
 
   val ctDataTransfer: VOADataTransfer =
     VOADataTransfer(toLegacyContact(confirmedContactDetails), propertyAddress, true, subject, ctEmail, enquiryCategoryMsg, subEnquiryCategoryMsg, message)

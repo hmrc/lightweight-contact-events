@@ -5,9 +5,8 @@ val appName = "lightweight-contact-events"
 
 ThisBuild / libraryDependencySchemes += "org.scala-lang.modules" %% "scala-xml" % VersionScheme.Always // Resolves versions conflict
 
+ThisBuild / scalaVersion := "3.3.3"
 ThisBuild / majorVersion := 1
-ThisBuild / scalaVersion := "2.13.12"
-ThisBuild / scalafixScalaBinaryVersion := "2.13"
 
 lazy val microservice = Project(appName, file("."))
   .enablePlugins(PlayScala, SbtDistributablesPlugin)

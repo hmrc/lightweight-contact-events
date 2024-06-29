@@ -16,12 +16,13 @@
 
 package uk.gov.hmrc.lightweightcontactevents.repository
 
+import org.mongodb.scala.SingleObservableFuture
 import org.mongodb.scala.bson.collection.immutable.Document
-
-import java.time.Instant
 import org.scalatest.OptionValues
 import uk.gov.hmrc.lightweightcontactevents.DiAcceptanceTest
 import uk.gov.hmrc.lightweightcontactevents.util.LightweightITFixture.aQueuedDataTransfer
+
+import java.time.Instant
 
 class QueuedDataTransferRepositorySpec extends DiAcceptanceTest with OptionValues {
 
