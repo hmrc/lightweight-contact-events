@@ -3,14 +3,14 @@ import sbt.*
 
 object AppDependencies {
 
-  private val bootstrapVersion = "8.3.0"
-  private val hmrcMongoVersion = "1.6.0"
+  private val bootstrapVersion = "9.0.0"
+  private val hmrcMongoVersion = "2.1.0"
 
   // Test dependencies
   private val scalaTestPlusPlayVersion = "7.0.1"
-  private val scalaTestVersion         = "3.2.17"
-  private val scalacheckVersion        = "3.2.17.0"
-  private val mockitoVersion           = "3.2.17.0"
+  private val scalaTestVersion         = "3.2.19"
+  private val scalacheckVersion        = "3.2.19.0"
+  private val mockitoVersion           = "3.2.19.0"
   private val scalaGuiceVersion        = "6.0.0"
   private val flexMarkVersion          = "0.64.8"
 
@@ -27,13 +27,13 @@ object AppDependencies {
   )
 
   private val testOnly = Seq(
-    "org.scalatestplus" %% "mockito-4-11" % mockitoVersion % Test
+    "org.scalatestplus" %% "mockito-5-12" % mockitoVersion % Test
   )
 
   private val integrationTestOnly = Seq(
     "org.apache.pekko"  %% "pekko-testkit"   % PlayVersion.pekkoVersion % Test,
     "net.codingwell"    %% "scala-guice"     % scalaGuiceVersion        % Test,
-    "org.scalatestplus" %% "scalacheck-1-17" % scalacheckVersion        % Test
+    "org.scalatestplus" %% "scalacheck-1-18" % scalacheckVersion        % Test
   )
 
   val appDependencies: Seq[ModuleID] = compile ++ commonTests ++ testOnly

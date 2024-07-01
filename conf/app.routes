@@ -1,3 +1,3 @@
 # microservice specific routes
 
-POST   /create                  @uk.gov.hmrc.lightweightcontactevents.controllers.CreationController.create()
+POST   /create                  uk.gov.hmrc.lightweightcontactevents.controllers.CreationController.create

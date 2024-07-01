@@ -36,7 +36,7 @@ class CreationController @Inject() (
 )(implicit ec: ExecutionContext
 ) extends BackendController(controllerComponents) {
 
-  def create(): Action[AnyContent] = action.async { implicit request =>
+  def create: Action[AnyContent] = action.async { implicit request =>
     createContact(request.body.asJson) match {
       case Right(contact) =>
         val jsonData = VOADataTransfer(contact, init)

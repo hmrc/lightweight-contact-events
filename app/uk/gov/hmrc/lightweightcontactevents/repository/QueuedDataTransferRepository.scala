@@ -21,7 +21,7 @@ import org.mongodb.scala.bson.ObjectId
 import org.mongodb.scala.bson.conversions.Bson
 import org.mongodb.scala.model.Updates.set
 import org.mongodb.scala.model.{Filters, FindOneAndReplaceOptions, FindOneAndUpdateOptions, ReturnDocument}
-import org.mongodb.scala.{ReadPreference, SingleObservable}
+import org.mongodb.scala.{ObservableFuture, ReadPreference, SingleObservable, SingleObservableFuture}
 import play.api.Logging
 import uk.gov.hmrc.lightweightcontactevents.models.QueuedDataTransfer
 import uk.gov.hmrc.mongo.MongoComponent

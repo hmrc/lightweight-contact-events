@@ -16,6 +16,7 @@
 
 package uk.gov.hmrc.lightweightcontactevents
 
+import org.mongodb.scala.SingleObservableFuture
 import org.scalatest.BeforeAndAfterAll
 import org.scalatest.matchers.must.Matchers
 import org.scalatest.wordspec.AnyWordSpecLike
