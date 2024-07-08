@@ -45,7 +45,7 @@ object FormatAllPlugin extends AutoPlugin {
   )
 
   private def scalafixSettings: Seq[Setting[?]] = Seq(
-    semanticdbEnabled := true // enable SemanticDB
+    semanticdbEnabled := true
   )
 
 }
