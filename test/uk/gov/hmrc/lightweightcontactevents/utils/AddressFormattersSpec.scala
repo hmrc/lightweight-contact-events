@@ -39,7 +39,7 @@ class AddressFormattersSpec extends SpecBase {
       formattedPropertyAddress(address, "<br/>") mustBe "a<br/>b<br/>c<br/>d<br/>e"
     }
 
-    "Given address line 2 and without county, with elements that have too many spaces it should generate a formatted string using the given interstitial" in {
+    "Given no address line 2 and no county, with elements that have too many spaces it should generate a formatted string using the given interstitial" in {
       val address = PropertyAddress(" a ", None, " c ", None, " e ")
       formattedPropertyAddress(address, "<br/>") mustBe "a<br/>c<br/>e"
     }
