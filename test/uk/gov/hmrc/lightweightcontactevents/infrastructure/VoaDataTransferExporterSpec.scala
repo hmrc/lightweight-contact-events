@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 HM Revenue & Customs
+ * Copyright 2024 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -59,9 +59,9 @@ class VoaDataTransferExporterSpec extends AnyFlatSpec with Matchers with Mockito
     val transfer = aQueuedDataTransfer()
     val data     = List(transfer)
 
-    when(dataTransferConnector.transfer(any[VOADataTransfer])(any[HeaderCarrier])) thenReturn Future.successful(Success(OK))
-    when(dataTransferRepository.findBatch()) thenReturn Future.successful(data)
-    when(dataTransferRepository.removeById(any[ObjectId])) thenReturn Future.unit
+    when(dataTransferConnector.transfer(any[VOADataTransfer])(any[HeaderCarrier])).thenReturn(Future.successful(Success(OK)))
+    when(dataTransferRepository.findBatch()).thenReturn(Future.successful(data))
+    when(dataTransferRepository.removeById(any[ObjectId])).thenReturn(Future.unit)
 
     await(voaDataTransferExporter.exportBatch())
 
@@ -79,10 +79,10 @@ class VoaDataTransferExporterSpec extends AnyFlatSpec with Matchers with Mockito
     val transfer = aQueuedDataTransfer()
     val data     = List(transfer)
 
-    when(dataTransferConnector.transfer(any[VOADataTransfer])(any[HeaderCarrier])) thenReturn Future.successful(Success(NOT_FOUND))
-    when(dataTransferRepository.findBatch()) thenReturn Future.successful(data)
-    when(dataTransferRepository.removeById(any[ObjectId])) thenReturn Future.unit
-    when(dataTransferRepository.updateTime(any[ObjectId], any[Instant])) thenReturn Future.unit
+    when(dataTransferConnector.transfer(any[VOADataTransfer])(any[HeaderCarrier])).thenReturn(Future.successful(Success(NOT_FOUND)))
+    when(dataTransferRepository.findBatch()).thenReturn(Future.successful(data))
+    when(dataTransferRepository.removeById(any[ObjectId])).thenReturn(Future.unit)
+    when(dataTransferRepository.updateTime(any[ObjectId], any[Instant])).thenReturn(Future.unit)
 
     await(voaDataTransferExporter.exportBatch())
 
@@ -102,10 +102,10 @@ class VoaDataTransferExporterSpec extends AnyFlatSpec with Matchers with Mockito
     val transfer = aQueuedDataTransfer().copy(firstError = Option(nowMinus12Days))
     val data     = List(transfer)
 
-    when(dataTransferConnector.transfer(any[VOADataTransfer])(any[HeaderCarrier])) thenReturn Future.successful(Success(NOT_FOUND))
-    when(dataTransferRepository.findBatch()) thenReturn Future.successful(data)
-    when(dataTransferRepository.removeById(any[ObjectId])) thenReturn Future.unit
-    when(dataTransferRepository.updateTime(any[ObjectId], any[Instant])) thenReturn Future.unit
+    when(dataTransferConnector.transfer(any[VOADataTransfer])(any[HeaderCarrier])).thenReturn(Future.successful(Success(NOT_FOUND)))
+    when(dataTransferRepository.findBatch()).thenReturn(Future.successful(data))
+    when(dataTransferRepository.removeById(any[ObjectId])).thenReturn(Future.unit)
+    when(dataTransferRepository.updateTime(any[ObjectId], any[Instant])).thenReturn(Future.unit)
 
     await(voaDataTransferExporter.exportBatch())
 

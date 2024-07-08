@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 HM Revenue & Customs
+ * Copyright 2024 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -39,7 +39,7 @@ class AddressFormattersSpec extends SpecBase {
       formattedPropertyAddress(address, "<br/>") mustBe "a<br/>b<br/>c<br/>d<br/>e"
     }
 
-    "Given a Property Address with no address line 2 and without county, with elements that have too many spaces it should generate a formatted string using the given interstitial" in {
+    "Given address line 2 and without county, with elements that have too many spaces it should generate a formatted string using the given interstitial" in {
       val address = PropertyAddress(" a ", None, " c ", None, " e ")
       formattedPropertyAddress(address, "<br/>") mustBe "a<br/>c<br/>e"
     }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 HM Revenue & Customs
+ * Copyright 2024 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -47,9 +47,10 @@ trait SpecBase extends PlaySpec with GuiceOneAppPerSuite with MockitoSugar {
     val httpMock = mock[HttpClient]
     when(
       httpMock.POST(anyString, any[JsValue], any[Seq[(String, String)]])(any[Writes[JsValue]], any[HttpReads[Any]], any[HeaderCarrier], any())
-    ) thenReturn Future.successful(HttpResponse(returnedStatus, ""))
-    when(httpMock.GET(anyString, any[Seq[(String, String)]], any[Seq[(String, String)]])(any[HttpReads[Any]], any[HeaderCarrier], any())) thenReturn
+    ).thenReturn(Future.successful(HttpResponse(returnedStatus, "")))
+    when(httpMock.GET(anyString, any[Seq[(String, String)]], any[Seq[(String, String)]])(any[HttpReads[Any]], any[HeaderCarrier], any())).thenReturn(
       Future.successful(HttpResponse(returnedStatus, ""))
+    )
     httpMock
   }
 
