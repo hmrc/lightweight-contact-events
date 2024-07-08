@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 HM Revenue & Customs
+ * Copyright 2024 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,7 +28,7 @@ import scala.concurrent.ExecutionContext
 
 class SchedulerModule extends Module with Logging {
 
-  override def bindings(environment: Environment, configuration: Configuration): Seq[Binding[_]] =
+  override def bindings(environment: Environment, configuration: Configuration): Seq[Binding[?]] =
     if (configuration.getOptional[String]("voaExport.enable").exists(_.toBoolean)) {
       Seq(
         bind[VoaDataTransferScheduler].toProvider[VoaDataTransferSchedulerProvider].eagerly(),
@@ -36,7 +36,7 @@ class SchedulerModule extends Module with Logging {
       )
     } else {
       logger.warn("Export disabled, transfers won't be exported to VOA")
-      Seq.empty[Binding[_]]
+      Seq.empty[Binding[?]]
     }
 }
 
