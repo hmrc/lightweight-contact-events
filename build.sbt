@@ -3,9 +3,7 @@ import uk.gov.hmrc.DefaultBuildSettings.itSettings
 
 val appName = "lightweight-contact-events"
 
-ThisBuild / libraryDependencySchemes += "org.scala-lang.modules" %% "scala-xml" % VersionScheme.Always // Resolves versions conflict
-
-ThisBuild / scalaVersion := "3.4.2"
+ThisBuild / scalaVersion := "3.7.0"
 ThisBuild / majorVersion := 1
 
 lazy val microservice = Project(appName, file("."))
@@ -14,8 +12,11 @@ lazy val microservice = Project(appName, file("."))
   .settings(
     PlayKeys.playDefaultPort := 7312,
     libraryDependencies ++= AppDependencies.appDependencies,
-    scalacOptions += "-Wconf:src=routes/.*:s",
     maintainer := "voa.service.optimisation@digital.hmrc.gov.uk",
+    scalacOptions += "-Wconf:src=routes/.*:s",
+    scalacOptions += "-Wconf:msg=Flag .* set repeatedly:s",
+    scalacOptions += "-Wconf:msg=Implicit parameters should be provided with a \\`using\\` clause&src=views/.*:s",
+    javaOptions += "-XX:+EnableDynamicAgentLoading",
     Test / parallelExecution := false
   )
 
@@ -23,4 +24,9 @@ lazy val it = (project in file("it"))
   .enablePlugins(PlayScala)
   .dependsOn(microservice)
   .settings(itSettings())
-  .settings(libraryDependencies ++= AppDependencies.itDependencies)
+  .settings(
+    scalacOptions += "-Wconf:msg=Flag .* set repeatedly:s",
+    libraryDependencies ++= AppDependencies.itDependencies
+  )
+
+addCommandAlias("scalastyle", ";scalafmtAll;scalafmtSbt;it/test:scalafmt;scalafixAll")

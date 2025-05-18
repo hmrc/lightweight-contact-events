@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 HM Revenue & Customs
+ * Copyright 2025 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -272,12 +272,11 @@ class CreationControllerSpec extends SpecBase with MockitoSugar with EitherValue
     result.isLeft mustBe true
   }
 
-  "Create method returns a Failure when the email service returns an internal server error" in {
+  "Create method returns a Failure when the email service returns an internal server error" in
     intercept[Exception] {
       val repository = getQueuedDataTransferRepository()
 
       val result = new CreationController(repository, initialize, action, stub).create()(fakeRequestWithJson(contactJson))
       status(result) mustBe INTERNAL_SERVER_ERROR
     }
-  }
 }

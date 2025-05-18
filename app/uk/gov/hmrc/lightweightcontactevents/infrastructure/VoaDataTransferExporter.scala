@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 HM Revenue & Customs
+ * Copyright 2025 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -71,7 +71,7 @@ class VoaDataTransferExporter @Inject() (
 
   def sendToVoa(transfer: VOADataTransfer)(implicit ec: ExecutionContext): Future[Unit] = {
     val hc: HeaderCarrier = new HeaderCarrier()
-    dataTransferConnector.transfer(transfer)(hc).flatMap {
+    dataTransferConnector.transfer(transfer)(using hc).flatMap {
       case Success(statusCode) if statusCode < 300 => Future.unit
       case Success(statusCode)                     => Future.failed(new RuntimeException(s"Unable to send data to VOA, StatusCode: $statusCode"))
       case Failure(exception)                      => Future.failed(new RuntimeException("Unable to send data to VOA", exception))
