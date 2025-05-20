@@ -1,6 +1,5 @@
 import org.scalafmt.sbt.ScalafmtPlugin
 import org.scalafmt.sbt.ScalafmtPlugin.autoImport.{scalafmtAll, scalafmtFailOnErrors, scalafmtSbt}
-import org.scalastyle.sbt.ScalastylePlugin.autoImport.scalastyle
 import sbt.*
 import sbt.Keys.*
 import scalafix.sbt.ScalafixPlugin
@@ -8,10 +7,10 @@ import scalafix.sbt.ScalafixPlugin.autoImport.scalafixAll
 import scoverage.ScoverageSbtPlugin
 
 /**
- * Provides sbt task `formatAll` and settings for `scalafmt`, `scalafix` plugins.
- *
- * @author Yuriy Tumakha
- */
+  * Provides sbt task `formatAll` and settings for `scalafmt`, `scalafix` plugins.
+  *
+  * @author Yuriy Tumakha
+  */
 object FormatAllPlugin extends AutoPlugin {
 
   override def requires: Plugins = ScalafmtPlugin && ScalafixPlugin && ScoverageSbtPlugin
@@ -33,9 +32,7 @@ object FormatAllPlugin extends AutoPlugin {
         .sequential(
           scalafmtAll,
           Compile / scalafmtSbt,
-          scalafixAll.toTask(""),
-          (Compile / scalastyle).toTask(""),
-          (Test / scalastyle).toTask("")
+          scalafixAll.toTask("")
         )
         .value
     )

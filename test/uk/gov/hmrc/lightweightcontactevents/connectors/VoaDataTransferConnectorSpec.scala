@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 HM Revenue & Customs
+ * Copyright 2025 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -63,7 +63,7 @@ class VoaDataTransferConnectorSpec extends SpecBase {
 
       "Send the contact details returning a 200 when it succeeds" in {
         val httpMock = getHttpMock(OK)
-        val result   = await(connector(httpMock).transfer(ctDataTransfer)(HeaderCarrier()))
+        val result   = await(connector(httpMock).transfer(ctDataTransfer)(using HeaderCarrier()))
 
         result match {
           case Success(status) => status mustBe OK
@@ -73,7 +73,7 @@ class VoaDataTransferConnectorSpec extends SpecBase {
 
       "return a failure representing the error when send method fails" in {
         val httpMock = getHttpMock(INTERNAL_SERVER_ERROR)
-        val result   = await(connector(httpMock).transfer(ctDataTransfer)(HeaderCarrier()))
+        val result   = await(connector(httpMock).transfer(ctDataTransfer)(using HeaderCarrier()))
 
         assert(result.isFailure)
       }
@@ -89,10 +89,10 @@ class VoaDataTransferConnectorSpec extends SpecBase {
         val headersCaptor: ArgumentCaptor[Seq[(String, String)]] = ArgumentCaptor.forClass(classOf[Seq[(String, String)]])
 
         val httpMock = getHttpMock(OK)
-        connector(httpMock).sendJson(minimalJson)(HeaderCarrier())
+        connector(httpMock).sendJson(minimalJson)(using HeaderCarrier())
 
         verify(httpMock).POST(urlCaptor.capture, bodyCaptor.capture, headersCaptor.capture)(
-          jsonWritesNapper.capture,
+          using jsonWritesNapper.capture,
           httpReadsNapper.capture,
           headerCarrierNapper.capture,
           any()
@@ -103,7 +103,7 @@ class VoaDataTransferConnectorSpec extends SpecBase {
       }
 
       "return a 200 if the data transfer call is successful" in {
-        val result = await(connector(getHttpMock(OK)).sendJson(minimalJson)(HeaderCarrier()))
+        val result = await(connector(getHttpMock(OK)).sendJson(minimalJson)(using HeaderCarrier()))
         result match {
           case Success(status) =>
             status mustBe OK
@@ -113,16 +113,16 @@ class VoaDataTransferConnectorSpec extends SpecBase {
 
       "throw an failure if the data transfer call fails" in {
         val httpMock = getHttpMock(INTERNAL_SERVER_ERROR)
-        val result   = await(connector(httpMock).sendJson(minimalJson)(HeaderCarrier()))
+        val result   = await(connector(httpMock).sendJson(minimalJson)(using HeaderCarrier()))
         assert(result.isFailure)
       }
 
       "return a failure if the data transfer call throws an exception" in {
         val httpMock = mock[HttpClient]
         when(
-          httpMock.POST(anyString, any[JsValue], any[Seq[(String, String)]])(any[Writes[JsValue]], any[HttpReads[Any]], any[HeaderCarrier], any())
+          httpMock.POST(anyString, any[JsValue], any[Seq[(String, String)]])(using any[Writes[JsValue]], any[HttpReads[Any]], any[HeaderCarrier], any())
         ).thenReturn(Future.successful(new RuntimeException))
-        val result   = await(connector(httpMock).sendJson(minimalJson)(HeaderCarrier()))
+        val result   = await(connector(httpMock).sendJson(minimalJson)(using HeaderCarrier()))
         assert(result.isFailure)
       }
     }
