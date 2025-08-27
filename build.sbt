@@ -3,7 +3,7 @@ import uk.gov.hmrc.DefaultBuildSettings.itSettings
 
 val appName = "lightweight-contact-events"
 
-ThisBuild / scalaVersion := "3.7.0"
+ThisBuild / scalaVersion := "3.7.2"
 ThisBuild / majorVersion := 1
 
 lazy val microservice = Project(appName, file("."))
@@ -16,6 +16,7 @@ lazy val microservice = Project(appName, file("."))
     scalacOptions += "-Wconf:src=routes/.*:s",
     scalacOptions += "-Wconf:msg=Flag .* set repeatedly:s",
     scalacOptions += "-Wconf:msg=Implicit parameters should be provided with a \\`using\\` clause&src=views/.*:s",
+    scalacOptions += "-feature",
     javaOptions += "-XX:+EnableDynamicAgentLoading",
     Test / parallelExecution := false
   )
