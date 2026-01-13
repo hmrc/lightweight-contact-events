@@ -3,15 +3,15 @@ import sbt.*
 
 object AppDependencies {
 
-  private val bootstrapVersion = "10.1.0"
-  private val hmrcMongoVersion = "2.7.0"
+  private val bootstrapVersion = "10.5.0"
+  private val hmrcMongoVersion = "2.11.0"
 
   // Test dependencies
   private val scalaTestPlusPlayVersion = "7.0.2"
   private val scalaTestVersion         = "3.2.19"
   private val scalacheckVersion        = "3.2.19.0"
   private val mockitoVersion           = "3.2.19.0"
-  private val scalaGuiceVersion        = "6.0.0" // Use 6.0.0 because 7.0.0 is not compatible with play-guice:3.0.8
+  private val scalaGuiceVersion        = "6.0.0" // Use 6.0.0 because 7.0.0 is not compatible with play-guice:3.0.10
   private val flexMarkVersion          = "0.64.8"
 
   private val compile = Seq(

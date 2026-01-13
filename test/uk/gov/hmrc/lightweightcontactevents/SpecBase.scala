@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 HM Revenue & Customs
+ * Copyright 2026 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,24 +16,24 @@
 
 package uk.gov.hmrc.lightweightcontactevents
 
-import org.mockito.ArgumentMatchers.{any, anyString}
+import org.mockito.ArgumentMatchers.any
 import org.mockito.Mockito.when
 import org.scalatestplus.mockito.MockitoSugar
 import org.scalatestplus.play.PlaySpec
-import org.scalatestplus.play.guice._
+import org.scalatestplus.play.guice.*
 import play.api.i18n.{Messages, MessagesApi}
 import play.api.inject.Injector
-import play.api.libs.json.{JsValue, Writes}
 import play.api.mvc.AnyContentAsEmpty
 import play.api.test.FakeRequest
-import uk.gov.hmrc.http.{HeaderCarrier, HttpReads, HttpResponse}
+import uk.gov.hmrc.http.HeaderCarrier
+import uk.gov.hmrc.http.client.HttpClientV2
 import uk.gov.hmrc.lightweightcontactevents.models.QueuedDataTransfer
 import uk.gov.hmrc.lightweightcontactevents.repository.QueuedDataTransferRepository
-import uk.gov.hmrc.http.HttpClient
 
+import java.net.URL
 import scala.concurrent.Future
 
-trait SpecBase extends PlaySpec with GuiceOneAppPerSuite with MockitoSugar {
+trait SpecBase extends PlaySpec with GuiceOneAppPerSuite with MockitoSugar:
 
   def injector: Injector = app.injector
 
@@ -43,21 +43,17 @@ trait SpecBase extends PlaySpec with GuiceOneAppPerSuite with MockitoSugar {
 
   def messages: Messages = messagesApi.preferred(fakeRequest)
 
-  def getHttpMock(returnedStatus: Int): HttpClient = {
-    val httpMock = mock[HttpClient]
+  def getHttpMock(returnedStatus: Int): HttpClientV2 =
+    val httpClientV2Mock = mock[HttpClientV2]
     when(
-      httpMock.POST(anyString, any[JsValue], any[Seq[(String, String)]])(using any[Writes[JsValue]], any[HttpReads[Any]], any[HeaderCarrier], any())
-    ).thenReturn(Future.successful(HttpResponse(returnedStatus, "")))
-    when(httpMock.GET(anyString, any[Seq[(String, String)]], any[Seq[(String, String)]])(using any[HttpReads[Any]], any[HeaderCarrier], any())).thenReturn(
-      Future.successful(HttpResponse(returnedStatus, ""))
-    )
-    httpMock
-  }
+      httpClientV2Mock.post(any[URL])(using any[HeaderCarrier])
+    ).thenReturn(RequestBuilderStub(Right(returnedStatus), "{}"))
+    when(
+      httpClientV2Mock.get(any[URL])(using any[HeaderCarrier])
+    ).thenReturn(RequestBuilderStub(Right(returnedStatus), "{}"))
+    httpClientV2Mock
 
-  def getQueuedDataTransferRepository(): QueuedDataTransferRepository = {
+  def getQueuedDataTransferRepository: QueuedDataTransferRepository =
     val repositoryMock = mock[QueuedDataTransferRepository]
     when(repositoryMock.insert(any[QueuedDataTransfer])).thenReturn(Future.unit)
     repositoryMock
-  }
-
-}
