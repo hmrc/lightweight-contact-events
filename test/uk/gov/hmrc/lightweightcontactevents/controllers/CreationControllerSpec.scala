@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 HM Revenue & Customs
+ * Copyright 2026 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -191,7 +191,7 @@ class CreationControllerSpec extends SpecBase with MockitoSugar with EitherValue
   }""""
 
   "Given some Json representing a Contact with an enquiry, the createContact method creates a Right(Contact) with council tax address details" in {
-    val repository = getQueuedDataTransferRepository()
+    val repository = getQueuedDataTransferRepository
     val controller = new CreationController(repository, initialize, action, stub)
     val result     = controller.createContact(Some(Json.parse(contactJson)))
 
@@ -204,35 +204,35 @@ class CreationControllerSpec extends SpecBase with MockitoSugar with EitherValue
   }
 
   "return 200 for a POST carrying an enquiry for council tax" in {
-    val repository = getQueuedDataTransferRepository()
+    val repository = getQueuedDataTransferRepository
 
     val result = new CreationController(repository, initialize, action, stub).create()(fakeRequestWithJson(contactJson))
     status(result) mustBe OK
   }
 
   "return 200 for a POST carrying an enquiry for business rates" in {
-    val repository = getQueuedDataTransferRepository()
+    val repository = getQueuedDataTransferRepository
 
     val result = new CreationController(repository, initialize, action, stub).create()(fakeRequestWithJson(brContactJson))
     status(result) mustBe OK
   }
 
   "return 200 for a POST carrying an enquiry for housing allowance" in {
-    val repository = getQueuedDataTransferRepository()
+    val repository = getQueuedDataTransferRepository
 
     val result = new CreationController(repository, initialize, action, stub).create()(fakeRequestWithJson(haContactJson))
     status(result) mustBe OK
   }
 
   "return 200 for a POST carrying an enquiry for fair rent" in {
-    val repository = getQueuedDataTransferRepository()
+    val repository = getQueuedDataTransferRepository
 
     val result = new CreationController(repository, initialize, action, stub).create()(fakeRequestWithJson(frContactJson))
     status(result) mustBe OK
   }
 
   "return 200 for a POST carrying an enquiry for other" in {
-    val repository = getQueuedDataTransferRepository()
+    val repository = getQueuedDataTransferRepository
 
     val result = new CreationController(repository, initialize, action, stub).create()(fakeRequestWithJson(oContactJson))
     status(result) mustBe OK
@@ -240,7 +240,7 @@ class CreationControllerSpec extends SpecBase with MockitoSugar with EitherValue
 
   "return 400 (badrequest) when given no json" in {
     val fakeRequest = FakeRequest("POST", "").withHeaders("Content-Type" -> "application/json")
-    val repository  = getQueuedDataTransferRepository()
+    val repository  = getQueuedDataTransferRepository
 
     val result = new CreationController(repository, initialize, action, stub).create()(fakeRequest)
     status(result) mustBe BAD_REQUEST
@@ -248,7 +248,7 @@ class CreationControllerSpec extends SpecBase with MockitoSugar with EitherValue
 
   "return 400 (badrequest) when given garbled json" in {
     val fakeRequest = FakeRequest("POST", "").withHeaders("Content-Type" -> "application/json").withTextBody("{")
-    val repository  = getQueuedDataTransferRepository()
+    val repository  = getQueuedDataTransferRepository
 
     val result = new CreationController(repository, initialize, action, stub).create()(fakeRequest)
     status(result) mustBe BAD_REQUEST
@@ -264,7 +264,7 @@ class CreationControllerSpec extends SpecBase with MockitoSugar with EitherValue
   }
 
   "Given some wrong Json format, the createContact method returns a Left(Unable to parse)" in {
-    val repository = getQueuedDataTransferRepository()
+    val repository = getQueuedDataTransferRepository
 
     val controller = new CreationController(repository, initialize, action, stub)
     val result     = controller.createContact(Some(Json.parse(wrongJson)))
@@ -274,7 +274,7 @@ class CreationControllerSpec extends SpecBase with MockitoSugar with EitherValue
 
   "Create method returns a Failure when the email service returns an internal server error" in
     intercept[Exception] {
-      val repository = getQueuedDataTransferRepository()
+      val repository = getQueuedDataTransferRepository
 
       val result = new CreationController(repository, initialize, action, stub).create()(fakeRequestWithJson(contactJson))
       status(result) mustBe INTERNAL_SERVER_ERROR

@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 HM Revenue & Customs
+ * Copyright 2026 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,25 +17,25 @@
 package uk.gov.hmrc.lightweightcontactevents.connectors
 
 import org.mockito.ArgumentCaptor
-import org.mockito.ArgumentMatchers.{any, anyString}
+import org.mockito.ArgumentMatchers.any
 import org.mockito.Mockito.{verify, when}
-import play.api.libs.json.{JsValue, Json, Writes}
-import play.api.test.Helpers._
-import play.api.{Configuration, Environment}
-import uk.gov.hmrc.http.{HeaderCarrier, HttpReads}
-import uk.gov.hmrc.lightweightcontactevents.SpecBase
+import play.api.Environment
+import play.api.libs.json.{JsValue, Json}
+import play.api.test.Helpers.*
+import uk.gov.hmrc.http.HeaderCarrier
+import uk.gov.hmrc.http.client.HttpClientV2
 import uk.gov.hmrc.lightweightcontactevents.models.ConfirmedContactDetails.toLegacyContact
 import uk.gov.hmrc.lightweightcontactevents.models.{ConfirmedContactDetails, PropertyAddress, VOADataTransfer}
+import uk.gov.hmrc.lightweightcontactevents.{RequestBuilderStub, SpecBase}
 import uk.gov.hmrc.play.bootstrap.config.ServicesConfig
-import uk.gov.hmrc.http.HttpClient
 
-import scala.concurrent.{ExecutionContext, Future}
+import java.net.URL
+import scala.concurrent.ExecutionContext
 import scala.util.{Failure, Success}
 
 class VoaDataTransferConnectorSpec extends SpecBase {
 
   implicit val ec: ExecutionContext  = injector.instanceOf[ExecutionContext]
-  val configuration: Configuration   = injector.instanceOf[Configuration]
   val auditService: AuditingService  = injector.instanceOf[AuditingService]
   val environment: Environment       = injector.instanceOf[Environment]
   val servicesConfig: ServicesConfig = injector.instanceOf[ServicesConfig]
@@ -54,8 +54,8 @@ class VoaDataTransferConnectorSpec extends SpecBase {
     VOADataTransfer(toLegacyContact(confirmedContactDetails), propertyAddress, true, subject, ctEmail, enquiryCategoryMsg, subEnquiryCategoryMsg, message)
   val minimalJson: JsValue            = Json.toJson(ctDataTransfer)
 
-  def connector(httpMock: HttpClient) =
-    new VoaDataTransferConnector(httpMock, configuration, auditService, servicesConfig)
+  def connector(httpClientV2Mock: HttpClientV2) =
+    new VoaDataTransferConnector(httpClientV2Mock, auditService, servicesConfig)
 
   "Voa Data Transfer Connector" when {
 
@@ -81,25 +81,16 @@ class VoaDataTransferConnectorSpec extends SpecBase {
 
     "provided with JSON directly" must {
       "call the Microservice with the given JSON" in {
-        implicit val headerCarrierNapper                         = ArgumentCaptor.forClass(classOf[HeaderCarrier])
-        implicit val httpReadsNapper                             = ArgumentCaptor.forClass(classOf[HttpReads[Any]])
-        implicit val jsonWritesNapper                            = ArgumentCaptor.forClass(classOf[Writes[JsValue]])
-        val urlCaptor: ArgumentCaptor[String]                    = ArgumentCaptor.forClass(classOf[String])
-        val bodyCaptor: ArgumentCaptor[JsValue]                  = ArgumentCaptor.forClass(classOf[JsValue])
-        val headersCaptor: ArgumentCaptor[Seq[(String, String)]] = ArgumentCaptor.forClass(classOf[Seq[(String, String)]])
+        val headerCarrierNapper = ArgumentCaptor.forClass(classOf[HeaderCarrier])
+        val urlCaptor           = ArgumentCaptor.forClass(classOf[URL])
 
-        val httpMock = getHttpMock(OK)
-        connector(httpMock).sendJson(minimalJson)(using HeaderCarrier())
+        val httpMock          = getHttpMock(OK)
+        val headerCarrierStub = HeaderCarrier()
+        connector(httpMock).sendJson(minimalJson)(using headerCarrierStub)
 
-        verify(httpMock).POST(urlCaptor.capture, bodyCaptor.capture, headersCaptor.capture)(
-          using jsonWritesNapper.capture,
-          httpReadsNapper.capture,
-          headerCarrierNapper.capture,
-          any()
-        )
-        urlCaptor.getValue must endWith("contact-process-api/contact/sendemail")
-        bodyCaptor.getValue mustBe minimalJson
-        headersCaptor.getValue mustBe Seq(connector(httpMock).jsonContentTypeHeader)
+        verify(httpMock).post(urlCaptor.capture)(using headerCarrierNapper.capture)
+        urlCaptor.getValue.toString must endWith("contact-process-api/contact/sendemail")
+        headerCarrierNapper.getValue.nsStamp mustBe headerCarrierStub.nsStamp
       }
 
       "return a 200 if the data transfer call is successful" in {
@@ -118,11 +109,12 @@ class VoaDataTransferConnectorSpec extends SpecBase {
       }
 
       "return a failure if the data transfer call throws an exception" in {
-        val httpMock = mock[HttpClient]
+        val httpClientV2Mock = mock[HttpClientV2]
         when(
-          httpMock.POST(anyString, any[JsValue], any[Seq[(String, String)]])(using any[Writes[JsValue]], any[HttpReads[Any]], any[HeaderCarrier], any())
-        ).thenReturn(Future.successful(new RuntimeException))
-        val result   = await(connector(httpMock).sendJson(minimalJson)(using HeaderCarrier()))
+          httpClientV2Mock.post(any[URL])(using any[HeaderCarrier])
+        ).thenReturn(RequestBuilderStub(Left(new RuntimeException), "{}"))
+
+        val result = await(connector(httpClientV2Mock).sendJson(minimalJson)(using HeaderCarrier()))
         assert(result.isFailure)
       }
     }

@@ -3,7 +3,7 @@ import uk.gov.hmrc.DefaultBuildSettings.itSettings
 
 val appName = "lightweight-contact-events"
 
-ThisBuild / scalaVersion := "3.7.2"
+ThisBuild / scalaVersion := "3.7.4"
 ThisBuild / majorVersion := 1
 
 lazy val microservice = Project(appName, file("."))

@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 HM Revenue & Customs
+ * Copyright 2026 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,26 +23,25 @@ import net.codingwell.scalaguice.ScalaModule
 import org.scalatest.OptionValues
 import play.api.http.Status.{NOT_FOUND, OK}
 import play.api.inject.guice.GuiceApplicationBuilder
-import play.api.Configuration
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.lightweightcontactevents.DiAcceptanceTest
 import uk.gov.hmrc.lightweightcontactevents.connectors.{AuditingService, VoaDataTransferConnector}
 import uk.gov.hmrc.lightweightcontactevents.models.VOADataTransfer
 import uk.gov.hmrc.lightweightcontactevents.repository.QueuedDataTransferRepository
 import uk.gov.hmrc.play.bootstrap.config.ServicesConfig
-import uk.gov.hmrc.http.HttpClient
+import uk.gov.hmrc.http.client.HttpClientV2
 import uk.gov.hmrc.lightweightcontactevents.util.LightweightITFixture.aQueuedDataTransfer
 import uk.gov.hmrc.mongo.lock.MongoLockRepository
 
 import java.time.Clock
 import java.util.concurrent.TimeUnit
 import javax.inject.{Inject, Singleton}
-import scala.concurrent.duration.{FiniteDuration, _}
+import scala.concurrent.duration.{DurationInt, FiniteDuration}
 import scala.concurrent.{ExecutionContext, Future}
 import scala.language.postfixOps
 import scala.util.{Success, Try}
 
-class ExportTransferSpec extends DiAcceptanceTest with OptionValues {
+class ExportTransferSpec extends DiAcceptanceTest with OptionValues:
   override def testDbPrefix(): String = "ExportTransferSpec"
 
   override def fakeApplicationBuilder(): GuiceApplicationBuilder = super.fakeApplicationBuilder()
@@ -113,7 +112,7 @@ class ExportTransferSpec extends DiAcceptanceTest with OptionValues {
 
   def repository: QueuedDataTransferRepository = app.injector.instanceOf[QueuedDataTransferRepository]
 
-  def createScheduler(): VoaDataTransferScheduler = {
+  def createScheduler(): VoaDataTransferScheduler =
     val actorSystem                              = app.injector.instanceOf[ActorSystem]
     val mongoLockRepository: MongoLockRepository = app.injector.instanceOf[MongoLockRepository]
 
@@ -126,29 +125,21 @@ class ExportTransferSpec extends DiAcceptanceTest with OptionValues {
       app.injector.instanceOf[VoaDataTransferExporter],
       mongoLockRepository
     )
-  }
 
-}
-
-class ScheduleEvery1Second extends DefaultRegularSchedule {
+class ScheduleEvery1Second extends DefaultRegularSchedule:
   override def timeUntilNextRun(): FiniteDuration = FiniteDuration.apply(1, TimeUnit.SECONDS)
-}
 
 @Singleton
 class ExportTestDataTransferConnector @Inject() (
-  http: HttpClient,
-  configuration: Configuration,
+  httpClientV2: HttpClientV2,
   auditService: AuditingService,
   servicesConfig: ServicesConfig
 )(implicit ec: ExecutionContext
-) extends VoaDataTransferConnector(http, configuration, auditService, servicesConfig) {
+) extends VoaDataTransferConnector(httpClientV2, auditService, servicesConfig):
 
   var transfer: List[VOADataTransfer] = List[VOADataTransfer]()
   var responseCode: Int               = OK
 
-  override def transfer(dataTransfer: VOADataTransfer)(implicit hc: HeaderCarrier): Future[Try[Int]] = {
+  override def transfer(dataTransfer: VOADataTransfer)(implicit hc: HeaderCarrier): Future[Try[Int]] =
     transfer = dataTransfer :: transfer
     Future.successful(Success(responseCode))
-  }
-
-}
