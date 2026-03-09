@@ -3,7 +3,7 @@ import uk.gov.hmrc.DefaultBuildSettings.{itSettings, targetJvm}
 
 val appName = "lightweight-contact-events"
 
-ThisBuild / scalaVersion := "3.8.1"
+ThisBuild / scalaVersion := "3.8.2"
 ThisBuild / majorVersion := 1
 
 val commonSettings = Seq(
