@@ -1,8 +1,8 @@
-# VOA Contact Forms - Lightweight Contact Events service
+# VO Contact Forms - Lightweight Contact Events service
 
-VOA Contact Forms - backend. Stores a history of events.
+VO Contact Forms - backend. Stores a history of events.
 
-### Running VOA Contact Forms on your local machine
+### Running VO Contact Forms on your local machine
 
 https://confluence.tools.tax.service.gov.uk/display/VOAO/Running+Contact+Forms+on+your+local+machine
 

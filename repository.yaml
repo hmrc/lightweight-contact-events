@@ -1,6 +1,6 @@
 repoVisibility: public_0C3F0CE3E6E6448FAD341E7BFA50FCD333E06A20CFF05FCACE61154DDBBADF71
 type: service
 service-type: backend
-description: VOA Contact Forms - Lightweight Contact Events service
+description: VO Contact Forms - Lightweight Contact Events service
 test-repositories:
   - voac-acceptance-tests
