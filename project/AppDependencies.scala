@@ -9,8 +9,7 @@ object AppDependencies {
   private val govukNotifyVersion = "6.0.0-RELEASE"
 
   // Test dependencies
-  private val scalacheckVersion = "3.2.19.0"
-  private val mockitoVersion    = "3.2.19.0"
+  private val voTestVersion     = "0.5.0"
   private val scalaGuiceVersion = "6.0.0" // Use 6.0.0 because 7.0.0 is not compatible with play-guice:3.0.11
 
   private val compile = Seq(
@@ -25,13 +24,13 @@ object AppDependencies {
   )
 
   private val testOnly = Seq(
-    "org.scalatestplus" %% "mockito-5-12" % mockitoVersion % Test
+    "uk.gov.hmrc" %% "vo-unit-test" % voTestVersion % Test
   )
 
   private val integrationTestOnly = Seq(
-    "org.apache.pekko"  %% "pekko-testkit"   % PlayVersion.pekkoVersion % Test,
-    "net.codingwell"    %% "scala-guice"     % scalaGuiceVersion        % Test,
-    "org.scalatestplus" %% "scalacheck-1-18" % scalacheckVersion        % Test
+    "uk.gov.hmrc"      %% "vo-integration-test" % voTestVersion            % Test,
+    "org.apache.pekko" %% "pekko-testkit"       % PlayVersion.pekkoVersion % Test,
+    "net.codingwell"   %% "scala-guice"         % scalaGuiceVersion        % Test
   )
 
   val appDependencies: Seq[ModuleID] = compile ++ commonTests ++ testOnly

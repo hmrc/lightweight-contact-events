@@ -39,7 +39,17 @@ class NotifyConnector @Inject() (config: Configuration, auditService: AuditingSe
   def sendEmailToVO(data: VODataTransfer)(using hc: HeaderCarrier): Try[Unit] =
     val json = Json.toJson(data)
 
-    val personalisationMap: Map[String, String] = null
+    val personalisationMap: Map[String, String] = Map(
+      "subject"               -> data.subject,
+      "propertyAddress"       -> data.propertyAddress.singleLine,
+      "firstName"             -> data.contact.firstName,
+      "lastName"              -> data.contact.lastName,
+      "email"                 -> data.contact.email,
+      "contactNumber"         -> data.contact.contactNumber,
+      "enquiryCategoryMsg"    -> data.enquiryCategoryMsg,
+      "subEnquiryCategoryMsg" -> data.subEnquiryCategoryMsg,
+      "message"               -> data.message
+    )
 
     sendEmail(contactFormTemplateId, data.recipientEmailAddress, personalisationMap, data.subject)
       .map { _ =>
