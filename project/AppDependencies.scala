@@ -3,17 +3,21 @@ import sbt.*
 
 object AppDependencies {
 
-  private val bootstrapVersion = "10.7.0"
-  private val hmrcMongoVersion = "2.12.0"
+  private val bootstrapVersion   = "10.7.0"
+  private val voServiceVersion   = "0.12.0"
+  private val hmrcMongoVersion   = "2.12.0"
+  private val govukNotifyVersion = "6.0.0-RELEASE"
 
   // Test dependencies
   private val scalacheckVersion = "3.2.19.0"
   private val mockitoVersion    = "3.2.19.0"
-  private val scalaGuiceVersion = "6.0.0" // Use 6.0.0 because 7.0.0 is not compatible with play-guice:3.0.10
+  private val scalaGuiceVersion = "6.0.0" // Use 6.0.0 because 7.0.0 is not compatible with play-guice:3.0.11
 
   private val compile = Seq(
-    "uk.gov.hmrc"       %% "bootstrap-backend-play-30" % bootstrapVersion,
-    "uk.gov.hmrc.mongo" %% "hmrc-mongo-play-30"        % hmrcMongoVersion
+    "uk.gov.hmrc"          %% "bootstrap-backend-play-30" % bootstrapVersion,
+    "uk.gov.hmrc"          %% "vo-backend-service"        % voServiceVersion,
+    "uk.gov.hmrc.mongo"    %% "hmrc-mongo-play-30"        % hmrcMongoVersion,
+    "uk.gov.service.notify" % "notifications-java-client" % govukNotifyVersion
   )
 
   private val commonTests = Seq(
