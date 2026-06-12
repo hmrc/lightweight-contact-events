@@ -20,7 +20,7 @@ import java.time.{Clock, Duration, Instant}
 import javax.inject.{Inject, Singleton}
 import play.api.Logging
 import uk.gov.hmrc.http.HeaderCarrier
-import uk.gov.hmrc.vo.contact.events.connectors.VODataTransferConnector
+import uk.gov.hmrc.vo.contact.events.connectors.NotifyConnector
 import uk.gov.hmrc.vo.contact.events.models.{QueuedDataTransfer, VODataTransfer}
 import uk.gov.hmrc.vo.contact.events.repository.QueuedDataTransferRepository
 
@@ -29,7 +29,7 @@ import scala.util.{Failure, Success}
 
 @Singleton
 class VODataTransferExporter @Inject() (
-  dataTransferConnector: VODataTransferConnector,
+  notifyConnector: NotifyConnector,
   dataTransferRepository: QueuedDataTransferRepository,
   clock: Clock = Clock.systemDefaultZone()
 ) extends Logging:
@@ -66,13 +66,12 @@ class VODataTransferExporter @Inject() (
     logger.warn(s"removing element with permanent error : $transfer") // TODO - send details only to SPLUNK
     dataTransferRepository.removeById(transfer._id).map(_ => ())
 
-  private def sendToVO(transfer: VODataTransfer)(using ec: ExecutionContext): Future[Unit] =
+  private def sendToVO(data: VODataTransfer): Future[Unit] =
     val hc: HeaderCarrier = HeaderCarrier()
-    dataTransferConnector.transfer(transfer)(using hc).flatMap {
-      case Success(statusCode) if statusCode < 300 => Future.unit
-      case Success(statusCode)                     => Future.failed(RuntimeException(s"Unable to send data to VO, StatusCode: $statusCode"))
-      case Failure(exception)                      => Future.failed(RuntimeException("Unable to send data to VO", exception))
-    }
+
+    notifyConnector.sendEmailToVO(data)(using hc) match
+      case Success(_)         => Future.unit
+      case Failure(exception) => Future.failed(RuntimeException("Unable to send data to VO", exception))
 
   private def recordError(transfer: QueuedDataTransfer): Future[Unit] =
     if transfer.firstError.isEmpty then

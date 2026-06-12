@@ -16,24 +16,23 @@
 
 package uk.gov.hmrc.vo.contact.events.infrastructure
 
-import org.mockito.ArgumentMatchers.{any, eq => eqTo}
+import org.mockito.ArgumentMatchers.{any, eq as eqTo}
 import org.mockito.Mockito.{times, verify, when}
 import org.mongodb.scala.bson.ObjectId
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
 import org.scalatestplus.mockito.MockitoSugar
-import play.api.http.Status.{NOT_FOUND, OK}
 import play.api.test.{DefaultAwaitTimeout, FutureAwaits}
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.vo.contact.events.utils.LightweightFixture.*
-import uk.gov.hmrc.vo.contact.events.connectors.VODataTransferConnector
+import uk.gov.hmrc.vo.contact.events.connectors.NotifyConnector
 import uk.gov.hmrc.vo.contact.events.models.VODataTransfer
 import uk.gov.hmrc.vo.contact.events.repository.QueuedDataTransferRepository
 
 import java.time.{Clock, Instant, ZoneId}
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
-import scala.util.Success
+import scala.util.{Failure, Success}
 
 class VODataTransferExporterSpec extends AnyFlatSpec with Matchers with MockitoSugar with FutureAwaits with DefaultAwaitTimeout:
 
@@ -51,66 +50,69 @@ class VODataTransferExporterSpec extends AnyFlatSpec with Matchers with MockitoS
       override def instant(): Instant = now
 
   "DataExporter" should "export data" in {
-    val dataTransferConnector = mock[VODataTransferConnector]
+    val notifyConnector = mock[NotifyConnector]
 
     val dataTransferRepository = mock[QueuedDataTransferRepository]
 
-    val voDataTransferExporter = VODataTransferExporter(dataTransferConnector, dataTransferRepository, clock)
+    val voDataTransferExporter = VODataTransferExporter(notifyConnector, dataTransferRepository, clock)
 
     val transfer = aQueuedDataTransfer()
     val data     = List(transfer)
 
-    when(dataTransferConnector.transfer(any[VODataTransfer])(using any[HeaderCarrier])).thenReturn(Future.successful(Success(OK)))
+    when(notifyConnector.sendEmailToVO(any[VODataTransfer])(using any[HeaderCarrier]))
+      .thenReturn(Success(()))
     when(dataTransferRepository.findBatch()).thenReturn(Future.successful(data))
     when(dataTransferRepository.removeById(any[ObjectId])).thenReturn(Future.unit)
 
     await(voDataTransferExporter.exportBatch())
 
-    verify(dataTransferConnector, times(1)).transfer(eqTo(transfer.voDataTransfer))(using any[HeaderCarrier])
+    verify(notifyConnector, times(1)).sendEmailToVO(eqTo(transfer.voDataTransfer))(using any[HeaderCarrier])
     verify(dataTransferRepository, times(1)).removeById(eqTo(transfer._id))
   }
 
   it should "record error" in {
-    val dataTransferConnector = mock[VODataTransferConnector]
+    val notifyConnector = mock[NotifyConnector]
 
     val dataTransferRepository = mock[QueuedDataTransferRepository]
 
-    val voDataTransferExporter = VODataTransferExporter(dataTransferConnector, dataTransferRepository, clock)
+    val voDataTransferExporter = VODataTransferExporter(notifyConnector, dataTransferRepository, clock)
 
     val transfer = aQueuedDataTransfer()
     val data     = List(transfer)
 
-    when(dataTransferConnector.transfer(any[VODataTransfer])(using any[HeaderCarrier])).thenReturn(Future.successful(Success(NOT_FOUND)))
+    when(notifyConnector.sendEmailToVO(any[VODataTransfer])(using any[HeaderCarrier]))
+      .thenReturn(Failure(RuntimeException("Send email failure")))
     when(dataTransferRepository.findBatch()).thenReturn(Future.successful(data))
     when(dataTransferRepository.removeById(any[ObjectId])).thenReturn(Future.unit)
     when(dataTransferRepository.updateTime(any[ObjectId], any[Instant])).thenReturn(Future.unit)
 
     await(voDataTransferExporter.exportBatch())
 
-    verify(dataTransferConnector, times(1)).transfer(eqTo(transfer.voDataTransfer))(using any[HeaderCarrier])
+    verify(notifyConnector, times(1)).sendEmailToVO(eqTo(transfer.voDataTransfer))(using any[HeaderCarrier])
     verify(dataTransferRepository, times(0)).removeById(eqTo(transfer._id))
 
     verify(dataTransferRepository, times(1)).updateTime(eqTo(transfer._id), eqTo(clock.instant()))
   }
 
   it should "remove element with permanent error" in {
-    val dataTransferConnector = mock[VODataTransferConnector]
+    val notifyConnector = mock[NotifyConnector]
 
     val dataTransferRepository = mock[QueuedDataTransferRepository]
 
-    val voDataTransferExporter = VODataTransferExporter(dataTransferConnector, dataTransferRepository, clock)
+    val voDataTransferExporter = VODataTransferExporter(notifyConnector, dataTransferRepository, clock)
 
     val transfer = aQueuedDataTransfer().copy(firstError = Option(nowMinus12Days))
     val data     = List(transfer)
 
-    when(dataTransferConnector.transfer(any[VODataTransfer])(using any[HeaderCarrier])).thenReturn(Future.successful(Success(NOT_FOUND)))
+    when(notifyConnector.sendEmailToVO(any[VODataTransfer])(using any[HeaderCarrier]))
+      .thenReturn(Failure(RuntimeException("Send email failure")))
     when(dataTransferRepository.findBatch()).thenReturn(Future.successful(data))
     when(dataTransferRepository.removeById(any[ObjectId])).thenReturn(Future.unit)
     when(dataTransferRepository.updateTime(any[ObjectId], any[Instant])).thenReturn(Future.unit)
 
     await(voDataTransferExporter.exportBatch())
 
-    verify(dataTransferConnector, times(0)).transfer(eqTo(transfer.voDataTransfer))(using any[HeaderCarrier])
+    verify(notifyConnector, times(0)).sendEmailToVO(eqTo(transfer.voDataTransfer))(using any[HeaderCarrier])
     verify(dataTransferRepository, times(1)).removeById(eqTo(transfer._id))
 
     verify(dataTransferRepository, times(0)).updateTime(eqTo(transfer._id), eqTo(clock.instant()))

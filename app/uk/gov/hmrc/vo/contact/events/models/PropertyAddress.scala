@@ -18,7 +18,18 @@ package uk.gov.hmrc.vo.contact.events.models
 
 import play.api.libs.json.*
 
-case class PropertyAddress(addressLine1: String, addressLine2: Option[String], town: String, county: Option[String], postcode: String)
+case class PropertyAddress(addressLine1: String, addressLine2: Option[String], town: String, county: Option[String], postcode: String):
+
+  private def addressLines: List[String] =
+    List(
+      Some(addressLine1),
+      addressLine2,
+      Some(town),
+      county,
+      Some(postcode.replaceAll("^(\\S+?)\\s*?(\\d\\w\\w)$", "$1 $2"))
+    ).flatten
+
+  def singleLine: String = addressLines.mkString(", ")
 
 object PropertyAddress:
   implicit val format: OFormat[PropertyAddress] = Json.format[PropertyAddress]

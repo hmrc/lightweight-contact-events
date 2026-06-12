@@ -16,33 +16,31 @@
 
 package uk.gov.hmrc.vo.contact.events.infrastructure
 
-import org.apache.pekko.actor.ActorSystem
-import org.apache.pekko.testkit.TestProbe
 import com.google.inject.AbstractModule
 import net.codingwell.scalaguice.ScalaModule
+import org.apache.pekko.actor.ActorSystem
+import org.apache.pekko.testkit.TestProbe
 import org.scalatest.OptionValues
-import play.api.http.Status.{NOT_FOUND, OK}
+import play.api.Configuration
 import play.api.inject.guice.GuiceApplicationBuilder
 import uk.gov.hmrc.http.HeaderCarrier
-import uk.gov.hmrc.play.bootstrap.config.ServicesConfig
-import uk.gov.hmrc.http.client.HttpClientV2
-import uk.gov.hmrc.vo.contact.events.util.LightweightITFixture.aQueuedDataTransfer
 import uk.gov.hmrc.mongo.lock.MongoLockRepository
 import uk.gov.hmrc.vo.contact.events.DiAcceptanceTest
-import uk.gov.hmrc.vo.contact.events.connectors.{AuditingService, VODataTransferConnector}
+import uk.gov.hmrc.vo.contact.events.connectors.{AuditingService, NotifyConnector}
 import uk.gov.hmrc.vo.contact.events.models.VODataTransfer
 import uk.gov.hmrc.vo.contact.events.repository.QueuedDataTransferRepository
+import uk.gov.hmrc.vo.contact.events.util.LightweightITFixture.aQueuedDataTransfer
 
 import java.time.Clock
 import java.util.concurrent.TimeUnit
 import javax.inject.{Inject, Singleton}
+import scala.concurrent.ExecutionContext
 import scala.concurrent.duration.{DurationInt, FiniteDuration}
-import scala.concurrent.{ExecutionContext, Future}
 import scala.language.postfixOps
-import scala.util.{Success, Try}
+import scala.util.{Failure, Success, Try}
 
-class ExportTransferSpec extends DiAcceptanceTest with OptionValues:
-  override def testDbPrefix(): String = "ExportTransferSpec"
+class ExportToNotifySpec extends DiAcceptanceTest with OptionValues:
+  override def testDbPrefix(): String = "ExportToNotifySpec"
 
   override def fakeApplicationBuilder(): GuiceApplicationBuilder = super.fakeApplicationBuilder()
     .configure(Map(
@@ -51,15 +49,15 @@ class ExportTransferSpec extends DiAcceptanceTest with OptionValues:
       new AbstractModule with ScalaModule:
         override def configure(): Unit =
           bind[Clock].toInstance(Clock.systemUTC)
-          bind[VODataTransferConnector].to[ExportTestDataTransferConnector]
+          bind[NotifyConnector].to[TestNotifyConnector]
     )
 
-  def exportConnector: ExportTestDataTransferConnector = app.injector.instanceOf[ExportTestDataTransferConnector]
+  def testNotifyConnector: TestNotifyConnector = app.injector.instanceOf[TestNotifyConnector]
 
   "Scheduler" should {
     "Schedule event and export data to VO" in {
-
-      exportConnector.transfer = List.empty[VODataTransfer]
+      testNotifyConnector.transfer = List.empty[VODataTransfer]
+      testNotifyConnector.response = Success(())
 
       implicit val actorSystem: ActorSystem = app.actorSystem
       implicit val ec: ExecutionContext     = app.injector.instanceOf[ExecutionContext]
@@ -80,12 +78,12 @@ class ExportTransferSpec extends DiAcceptanceTest with OptionValues:
       exportEvent mustBe ExportSuccess
       queueSize.value mustBe 0
 
-      exportConnector.transfer.head mustBe transfer.voDataTransfer
+      testNotifyConnector.transfer.head mustBe transfer.voDataTransfer
     }
 
     "Keep items in DB if export fail" in {
-      exportConnector.transfer = List.empty[VODataTransfer]
-      exportConnector.responseCode = NOT_FOUND
+      testNotifyConnector.transfer = List.empty[VODataTransfer]
+      testNotifyConnector.response = Failure(RuntimeException("Send email failure"))
 
       implicit val actorSystem: ActorSystem = app.actorSystem
       implicit val ec: ExecutionContext     = app.injector.instanceOf[ExecutionContext]
@@ -129,16 +127,16 @@ class ScheduleEvery1Second extends DefaultRegularSchedule:
   override def timeUntilNextRun(): FiniteDuration = FiniteDuration.apply(1, TimeUnit.SECONDS)
 
 @Singleton
-class ExportTestDataTransferConnector @Inject() (
-  httpClientV2: HttpClientV2,
-  auditService: AuditingService,
-  servicesConfig: ServicesConfig
+class TestNotifyConnector @Inject() (
+  config: Configuration,
+  auditService: AuditingService
 )(using ec: ExecutionContext
-) extends VODataTransferConnector(httpClientV2, auditService, servicesConfig):
+) extends NotifyConnector(config, auditService):
 
   var transfer: List[VODataTransfer] = List[VODataTransfer]()
-  var responseCode: Int              = OK
+  var response: Try[Unit]            = Success(())
 
-  override def transfer(dataTransfer: VODataTransfer)(using hc: HeaderCarrier): Future[Try[Int]] =
+  override def sendEmailToVO(dataTransfer: VODataTransfer)(using hc: HeaderCarrier): Try[Unit] =
+    println("dataTransfer: " + dataTransfer)
     transfer = dataTransfer :: transfer
-    Future.successful(Success(responseCode))
+    response
