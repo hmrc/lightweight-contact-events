@@ -17,50 +17,50 @@
 package uk.gov.hmrc.vo.contact.events.utils
 
 import AddressFormatters.*
-import uk.gov.hmrc.vo.contact.events.SpecBase
 import uk.gov.hmrc.vo.contact.events.models.PropertyAddress
+import uk.gov.hmrc.vo.unit.test.BaseAppSpec
 
-class AddressFormattersSpec extends SpecBase:
+class AddressFormattersSpec extends BaseAppSpec:
 
-  "Address Formatter" must {
+  "Address Formatter" should {
 
     "Given a complete Property Address it should generate a formatted string using the given interstitial" in {
       val address = PropertyAddress("a", Some("b"), "c", Some("d"), "e")
-      formattedPropertyAddress(address, "<br/>") mustBe "a<br/>b<br/>c<br/>d<br/>e"
+      formattedPropertyAddress(address, "<br/>") shouldBe "a<br/>b<br/>c<br/>d<br/>e"
     }
 
     "Given a Property Address without address line 2 and county should generate a formatted string using the given interstitial" in {
       val address = PropertyAddress("a", None, "c", None, "e")
-      formattedPropertyAddress(address, "<br/>") mustBe "a<br/>c<br/>e"
+      formattedPropertyAddress(address, "<br/>") shouldBe "a<br/>c<br/>e"
     }
 
     "Given a Property Address with elements that have too many spaces it should generate a formatted string using the given interstitial" in {
       val address = PropertyAddress(" a ", Some(" b "), " c ", Some(" d "), " e ")
-      formattedPropertyAddress(address, "<br/>") mustBe "a<br/>b<br/>c<br/>d<br/>e"
+      formattedPropertyAddress(address, "<br/>") shouldBe "a<br/>b<br/>c<br/>d<br/>e"
     }
 
     "Given no address line 2 and no county, with elements that have too many spaces it should generate a formatted string using the given interstitial" in {
       val address = PropertyAddress(" a ", None, " c ", None, " e ")
-      formattedPropertyAddress(address, "<br/>") mustBe "a<br/>c<br/>e"
+      formattedPropertyAddress(address, "<br/>") shouldBe "a<br/>c<br/>e"
     }
 
     "Given a Sequence with three strings insert the interstitials" in {
-      insertInterstitials(Seq(Some("a"), Some("b"), Some("c")), ",") mustBe "a,b,c"
+      insertInterstitials(Seq(Some("a"), Some("b"), Some("c")), ",") shouldBe "a,b,c"
     }
 
     "Given an empty sequence return an empty String" in {
-      insertInterstitials(Seq(), ",") mustBe ""
+      insertInterstitials(Seq(), ",") shouldBe ""
     }
 
     "Given a sequence of strings that have leading or trailing spaces return the formatted string without the leading or trailing spaces" in {
-      insertInterstitials(Seq(Some(" a "), Some(" b "), Some(" c ")), ",") mustBe "a,b,c"
+      insertInterstitials(Seq(Some(" a "), Some(" b "), Some(" c ")), ",") shouldBe "a,b,c"
     }
 
     "Given an Option String with spaces trim it" in {
-      trim(Some("   a   "), ",") mustBe ",a"
+      trim(Some("   a   "), ",") shouldBe ",a"
     }
 
     "Given a None in place of an optional string return empty string" in {
-      trim(None, ", ") mustBe ""
+      trim(None, ", ") shouldBe ""
     }
   }

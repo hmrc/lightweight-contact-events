@@ -97,7 +97,7 @@ object LightweightFixture:
     )
 
   def aPropertyAddress(): PropertyAddress =
-    PropertyAddress("Some stree", None, "Some town", Some("Some county"), "BN12 4AX")
+    PropertyAddress("Some street", None, "Some town", Some("Some county"), "BN12 4AX")
 
   def aConfirmedContactDetails(): ConfirmedContactDetails =
     ConfirmedContactDetails(

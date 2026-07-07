@@ -16,39 +16,33 @@
 
 package uk.gov.hmrc.vo.contact.events.controllers
 
-import org.mockito.ArgumentMatchers.any
-import org.mockito.Mockito.when
-import org.scalatest.EitherValues
-import org.scalatestplus.mockito.MockitoSugar
-import play.api.{Configuration, Environment}
 import play.api.libs.json.Json
 import play.api.mvc.DefaultActionBuilder
 import play.api.test.{FakeRequest, Helpers}
 import play.api.test.Helpers.*
 
-import scala.concurrent.{ExecutionContext, Future}
+import scala.concurrent.Future
 import play.api.mvc.{AnyContentAsJson, ControllerComponents}
-import uk.gov.hmrc.vo.contact.events.SpecBase
-import uk.gov.hmrc.vo.contact.events.connectors.AuditingService
 import uk.gov.hmrc.vo.contact.events.models.{ConfirmedContactDetails, PropertyAddress, QueuedDataTransfer}
 import uk.gov.hmrc.vo.contact.events.repository.QueuedDataTransferRepository
 import uk.gov.hmrc.vo.contact.events.utils.Initialize
+import uk.gov.hmrc.vo.unit.test.BaseAppSpec
 
-class CreationControllerSpec extends SpecBase with MockitoSugar with EitherValues:
+class CreationControllerSpec extends BaseAppSpec:
 
-  implicit val ec: ExecutionContext = inject[ExecutionContext]
-  val configuration: Configuration  = inject[Configuration]
-  val environment: Environment      = inject[Environment]
-  val auditService: AuditingService = inject[AuditingService]
-  val initialize: Initialize        = inject[Initialize]
-  val action: DefaultActionBuilder  = inject[DefaultActionBuilder]
+  private val initialize: Initialize       = inject[Initialize]
+  private val action: DefaultActionBuilder = inject[DefaultActionBuilder]
 
-  val stub: ControllerComponents = Helpers.stubControllerComponents()
+  private val stub: ControllerComponents = Helpers.stubControllerComponents()
 
-  def fakeRequestWithJson(jsonStr: String): FakeRequest[AnyContentAsJson] = {
+  private def fakeRequestWithJson(jsonStr: String): FakeRequest[AnyContentAsJson] =
     val json = Json.parse(jsonStr)
     FakeRequest("POST", "").withHeaders("Content-Type" -> "application/json").withJsonBody(json)
-  }
+
+  private def getQueuedDataTransferRepository: QueuedDataTransferRepository =
+    val repositoryMock = mock[QueuedDataTransferRepository]
+    when(repositoryMock.insert(any[QueuedDataTransfer])).thenReturn(Future.unit)
+    repositoryMock
 
   val contactJson =
     """{
@@ -190,92 +184,94 @@ class CreationControllerSpec extends SpecBase with MockitoSugar with EitherValue
     "message": "message"
   }""""
 
-  "Given some Json representing a Contact with an enquiry, the createContact method creates a Right(Contact) with council tax address details" in {
-    val repository = getQueuedDataTransferRepository
-    val controller = CreationController(repository, initialize, action, stub)
-    val result     = controller.createContact(Some(Json.parse(contactJson)))
+  "CreationController" should {
+    "Given some Json representing a Contact with an enquiry, the createContact method creates a Right(Contact) with council tax address details" in {
+      val repository = getQueuedDataTransferRepository
+      val controller = CreationController(repository, initialize, action, stub)
+      val result     = controller.createContact(Some(Json.parse(contactJson)))
 
-    result.isRight mustBe true
-    result.value.contact mustBe ConfirmedContactDetails("full name", "email", "tel")
-    result.value.propertyAddress mustBe PropertyAddress("line1", Some("line2"), "town", Some("county"), "postcode")
-    result.value.enquiryCategoryMsg mustBe "Council Tax"
-    result.value.subEnquiryCategoryMsg mustBe "seq"
-    result.value.message mustBe "message"
-  }
+      result.isRight                     shouldBe true
+      result.value.contact               shouldBe ConfirmedContactDetails("full name", "email", "tel")
+      result.value.propertyAddress       shouldBe PropertyAddress("line1", Some("line2"), "town", Some("county"), "postcode")
+      result.value.enquiryCategoryMsg    shouldBe "Council Tax"
+      result.value.subEnquiryCategoryMsg shouldBe "seq"
+      result.value.message               shouldBe "message"
+    }
 
-  "return 200 for a POST carrying an enquiry for council tax" in {
-    val repository = getQueuedDataTransferRepository
-
-    val result = CreationController(repository, initialize, action, stub).create()(fakeRequestWithJson(contactJson))
-    status(result) mustBe OK
-  }
-
-  "return 200 for a POST carrying an enquiry for business rates" in {
-    val repository = getQueuedDataTransferRepository
-
-    val result = CreationController(repository, initialize, action, stub).create()(fakeRequestWithJson(brContactJson))
-    status(result) mustBe OK
-  }
-
-  "return 200 for a POST carrying an enquiry for housing allowance" in {
-    val repository = getQueuedDataTransferRepository
-
-    val result = CreationController(repository, initialize, action, stub).create()(fakeRequestWithJson(haContactJson))
-    status(result) mustBe OK
-  }
-
-  "return 200 for a POST carrying an enquiry for fair rent" in {
-    val repository = getQueuedDataTransferRepository
-
-    val result = CreationController(repository, initialize, action, stub).create()(fakeRequestWithJson(frContactJson))
-    status(result) mustBe OK
-  }
-
-  "return 200 for a POST carrying an enquiry for other" in {
-    val repository = getQueuedDataTransferRepository
-
-    val result = CreationController(repository, initialize, action, stub).create()(fakeRequestWithJson(oContactJson))
-    status(result) mustBe OK
-  }
-
-  "return 400 (badrequest) when given no json" in {
-    val fakeRequest = FakeRequest("POST", "").withHeaders("Content-Type" -> "application/json")
-    val repository  = getQueuedDataTransferRepository
-
-    val result = CreationController(repository, initialize, action, stub).create()(fakeRequest)
-    status(result) mustBe BAD_REQUEST
-  }
-
-  "return 400 (badrequest) when given garbled json" in {
-    val fakeRequest = FakeRequest("POST", "").withHeaders("Content-Type" -> "application/json").withTextBody("{")
-    val repository  = getQueuedDataTransferRepository
-
-    val result = CreationController(repository, initialize, action, stub).create()(fakeRequest)
-    status(result) mustBe BAD_REQUEST
-  }
-
-  "return 500 (internal server errro) when repository is unable to enqueue request " in {
-    val repositoryMock = mock[QueuedDataTransferRepository]
-    when(repositoryMock.insert(any[QueuedDataTransfer])).thenReturn(Future.failed(Exception("Unable to store")))
-
-    val result = CreationController(repositoryMock, initialize, action, stub).create()(fakeRequestWithJson(contactJson))
-    status(result) mustBe INTERNAL_SERVER_ERROR
-
-  }
-
-  "Given some wrong Json format, the createContact method returns a Left(Unable to parse)" in {
-    val repository = getQueuedDataTransferRepository
-
-    val controller = CreationController(repository, initialize, action, stub)
-    val result     = controller.createContact(Some(Json.parse(wrongJson)))
-
-    result.isLeft mustBe true
-  }
-
-  "Create method returns a Failure when the email service returns an internal server error" in
-    intercept[Exception] {
+    "return 200 for a POST carrying an enquiry for council tax" in {
       val repository = getQueuedDataTransferRepository
 
       val result = CreationController(repository, initialize, action, stub).create()(fakeRequestWithJson(contactJson))
-      status(result) mustBe INTERNAL_SERVER_ERROR
+      status(result) shouldBe OK
     }
+
+    "return 200 for a POST carrying an enquiry for business rates" in {
+      val repository = getQueuedDataTransferRepository
+
+      val result = CreationController(repository, initialize, action, stub).create()(fakeRequestWithJson(brContactJson))
+      status(result) shouldBe OK
+    }
+
+    "return 200 for a POST carrying an enquiry for housing allowance" in {
+      val repository = getQueuedDataTransferRepository
+
+      val result = CreationController(repository, initialize, action, stub).create()(fakeRequestWithJson(haContactJson))
+      status(result) shouldBe OK
+    }
+
+    "return 200 for a POST carrying an enquiry for fair rent" in {
+      val repository = getQueuedDataTransferRepository
+
+      val result = CreationController(repository, initialize, action, stub).create()(fakeRequestWithJson(frContactJson))
+      status(result) shouldBe OK
+    }
+
+    "return 200 for a POST carrying an enquiry for other" in {
+      val repository = getQueuedDataTransferRepository
+
+      val result = CreationController(repository, initialize, action, stub).create()(fakeRequestWithJson(oContactJson))
+      status(result) shouldBe OK
+    }
+
+    "return 400 (badrequest) when given no json" in {
+      val fakeRequest = FakeRequest("POST", "").withHeaders("Content-Type" -> "application/json")
+      val repository  = getQueuedDataTransferRepository
+
+      val result = CreationController(repository, initialize, action, stub).create()(fakeRequest)
+      status(result) shouldBe BAD_REQUEST
+    }
+
+    "return 400 (badrequest) when given garbled json" in {
+      val fakeRequest = FakeRequest("POST", "").withHeaders("Content-Type" -> "application/json").withTextBody("{")
+      val repository  = getQueuedDataTransferRepository
+
+      val result = CreationController(repository, initialize, action, stub).create()(fakeRequest)
+      status(result) shouldBe BAD_REQUEST
+    }
+
+    "return 500 (internal server errro) when repository is unable to enqueue request " in {
+      val repositoryMock = mock[QueuedDataTransferRepository]
+      when(repositoryMock.insert(any[QueuedDataTransfer])).thenReturn(Future.failed(Exception("Unable to store")))
+
+      val result = CreationController(repositoryMock, initialize, action, stub).create()(fakeRequestWithJson(contactJson))
+      status(result) shouldBe INTERNAL_SERVER_ERROR
+
+    }
+
+    "Given some wrong Json format, the createContact method returns a Left(Unable to parse)" in {
+      val repository = getQueuedDataTransferRepository
+
+      val controller = CreationController(repository, initialize, action, stub)
+      val result     = controller.createContact(Some(Json.parse(wrongJson)))
+
+      result.isLeft shouldBe true
+    }
+
+    "Create method returns a Failure when the email service returns an internal server error" in
+      intercept[Exception] {
+        val repository = getQueuedDataTransferRepository
+
+        val result = CreationController(repository, initialize, action, stub).create()(fakeRequestWithJson(contactJson))
+        status(result) shouldBe INTERNAL_SERVER_ERROR
+      }
+  }

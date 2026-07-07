@@ -3,10 +3,10 @@ import sbt.*
 
 object AppDependencies {
 
-  private val bootstrapVersion   = "10.7.0"
+  private val bootstrapVersion   = "10.8.0"
   private val voServiceVersion   = "0.12.0"
   private val hmrcMongoVersion   = "2.12.0"
-  private val govukNotifyVersion = "6.0.0-RELEASE"
+  private val govukNotifyVersion = "6.0.1-RELEASE"
 
   // Test dependencies
   private val voTestVersion     = "0.5.0"
