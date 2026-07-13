@@ -20,14 +20,16 @@ import org.bson.codecs.ObjectIdCodec
 import org.mongodb.scala.bson.ObjectId
 import org.mongodb.scala.bson.conversions.Bson
 import org.mongodb.scala.model.Updates.set
-import org.mongodb.scala.model.{Filters, FindOneAndReplaceOptions, FindOneAndUpdateOptions, ReturnDocument}
+import org.mongodb.scala.model.{Filters, FindOneAndReplaceOptions, FindOneAndUpdateOptions, IndexModel, IndexOptions, Indexes, ReturnDocument}
 import org.mongodb.scala.{ReadPreference, SingleObservable}
 import play.api.Logging
 import uk.gov.hmrc.mongo.MongoComponent
+import uk.gov.hmrc.mongo.play.json.formats.MongoJavatimeFormats
 import uk.gov.hmrc.mongo.play.json.{Codecs, PlayMongoRepository}
 import uk.gov.hmrc.vo.contact.events.models.QueuedDataTransfer
 
 import java.time.Instant
+import java.util.concurrent.TimeUnit
 import javax.inject.{Inject, Singleton}
 import scala.concurrent.{ExecutionContext, Future}
 
@@ -39,10 +41,16 @@ class QueuedDataTransferRepository @Inject() (
     collectionName = "dataTransferQueue",
     mongoComponent = mongo,
     domainFormat = QueuedDataTransfer.format,
-    indexes = Seq.empty,
+    indexes = Seq(
+      IndexModel(
+        Indexes.ascending("createdAt"),
+        IndexOptions().name("dataTransferQueueTTL")
+          .expireAfter(7, TimeUnit.DAYS)
+      )
+    ),
     extraCodecs = Seq(
       ObjectIdCodec(),
-      Codecs.playFormatCodec(QueuedDataTransfer.instantFormat)
+      Codecs.playFormatCodec(MongoJavatimeFormats.instantFormat)
     )
   )
   with Logging:

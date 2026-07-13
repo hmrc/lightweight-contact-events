@@ -19,26 +19,20 @@ package uk.gov.hmrc.vo.contact.events.models
 import org.bson.types.ObjectId
 import play.api.libs.json.*
 
-import java.time.{Instant, ZoneOffset, ZonedDateTime}
-import scala.util.Try
+import java.time.Instant
+import java.time.temporal.ChronoUnit
 
-case class QueuedDataTransfer(voDataTransfer: VODataTransfer, firstError: Option[Instant] = None, _id: ObjectId = ObjectId.get())
+case class QueuedDataTransfer(
+  voDataTransfer: VODataTransfer,
+  firstError: Option[Instant] = None,
+  _id: ObjectId = ObjectId.get(),
+  createdAt: Instant = Instant.now.truncatedTo(ChronoUnit.MILLIS)
+)
 
 object QueuedDataTransfer:
 
   import uk.gov.hmrc.mongo.play.json.formats.MongoFormats.Implicits.*
 
-  implicit val instantWrites: Writes[Instant] = {
-    case instant: Instant => JsString(instant.atZone(ZoneOffset.UTC).toString)
-  }
-
-  implicit val instantReads: Reads[Instant] = Reads[Instant] {
-    case JsString(str) =>
-      Try(JsSuccess(ZonedDateTime.parse(str).toInstant))
-        .getOrElse(JsError("error.invalid.dateformat"))
-    case _             => JsError("error.expected.string")
-  }
-
-  implicit val instantFormat: Format[Instant] = Format(instantReads, instantWrites)
+  import uk.gov.hmrc.mongo.play.json.formats.MongoJavatimeFormats.Implicits.*
 
   implicit val format: Format[QueuedDataTransfer] = Json.format[QueuedDataTransfer]

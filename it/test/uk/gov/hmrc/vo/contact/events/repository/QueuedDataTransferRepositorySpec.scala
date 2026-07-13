@@ -16,56 +16,70 @@
 
 package uk.gov.hmrc.vo.contact.events.repository
 
+import com.google.inject.AbstractModule
+import net.codingwell.scalaguice.ScalaModule
 import org.mongodb.scala.SingleObservableFuture
 import org.mongodb.scala.bson.collection.immutable.Document
-import org.scalatest.OptionValues
-import uk.gov.hmrc.vo.contact.events.DiAcceptanceTest
+import play.api.Application
+import play.api.inject.guice.GuiceApplicationBuilder
+import uk.gov.hmrc.mongo.MongoComponent
+import uk.gov.hmrc.mongo.play.json.PlayMongoRepository
+import uk.gov.hmrc.vo.contact.events.DBIntegrationTest
+import uk.gov.hmrc.vo.contact.events.models.QueuedDataTransfer
 import uk.gov.hmrc.vo.contact.events.util.LightweightITFixture.aQueuedDataTransfer
 
 import java.time.Instant
+import java.time.temporal.ChronoUnit
 
-class QueuedDataTransferRepositorySpec extends DiAcceptanceTest with OptionValues:
+class QueuedDataTransferRepositorySpec extends DBIntegrationTest[QueuedDataTransfer]:
 
-  override def testDbPrefix(): String = "cf-repository-spec"
+  override def fakeApplication(): Application =
+    new GuiceApplicationBuilder()
+      .overrides(
+        new AbstractModule with ScalaModule:
+          override def configure(): Unit =
+            bind[MongoComponent].toInstance(mongoComponent)
+      ).build()
 
-  def mongoRepository: QueuedDataTransferRepository = app.injector.instanceOf[QueuedDataTransferRepository]
+  val mongoRepository: QueuedDataTransferRepository = inject[QueuedDataTransferRepository]
+
+  override protected val repository: PlayMongoRepository[QueuedDataTransfer] = mongoRepository
 
   "Repository" should {
     "save item to DB and read it back" in {
 
       val item = aQueuedDataTransfer()
-      await(mongoRepository.insert(item))
+      mongoRepository.insert(item).futureValue
 
-      val itemFromDb = await(mongoRepository.findById(item._id))
+      val itemFromDb = mongoRepository.findById(item._id).futureValue
 
-      itemFromDb.value mustBe item
+      itemFromDb shouldBe Some(item)
     }
 
     "Update firstError time" in {
       val item = aQueuedDataTransfer()
-      await(mongoRepository.insert(item))
+      mongoRepository.insert(item).futureValue
 
-      val errorTime = Instant.now
+      val errorTime = Instant.now.truncatedTo(ChronoUnit.MILLIS)
 
-      await(mongoRepository.updateTime(item._id, errorTime))
+      mongoRepository.updateTime(item._id, errorTime).futureValue
 
-      val itemFromDatabase = await(mongoRepository.findById(item._id))
+      val itemFromDatabase = mongoRepository.findById(item._id).futureValue
 
-      itemFromDatabase.value.firstError.value mustBe errorTime
+      itemFromDatabase.get.firstError shouldBe Some(errorTime)
     }
 
     "Get batch of elements" in {
       val items = (1 to 20).map(_ => aQueuedDataTransfer()).toList
 
-      await(mongoRepository.collection.deleteMany(Document()).toFutureOption())
+      mongoRepository.collection.deleteMany(Document()).toFutureOption().futureValue
 
-      await(mongoRepository.collection.insertMany(items).toFutureOption())
+      mongoRepository.collection.insertMany(items).toFutureOption().futureValue
 
-      val res = await(mongoRepository.findBatch())
+      val res = mongoRepository.findBatch().futureValue
 
-      res must have size 10
+      res should have size 10
 
-      items must contain allElementsOf res
+      items should contain allElementsOf res
     }
-
   }
