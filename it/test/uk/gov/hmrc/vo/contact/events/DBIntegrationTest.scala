@@ -16,7 +16,12 @@
 
 package uk.gov.hmrc.vo.contact.events
 
+import org.mongodb.scala.SingleObservableFuture
 import uk.gov.hmrc.mongo.test.DefaultPlayMongoRepositorySupport
 import uk.gov.hmrc.vo.unit.test.BaseAppSpec
 
-trait DBIntegrationTest[A] extends BaseAppSpec with DefaultPlayMongoRepositorySupport[A]
+trait DBIntegrationTest[A] extends BaseAppSpec with DefaultPlayMongoRepositorySupport[A]:
+
+  override protected def afterAll(): Unit =
+    mongoComponent.database.drop().toFutureOption().futureValue
+    mongoComponent.client.close()
