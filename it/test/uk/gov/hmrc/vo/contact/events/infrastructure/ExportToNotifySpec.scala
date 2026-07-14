@@ -20,14 +20,15 @@ import com.google.inject.AbstractModule
 import net.codingwell.scalaguice.ScalaModule
 import org.apache.pekko.actor.ActorSystem
 import org.apache.pekko.testkit.TestProbe
-import org.scalatest.OptionValues
-import play.api.Configuration
 import play.api.inject.guice.GuiceApplicationBuilder
+import play.api.{Application, Configuration}
 import uk.gov.hmrc.http.HeaderCarrier
+import uk.gov.hmrc.mongo.MongoComponent
 import uk.gov.hmrc.mongo.lock.MongoLockRepository
-import uk.gov.hmrc.vo.contact.events.DiAcceptanceTest
+import uk.gov.hmrc.mongo.play.json.PlayMongoRepository
+import uk.gov.hmrc.vo.contact.events.DBIntegrationTest
 import uk.gov.hmrc.vo.contact.events.connectors.{AuditingService, NotifyConnector}
-import uk.gov.hmrc.vo.contact.events.models.VODataTransfer
+import uk.gov.hmrc.vo.contact.events.models.{QueuedDataTransfer, VODataTransfer}
 import uk.gov.hmrc.vo.contact.events.repository.QueuedDataTransferRepository
 import uk.gov.hmrc.vo.contact.events.util.LightweightITFixture.aQueuedDataTransfer
 
@@ -39,20 +40,27 @@ import scala.concurrent.duration.{DurationInt, FiniteDuration}
 import scala.language.postfixOps
 import scala.util.{Failure, Success, Try}
 
-class ExportToNotifySpec extends DiAcceptanceTest with OptionValues:
-  override def testDbPrefix(): String = "ExportToNotifySpec"
+class ExportToNotifySpec extends DBIntegrationTest[QueuedDataTransfer]:
 
-  override def fakeApplicationBuilder(): GuiceApplicationBuilder = super.fakeApplicationBuilder()
-    .configure(Map(
-      "voaExport.enable" -> false
-    )).overrides(
-      new AbstractModule with ScalaModule:
-        override def configure(): Unit =
-          bind[Clock].toInstance(Clock.systemUTC)
-          bind[NotifyConnector].to[TestNotifyConnector]
-    )
+  override def fakeApplication(): Application =
+    new GuiceApplicationBuilder()
+      .configure(
+        Map(
+          "voaExport.enable" -> false
+        )
+      ).overrides(
+        new AbstractModule with ScalaModule:
+          override def configure(): Unit =
+            bind[MongoComponent].toInstance(mongoComponent)
+            bind[Clock].toInstance(Clock.systemUTC)
+            bind[NotifyConnector].to[TestNotifyConnector]
+      ).build()
 
-  def testNotifyConnector: TestNotifyConnector = app.injector.instanceOf[TestNotifyConnector]
+  val testNotifyConnector: TestNotifyConnector = inject[TestNotifyConnector]
+
+  val mongoRepository: QueuedDataTransferRepository = inject[QueuedDataTransferRepository]
+
+  override protected val repository: PlayMongoRepository[QueuedDataTransfer] = mongoRepository
 
   "Scheduler" should {
     "Schedule event and export data to VO" in {
@@ -60,25 +68,24 @@ class ExportToNotifySpec extends DiAcceptanceTest with OptionValues:
       testNotifyConnector.response = Success(())
 
       implicit val actorSystem: ActorSystem = app.actorSystem
-      implicit val ec: ExecutionContext     = app.injector.instanceOf[ExecutionContext]
 
       val probe = TestProbe("test-probe")
       actorSystem.eventStream.subscribe(probe.ref, classOf[ExportEvent]) // subscribe for event
 
       val transfer = aQueuedDataTransfer()
-      await(repository.insert(transfer)) // item is in database, can trigger scheduler
+      mongoRepository.insert(transfer).futureValue // item is in database, can trigger scheduler
 
       val scheduler = createScheduler()
       scheduler.start()
 
       val exportEvent = probe.expectMsgType[ExportEvent](3 seconds)
 
-      val queueSize = await(repository.count)
+      val queueSize = mongoRepository.count.futureValue
 
-      exportEvent mustBe ExportSuccess
-      queueSize.value mustBe 0
+      exportEvent shouldBe ExportSuccess
+      queueSize   shouldBe Some(0)
 
-      testNotifyConnector.transfer.head mustBe transfer.voDataTransfer
+      testNotifyConnector.transfer.head shouldBe transfer.voDataTransfer
     }
 
     "Keep items in DB if export fail" in {
@@ -86,40 +93,34 @@ class ExportToNotifySpec extends DiAcceptanceTest with OptionValues:
       testNotifyConnector.response = Failure(RuntimeException("Send email failure"))
 
       implicit val actorSystem: ActorSystem = app.actorSystem
-      implicit val ec: ExecutionContext     = app.injector.instanceOf[ExecutionContext]
 
       val probe = TestProbe("test-probe")
       actorSystem.eventStream.subscribe(probe.ref, classOf[ExportEvent]) // subscribe for event
 
       val transfer = aQueuedDataTransfer()
-      await(repository.insert(transfer)) // item is in database, can trigger scheduler
+      mongoRepository.insert(transfer).futureValue // item is in database, can trigger scheduler
 
       val scheduler = createScheduler()
       scheduler.start()
 
       val exportEvent = probe.expectMsgType[ExportEvent](3 seconds)
 
-      val queueSize = await(repository.count)
+      val queueSize = mongoRepository.count.futureValue
 
-      exportEvent mustBe ExportSuccess
-      queueSize.value mustBe 1
+      exportEvent shouldBe ExportSuccess
+      queueSize   shouldBe Some(1)
     }
-
   }
 
-  def repository: QueuedDataTransferRepository = app.injector.instanceOf[QueuedDataTransferRepository]
-
   def createScheduler(): VODataTransferScheduler =
-    val actorSystem                              = app.injector.instanceOf[ActorSystem]
-    val mongoLockRepository: MongoLockRepository = app.injector.instanceOf[MongoLockRepository]
-
-    implicit val ec: ExecutionContext = app.injector.instanceOf[ExecutionContext]
+    val actorSystem                              = inject[ActorSystem]
+    val mongoLockRepository: MongoLockRepository = inject[MongoLockRepository]
 
     VODataTransferScheduler(
       actorSystem.scheduler,
       actorSystem.eventStream,
       ScheduleEvery1Second(),
-      app.injector.instanceOf[VODataTransferExporter],
+      inject[VODataTransferExporter],
       mongoLockRepository
     )
 
