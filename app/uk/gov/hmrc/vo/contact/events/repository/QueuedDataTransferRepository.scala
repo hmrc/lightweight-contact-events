@@ -45,7 +45,7 @@ class QueuedDataTransferRepository @Inject() (
       IndexModel(
         Indexes.ascending("createdAt"),
         IndexOptions().name("dataTransferQueueTTL")
-          .expireAfter(7, TimeUnit.DAYS)
+          .expireAfter(14, TimeUnit.DAYS)
       )
     ),
     extraCodecs = Seq(
