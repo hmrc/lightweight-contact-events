@@ -16,38 +16,19 @@
 
 package uk.gov.hmrc.vo.contact.events.repository
 
-import com.google.inject.AbstractModule
-import net.codingwell.scalaguice.ScalaModule
 import org.mongodb.scala.SingleObservableFuture
 import org.mongodb.scala.bson.collection.immutable.Document
-import play.api.Application
-import play.api.inject.guice.GuiceApplicationBuilder
-import uk.gov.hmrc.mongo.MongoComponent
-import uk.gov.hmrc.mongo.play.json.PlayMongoRepository
-import uk.gov.hmrc.vo.contact.events.DBIntegrationTest
 import uk.gov.hmrc.vo.contact.events.models.QueuedDataTransfer
 import uk.gov.hmrc.vo.contact.events.util.LightweightITFixture.aQueuedDataTransfer
+import uk.gov.hmrc.vo.unit.test.db.MongoDBAppSpec
 
 import java.time.Instant
 import java.time.temporal.ChronoUnit
 
-class QueuedDataTransferRepositorySpec extends DBIntegrationTest[QueuedDataTransfer]:
+class QueuedDataTransferRepositorySpec extends MongoDBAppSpec[QueuedDataTransfer, QueuedDataTransferRepository]:
 
-  override def fakeApplication(): Application =
-    new GuiceApplicationBuilder()
-      .overrides(
-        new AbstractModule with ScalaModule:
-          override def configure(): Unit =
-            bind[MongoComponent].toInstance(mongoComponent)
-      ).build()
-
-  val mongoRepository: QueuedDataTransferRepository = inject[QueuedDataTransferRepository]
-
-  override protected val repository: PlayMongoRepository[QueuedDataTransfer] = mongoRepository
-
-  "Repository" should {
+  "QueuedDataTransferRepository" should {
     "save item to DB and read it back" in {
-
       val item = aQueuedDataTransfer()
       mongoRepository.insert(item).futureValue
 
