@@ -27,9 +27,8 @@ object AppDependencies {
   )
 
   private val integrationTestOnly = Seq(
-    "uk.gov.hmrc"       %% "vo-integration-test"     % voTestVersion            % Test,
-    "uk.gov.hmrc.mongo" %% "hmrc-mongo-test-play-30" % hmrcMongoVersion         % Test,
-    "org.apache.pekko"  %% "pekko-testkit"           % PlayVersion.pekkoVersion % Test
+    "uk.gov.hmrc"      %% "vo-integration-test" % voTestVersion            % Test,
+    "org.apache.pekko" %% "pekko-testkit"       % PlayVersion.pekkoVersion % Test
   )
 
   val appDependencies: Seq[ModuleID] = compile ++ commonTests ++ testOnly
