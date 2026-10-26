@@ -35,4 +35,4 @@ object QueuedDataTransfer:
 
   import uk.gov.hmrc.mongo.play.json.formats.MongoJavatimeFormats.Implicits.*
 
-  implicit val format: Format[QueuedDataTransfer] = Json.format[QueuedDataTransfer]
+  implicit val format: OFormat[QueuedDataTransfer] = Json.format

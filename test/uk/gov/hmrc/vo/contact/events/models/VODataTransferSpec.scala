@@ -16,13 +16,14 @@
 
 package uk.gov.hmrc.vo.contact.events.models
 
+import uk.gov.hmrc.vo.contact.events.config.AppConfig
 import uk.gov.hmrc.vo.contact.events.utils.LightweightFixture.*
-import uk.gov.hmrc.vo.contact.events.utils.{Initialize, LightweightFixture}
+import uk.gov.hmrc.vo.contact.events.utils.LightweightFixture
 import uk.gov.hmrc.vo.unit.test.BaseAppSpec
 
 class VODataTransferSpec extends BaseAppSpec:
 
-  private val init: Initialize = mock[Initialize]
+  private val appConfig: AppConfig = mock[AppConfig]
 
   "VODataTransfer" should {
     "creating a contact case class containing contact details set to confirmed contact details" in {
@@ -90,7 +91,7 @@ class VODataTransferSpec extends BaseAppSpec:
     }
 
     "return an exception when VODataTransfer object contains a wrong enquiry category" in {
-      val init = mock[Initialize]
+      val init = mock[AppConfig]
 
       intercept[RuntimeException] {
         VODataTransfer(wrongContact, init)
@@ -100,67 +101,66 @@ class VODataTransferSpec extends BaseAppSpec:
     "return the correct subject and email address when the contact reason is equal to 'new_enquiry'" in {
       val contact = brContact.copy(contactReason = "new_enquiry", enquiryCategoryMsg = "Council Tax")
       val subject = "CF My property is in poor repair or uninhabitable AA11AA"
-      when(init.subjectText).thenReturn(subject)
-      when(init.councilTaxEmail).thenReturn(brEmail)
+      when(appConfig.subjectText).thenReturn(subject)
+      when(appConfig.councilTaxEmail).thenReturn(brEmail)
 
-      val voDataTransfer = VODataTransfer(contact, init)
+      val voDataTransfer = VODataTransfer(contact, appConfig)
       voDataTransfer.subject               shouldBe subject
       voDataTransfer.recipientEmailAddress shouldBe brEmail
     }
 
     "return the correct subject and email address when the contact reason is equal to 'new_enquiry' and the enquiry category is equal to 'Other'" in {
       val contact = brContact.copy(contactReason = "new_enquiry", enquiryCategoryMsg = "Other")
-      when(init.subjectText).thenReturn(subject)
-      when(init.otherEmail).thenReturn(brEmail)
+      when(appConfig.subjectText).thenReturn(subject)
+      when(appConfig.otherEmail).thenReturn(brEmail)
 
-      val voDataTransfer = VODataTransfer(contact, init)
+      val voDataTransfer = VODataTransfer(contact, appConfig)
       voDataTransfer.subject               shouldBe subject
       voDataTransfer.recipientEmailAddress shouldBe brEmail
     }
 
     "return the correct subject and email address when the contact reason is equal to 'more_details'" in {
       val contact = brContact.copy(contactReason = "more_details", enquiryCategoryMsg = "Council Tax")
-      when(init.subjectAddInfo).thenReturn(subject)
-      when(init.councilTaxEmail).thenReturn(brEmail)
+      when(appConfig.subjectAddInfo).thenReturn(subject)
+      when(appConfig.councilTaxEmail).thenReturn(brEmail)
 
-      val voDataTransfer = VODataTransfer(contact, init)
+      val voDataTransfer = VODataTransfer(contact, appConfig)
       voDataTransfer.subject               shouldBe s"$subject $postCode"
       voDataTransfer.recipientEmailAddress shouldBe brEmail
     }
 
     "return the correct subject and email address when the contact reason is equal to 'more_details' and the enquiry category is equal to 'Other'" in {
       val contact = brContact.copy(contactReason = "more_details", enquiryCategoryMsg = "Other")
-      when(init.subjectOtherAddInfo).thenReturn(subject)
-      when(init.otherEmail).thenReturn(brEmail)
+      when(appConfig.subjectOtherAddInfo).thenReturn(subject)
+      when(appConfig.otherEmail).thenReturn(brEmail)
 
-      val voDataTransfer = VODataTransfer(contact, init)
+      val voDataTransfer = VODataTransfer(contact, appConfig)
       voDataTransfer.subject               shouldBe s"$subject $postCode"
       voDataTransfer.recipientEmailAddress shouldBe brEmail
     }
 
     "return the correct subject and email address when the contact reason is equal to 'update_existing'" in {
       val contact = brContact.copy(contactReason = "update_existing", enquiryCategoryMsg = "Council Tax")
-      when(init.subjectChase).thenReturn(subject)
-      when(init.councilTaxEmail).thenReturn(brEmail)
+      when(appConfig.subjectChase).thenReturn(subject)
+      when(appConfig.councilTaxEmail).thenReturn(brEmail)
 
-      val voDataTransfer = VODataTransfer(contact, init)
+      val voDataTransfer = VODataTransfer(contact, appConfig)
       voDataTransfer.subject               shouldBe s"$subject $postCode"
       voDataTransfer.recipientEmailAddress shouldBe brEmail
     }
 
     "return the correct subject and email address when the contact reason is equal to 'update_existing' and the enquiry category is equal to 'Other'" in {
       val contact = brContact.copy(contactReason = "update_existing", enquiryCategoryMsg = "Other")
-      when(init.subjectOtherChase).thenReturn(subject)
-      when(init.otherEmail).thenReturn(brEmail)
+      when(appConfig.subjectOtherChase).thenReturn(subject)
+      when(appConfig.otherEmail).thenReturn(brEmail)
 
-      val voDataTransfer = VODataTransfer(contact, init)
+      val voDataTransfer = VODataTransfer(contact, appConfig)
       voDataTransfer.subject               shouldBe s"$subject $postCode"
       voDataTransfer.recipientEmailAddress shouldBe brEmail
     }
 
     "return the correct subject and email for contact reason 'new_enquiry' and enquiry category 'Housing Benefit and Local Housing Allowances'" in {
-      val initialize     = inject[Initialize]
-      val voDataTransfer = VODataTransfer(housingBenefitContact, initialize)
+      val voDataTransfer = VODataTransfer(housingBenefitContact, inject[AppConfig])
 
       voDataTransfer.recipientEmailAddress shouldBe housingBenefitEmail
       voDataTransfer.subject               shouldBe s"CF - other - $postCode"

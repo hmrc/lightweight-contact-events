@@ -4,12 +4,12 @@ import sbt.*
 object AppDependencies {
 
   private val bootstrapVersion   = "10.8.0"
-  private val voServiceVersion   = "0.12.0"
-  private val hmrcMongoVersion   = "2.13.0"
-  private val govukNotifyVersion = "6.2.0-RELEASE"
+  private val voServiceVersion   = "0.19.0"
+  private val hmrcMongoVersion   = "2.14.0"
+  private val govukNotifyVersion = "6.2.1-RELEASE"
 
   // Test dependencies
-  private val voTestVersion = "0.6.0"
+  private val voTestVersion = "0.10.0"
 
   private val compile = Seq(
     "uk.gov.hmrc"          %% "bootstrap-backend-play-30" % bootstrapVersion,

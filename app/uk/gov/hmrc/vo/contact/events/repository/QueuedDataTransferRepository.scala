@@ -19,6 +19,7 @@ package uk.gov.hmrc.vo.contact.events.repository
 import org.bson.codecs.ObjectIdCodec
 import org.mongodb.scala.bson.ObjectId
 import org.mongodb.scala.bson.conversions.Bson
+import org.mongodb.scala.model.Sorts.ascending
 import org.mongodb.scala.model.Updates.set
 import org.mongodb.scala.model.{Filters, FindOneAndReplaceOptions, FindOneAndUpdateOptions, IndexModel, IndexOptions, Indexes, ReturnDocument}
 import org.mongodb.scala.{ReadPreference, SingleObservable}
@@ -82,6 +83,7 @@ class QueuedDataTransferRepository @Inject() (
   def findBatch(batchSize: Int = defaultBatchSize, readPreference: ReadPreference = ReadPreference.primaryPreferred()): Future[Seq[QueuedDataTransfer]] =
     collection.withReadPreference(readPreference)
       .find()
+      .sort(ascending("createdAt"))
       .limit(batchSize)
       .toFuture()
 

@@ -23,14 +23,14 @@ import play.api.mvc.{Action, AnyContent, ControllerComponents, DefaultActionBuil
 import scala.concurrent.{ExecutionContext, Future}
 import play.api.libs.json.*
 import uk.gov.hmrc.play.bootstrap.backend.controller.BackendController
+import uk.gov.hmrc.vo.contact.events.config.AppConfig
 import uk.gov.hmrc.vo.contact.events.models.{Contact, QueuedDataTransfer, VODataTransfer}
 import uk.gov.hmrc.vo.contact.events.repository.QueuedDataTransferRepository
-import uk.gov.hmrc.vo.contact.events.utils.Initialize
 
 @Singleton
 class CreationController @Inject() (
   val queueRepository: QueuedDataTransferRepository,
-  val init: Initialize,
+  val appConfig: AppConfig,
   val action: DefaultActionBuilder,
   override val controllerComponents: ControllerComponents
 )(using ec: ExecutionContext
@@ -39,7 +39,7 @@ class CreationController @Inject() (
   def create: Action[AnyContent] = action.async { implicit request =>
     createContact(request.body.asJson) match
       case Right(contact) =>
-        val jsonData = VODataTransfer(contact, init)
+        val jsonData = VODataTransfer(contact, appConfig)
         val result   = queueRepository.insert(QueuedDataTransfer(jsonData))
 
         result.map(_ => Ok)

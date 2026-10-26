@@ -32,4 +32,4 @@ case class PropertyAddress(addressLine1: String, addressLine2: Option[String], t
   def singleLine: String = addressLines.mkString(", ")
 
 object PropertyAddress:
-  implicit val format: OFormat[PropertyAddress] = Json.format[PropertyAddress]
+  implicit val format: OFormat[PropertyAddress] = Json.format

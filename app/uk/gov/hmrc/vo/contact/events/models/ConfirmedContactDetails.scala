@@ -24,10 +24,10 @@ case class ConfirmedContactDetails(fullName: String, email: String, contactNumbe
 final case class ConfirmedContactDetailsLegacy(firstName: String, lastName: String, email: String, contactNumber: String)
 
 object ConfirmedContactDetails:
-  implicit val format: OFormat[ConfirmedContactDetails] = Json.format[ConfirmedContactDetails]
+  implicit val format: OFormat[ConfirmedContactDetails] = Json.format
 
   def toLegacyContact(ct: ConfirmedContactDetails): ConfirmedContactDetailsLegacy =
     ConfirmedContactDetailsLegacy(ct.fullName, lastName = "", ct.email, ct.contactNumber)
 
 object ConfirmedContactDetailsLegacy:
-  implicit val format: OFormat[ConfirmedContactDetailsLegacy] = Json.format[ConfirmedContactDetailsLegacy]
+  implicit val format: OFormat[ConfirmedContactDetailsLegacy] = Json.format
