@@ -1,0 +1,19 @@
+{
+  "contact": {
+    "firstName": "First name",
+    "lastName": "Last name",
+    "email": "user@email.com",
+    "contactNumber": "1234567890"
+  },
+  "propertyAddress": {
+    "addressLine1": "address line 1",
+    "town": "Town",
+    "postcode": "postcode"
+  },
+  "isCouncilTaxEnquiry": false,
+  "subject": "Email subject",
+  "recipientEmailAddress": "recipient.email@test.com",
+  "enquiryCategoryMsg": "Enquiry category",
+  "subEnquiryCategoryMsg": "Sub category",
+  "message": "Message content"
+}

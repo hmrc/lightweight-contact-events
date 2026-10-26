@@ -24,16 +24,16 @@ import play.api.{Application, Configuration}
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.mongo.MongoComponent
 import uk.gov.hmrc.mongo.lock.MongoLockRepository
-import uk.gov.hmrc.vo.contact.events.connectors.{AuditingService, NotifyConnector}
+import uk.gov.hmrc.vo.contact.events.connectors.NotifyConnector
 import uk.gov.hmrc.vo.contact.events.models.{QueuedDataTransfer, VODataTransfer}
 import uk.gov.hmrc.vo.contact.events.repository.QueuedDataTransferRepository
 import uk.gov.hmrc.vo.contact.events.util.LightweightITFixture.aQueuedDataTransfer
+import uk.gov.hmrc.vo.service.connectors.AuditService
 import uk.gov.hmrc.vo.unit.test.db.MongoDBAppSpec
 
 import java.time.Clock
 import java.util.concurrent.TimeUnit
 import javax.inject.{Inject, Singleton}
-import scala.concurrent.ExecutionContext
 import scala.concurrent.duration.{DurationInt, FiniteDuration}
 import scala.language.postfixOps
 import scala.util.{Failure, Success, Try}
@@ -124,8 +124,7 @@ class ScheduleEvery1Second extends DefaultRegularSchedule:
 @Singleton
 class TestNotifyConnector @Inject() (
   config: Configuration,
-  auditService: AuditingService
-)(using ec: ExecutionContext
+  auditService: AuditService
 ) extends NotifyConnector(config, auditService):
 
   var transfer: List[VODataTransfer] = List[VODataTransfer]()

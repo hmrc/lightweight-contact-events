@@ -17,13 +17,12 @@
 package uk.gov.hmrc.vo.contact.events.connectors
 
 import play.api.Configuration
-import play.api.libs.json.Json
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.vo.contact.events.models.VODataTransfer
-import uk.gov.hmrc.vo.service.connectors.GovNotifyConnector
+import uk.gov.hmrc.vo.contact.events.models.event.SendContactEmailToVOA
+import uk.gov.hmrc.vo.service.connectors.{AuditService, GovNotifyConnector}
 
 import javax.inject.{Inject, Singleton}
-import scala.concurrent.ExecutionContext
 import scala.util.Try
 
 /**
@@ -32,13 +31,11 @@ import scala.util.Try
   * @author Yuriy Tumakha
   */
 @Singleton
-class NotifyConnector @Inject() (config: Configuration, auditService: AuditingService)(using ec: ExecutionContext) extends GovNotifyConnector(config):
+class NotifyConnector @Inject() (config: Configuration, audit: AuditService) extends GovNotifyConnector(config):
 
   private val contactFormTemplateId = config.get[String]("notify.contactFormTemplateId")
 
   def sendEmailToVO(data: VODataTransfer)(using hc: HeaderCarrier): Try[Unit] =
-    val json = Json.toJson(data)
-
     val personalisationMap: Map[String, String] = Map(
       "subject"               -> data.subject,
       "propertyAddress"       -> data.propertyAddress.singleLine,
@@ -51,7 +48,5 @@ class NotifyConnector @Inject() (config: Configuration, auditService: AuditingSe
       "message"               -> data.message
     )
 
-    sendEmail(contactFormTemplateId, data.recipientEmailAddress, personalisationMap, data.subject)
-      .map { _ =>
-        auditService.sendEvent("sendcontactemailtoVOA", json)
-      }
+    audit.send(SendContactEmailToVOA(data))
+    sendEmail(contactFormTemplateId, data.recipientEmailAddress, personalisationMap, data.subject).map(_ => ())
