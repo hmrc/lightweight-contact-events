@@ -21,6 +21,7 @@ import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.vo.contact.events.models.VODataTransfer
 import uk.gov.hmrc.vo.contact.events.models.event.SendContactEmailToVOA
 import uk.gov.hmrc.vo.service.connectors.{AuditService, GovNotifyConnector}
+import uk.gov.service.notify.SendEmailResponse
 
 import javax.inject.{Inject, Singleton}
 import scala.util.Try
@@ -35,7 +36,7 @@ class NotifyConnector @Inject() (config: Configuration, audit: AuditService) ext
 
   private val contactFormTemplateId = config.get[String]("notify.contactFormTemplateId")
 
-  def sendEmailToVO(data: VODataTransfer)(using hc: HeaderCarrier): Try[Unit] =
+  def sendEmailToVO(data: VODataTransfer)(using hc: HeaderCarrier): Try[SendEmailResponse] =
     val personalisationMap: Map[String, String] = Map(
       "subject"               -> data.subject,
       "propertyAddress"       -> data.propertyAddress.singleLine,
@@ -49,4 +50,4 @@ class NotifyConnector @Inject() (config: Configuration, audit: AuditService) ext
     )
 
     audit.send(SendContactEmailToVOA(data))
-    sendEmail(contactFormTemplateId, data.recipientEmailAddress, personalisationMap, data.subject).map(_ => ())
+    sendEmail(contactFormTemplateId, data.recipientEmailAddress, personalisationMap, data.subject)

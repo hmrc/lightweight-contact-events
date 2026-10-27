@@ -70,8 +70,12 @@ class VODataTransferExporter @Inject() (
     val hc: HeaderCarrier = HeaderCarrier()
 
     notifyConnector.sendEmailToVO(data)(using hc) match
-      case Success(_)         => Future.unit
-      case Failure(exception) => Future.failed(RuntimeException("Unable to send data to VO", exception))
+      case Success(r)         =>
+        logger.info(s"Sent email notificationId: ${r.getNotificationId}, reference: ${r.getReference}, subject: ${r.getSubject}")
+        Future.unit
+      case Failure(exception) =>
+        logger.error(s"Send email to VO failed. ${exception.getMessage}", exception)
+        Future.failed(RuntimeException("Unable to send data to VO", exception))
 
   private def recordError(transfer: QueuedDataTransfer): Future[Unit] =
     if transfer.firstError.isEmpty then

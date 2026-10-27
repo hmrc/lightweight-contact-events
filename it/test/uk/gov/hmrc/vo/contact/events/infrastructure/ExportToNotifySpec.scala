@@ -30,6 +30,7 @@ import uk.gov.hmrc.vo.contact.events.repository.QueuedDataTransferRepository
 import uk.gov.hmrc.vo.contact.events.util.LightweightITFixture.aQueuedDataTransfer
 import uk.gov.hmrc.vo.service.connectors.AuditService
 import uk.gov.hmrc.vo.unit.test.db.MongoDBAppSpec
+import uk.gov.service.notify.SendEmailResponse
 
 import java.time.Clock
 import java.util.concurrent.TimeUnit
@@ -54,12 +55,30 @@ class ExportToNotifySpec extends MongoDBAppSpec[QueuedDataTransfer, QueuedDataTr
       )
       .build()
 
-  val testNotifyConnector: TestNotifyConnector = inject[TestNotifyConnector]
+  private val testNotifyConnector: TestNotifyConnector = inject[TestNotifyConnector]
+
+  private val dummySuccessfulResponse =
+    Success(
+      SendEmailResponse(
+        """{
+          |  "id": "740e5834-3a29-46b4-9a6f-16142fde533a",
+          |  "content": {
+          |    "subject": "SUBJECT TEXT",
+          |    "body": "MESSAGE TEXT",
+          |  },
+          |  "template": {
+          |    "id": "f33517ff-2a88-4f6e-b855-c550268ce08a",
+          |    "version": 1,
+          |    "uri": "https://api.notifications.service.gov.uk/v2/template/f33517ff-2a88-4f6e-b855-c550268ce08a"
+          |  }
+          |}""".stripMargin
+      )
+    )
 
   "Scheduler" should {
     "Schedule event and export data to VO" in {
       testNotifyConnector.transfer = List.empty[VODataTransfer]
-      testNotifyConnector.response = Success(())
+      testNotifyConnector.response = dummySuccessfulResponse
 
       implicit val actorSystem: ActorSystem = app.actorSystem
 
@@ -118,8 +137,8 @@ class ExportToNotifySpec extends MongoDBAppSpec[QueuedDataTransfer, QueuedDataTr
       mongoLockRepository
     )
 
-class ScheduleEvery1Second extends DefaultRegularSchedule:
-  override def timeUntilNextRun(): FiniteDuration = FiniteDuration.apply(1, TimeUnit.SECONDS)
+  class ScheduleEvery1Second extends DefaultRegularSchedule:
+    override def timeUntilNextRun(): FiniteDuration = FiniteDuration.apply(1, TimeUnit.SECONDS)
 
 @Singleton
 class TestNotifyConnector @Inject() (
@@ -127,10 +146,10 @@ class TestNotifyConnector @Inject() (
   auditService: AuditService
 ) extends NotifyConnector(config, auditService):
 
-  var transfer: List[VODataTransfer] = List[VODataTransfer]()
-  var response: Try[Unit]            = Success(())
+  var transfer: List[VODataTransfer]   = List[VODataTransfer]()
+  var response: Try[SendEmailResponse] = Failure(RuntimeException("Send email failure"))
 
-  override def sendEmailToVO(dataTransfer: VODataTransfer)(using hc: HeaderCarrier): Try[Unit] =
+  override def sendEmailToVO(dataTransfer: VODataTransfer)(using hc: HeaderCarrier): Try[SendEmailResponse] =
     println("dataTransfer: " + dataTransfer)
     transfer = dataTransfer :: transfer
     response
