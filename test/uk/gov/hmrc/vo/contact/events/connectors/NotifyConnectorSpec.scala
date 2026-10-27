@@ -16,11 +16,10 @@
 
 package uk.gov.hmrc.vo.contact.events.connectors
 
+import org.scalatest.AppendedClues.convertToClueful
 import uk.gov.hmrc.vo.contact.events.models.ConfirmedContactDetails.toLegacyContact
 import uk.gov.hmrc.vo.contact.events.models.{ConfirmedContactDetails, PropertyAddress, VODataTransfer}
 import uk.gov.hmrc.vo.unit.test.BaseAppSpec
-
-import scala.util.Success
 
 /**
   * @author Yuriy Tumakha
@@ -46,6 +45,6 @@ class NotifyConnectorSpec extends BaseAppSpec:
 
   "NotifyConnector" should {
     "sendEmailToVO" in {
-      notifyConnector.sendEmailToVO(dataTransfer) shouldBe Success(())
+      notifyConnector.sendEmailToVO(dataTransfer).isSuccess shouldBe true withClue ". Expected successful response"
     }
   }

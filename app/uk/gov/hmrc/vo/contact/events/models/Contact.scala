@@ -29,4 +29,4 @@ case class Contact(
 )
 
 object Contact:
-  implicit val format: OFormat[Contact] = Json.format[Contact]
+  implicit val format: OFormat[Contact] = Json.format

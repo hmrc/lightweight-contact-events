@@ -23,6 +23,7 @@ import uk.gov.hmrc.vo.contact.events.connectors.NotifyConnector
 import uk.gov.hmrc.vo.contact.events.models.VODataTransfer
 import uk.gov.hmrc.vo.contact.events.repository.QueuedDataTransferRepository
 import uk.gov.hmrc.vo.unit.test.BaseAppSpec
+import uk.gov.service.notify.SendEmailResponse
 
 import java.time.{Clock, Instant, ZoneId}
 import scala.concurrent.Future
@@ -43,6 +44,24 @@ class VODataTransferExporterSpec extends BaseAppSpec:
 
       override def instant(): Instant = now
 
+  private val dummySuccessfulResponse =
+    Success(
+      SendEmailResponse(
+        """{
+          |  "id": "740e5834-3a29-46b4-9a6f-16142fde533a",
+          |  "content": {
+          |    "subject": "SUBJECT TEXT",
+          |    "body": "MESSAGE TEXT",
+          |  },
+          |  "template": {
+          |    "id": "f33517ff-2a88-4f6e-b855-c550268ce08a",
+          |    "version": 1,
+          |    "uri": "https://api.notifications.service.gov.uk/v2/template/f33517ff-2a88-4f6e-b855-c550268ce08a"
+          |  }
+          |}""".stripMargin
+      )
+    )
+
   "VODataTransferExporter" should {
     "export data" in {
       val notifyConnector = mock[NotifyConnector]
@@ -55,7 +74,7 @@ class VODataTransferExporterSpec extends BaseAppSpec:
       val data     = List(transfer)
 
       when(notifyConnector.sendEmailToVO(any[VODataTransfer])(using any[HeaderCarrier]))
-        .thenReturn(Success(()))
+        .thenReturn(dummySuccessfulResponse)
       when(dataTransferRepository.findBatch()).thenReturn(Future.successful(data))
       when(dataTransferRepository.removeById(any[ObjectId])).thenReturn(Future.unit)
 
